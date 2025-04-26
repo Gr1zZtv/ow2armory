@@ -49,6 +49,42 @@
 
   <h2>Existing Heroes</h2>
   <div id="heroesList"></div>
+
+  <!-- 1) Auth0 SDK -->
+<script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
+
+<script>
+  // 2) Initialize Auth0 client
+  let auth0 = null;
+  async function initAuth0() {
+    auth0 = await createAuth0Client({
+      domain:   'YOUR_AUTH0_DOMAIN',
+      client_id:'YOUR_AUTH0_CLIENT_ID',
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true
+    });
+
+    // 3) If returning from Auth0 redirect:
+    if (window.location.search.includes('code=')) {
+      await auth0.handleRedirectCallback();
+      window.history.replaceState({}, document.title, '/admin.html');
+    }
+
+    // 4) If not logged in, kick off login flow
+    const isAuthenticated = await auth0.isAuthenticated();
+    if (!isAuthenticated) {
+      return auth0.loginWithRedirect({ redirect_uri: window.location.origin + '/admin.html' });
+    }
+
+    // 5) You’re logged in! Show the page
+    document.body.style.visibility = 'visible';
+  }
+
+  // Hide the page until Auth0 finishes
+  document.body.style.visibility = 'hidden';
+  window.onload = initAuth0;
+</script>
+
 <!-- admin.html (and likewise viewer.html) -->
   <script src="./initialData.js"></script>
   <script src="adminfunctions.js"></script>
