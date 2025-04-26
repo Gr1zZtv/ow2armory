@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>The Armory — Viewer</title>
+  <link rel="stylesheet" href="viewerstyles.css">
+</head>
+<body>
+
+  <div class="hero-selector">
+    Hero:
+    <select id="heroSelect"></select>
+    <a href="admin.html" style="color:#f96302; text-decoration:none; margin-left:12px;">
+      Admin
+    </a>
+  </div>
+
+  <div class="armory">
+
+    <!-- HEADER -->
+    <div class="header">
+      <img src="" class="avatar" alt="Avatar">
+      <div class="titles">
+        <h1>The Armory</h1>
+        <h2></h2>
+      </div>
+      <!-- stats moved here -->
+      <div class="stats header-stats" id="statsContainer"></div>
+    </div>
+
+    <!-- ABILITY TABS -->
+    <div class="tabs" id="tabsContainer"></div>
+
+    <!-- BUY AREA (single build panel) -->
+    <div class="left-panel">
+      <div class="build-cost">
+        <img src="" class="cost-icon" alt="Cost">
+        <span class="cost-value">0</span>
+      </div>
+      <div class="slots powers">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+      <div class="slots items">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="circle"></div>
+      </div>
+    </div>
+
+    <!-- ABILITY COLUMNS -->
+    <div class="column common">
+      <h3>Common</h3>
+      <div class="grid" id="commonGrid"></div>
+    </div>
+    <div class="column rare">
+      <h3>Rare</h3>
+      <div class="grid" id="rareGrid"></div>
+    </div>
+    <div class="column epic">
+      <h3>Epic</h3>
+      <div class="grid" id="epicGrid"></div>
+    </div>
+
+    <!-- (no more bottom-stats here) -->
+
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+  <!-- admin.html (and likewise viewer.html) -->
+<!-- admin.html (and likewise viewer.html) -->
+  <script src="initialData.js"></script>
+  <script src="viewerfunctions.js"></script>
+</body>
+</html>
