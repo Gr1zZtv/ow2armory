@@ -9,10 +9,10 @@ const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
     cache: true,
     rateLimit: true,
-    jwksUri: `dev-bx2itlkpy8ayes2m.us.auth0.com/.well-known/jwks.json`
+    jwksUri: `genai-32211481474906933.us.auth0.com/.well-known/jwks.json`
   }),
-  audience: 'https://dev-bx2itlkpy8ayes2m.us.auth0.com/api/v2/',   // create an API in Auth0 to get this, or use your Client ID
-  issuer:   `dev-bx2itlkpy8ayes2m.us.auth0.com`,
+  audience: 'https://genai-32211481474906933.us.auth0.com/api/v2/',   // create an API in Auth0 to get this, or use your Client ID
+  issuer:   `genai-32211481474906933.us.auth0.com`,
   algorithms: ['RS256']
 });
 
