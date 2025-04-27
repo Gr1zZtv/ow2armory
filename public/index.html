@@ -74,6 +74,12 @@
 </script>
 </head>
 <body>
+  <button id="btnLogout">Log Out</button>
+<script>
+  document.getElementById('btnLogout').onclick = () => {
+    auth0.logout({ returnTo: window.location.origin + '/index.html' });
+  };
+</script>
   <div class="container">
     <button onclick="window.location.href='viewer.html'">
       Go to Viewer
