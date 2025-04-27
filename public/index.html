@@ -51,10 +51,10 @@
 
     let auth0;
     window.onload = async () => {
-      // 1) Initialize Auth0 client
+      // 1) Initialize Auth0 client — note `client_id` here instead of `clientId`
       auth0 = await createAuth0Client({
         domain: AUTH0_DOMAIN,
-        clientId: AUTH0_CLIENTID,
+        client_id: AUTH0_CLIENTID,
         cacheLocation: 'localstorage',
         useRefreshTokens: true,
         authorizationParams: {
@@ -70,18 +70,15 @@
         window.history.replaceState({}, document.title, window.location.pathname);
       }
 
-      // 3) Check whether the user is authenticated
+      // 3) Check authentication state
       const isAuthenticated = await auth0.isAuthenticated();
 
-      // 4) Wire up login/logout/signup buttons
-      document.getElementById('btnLogin').onclick = () =>
-        auth0.loginWithRedirect();
-      document.getElementById('btnSignup').onclick = () =>
-        auth0.loginWithRedirect({ screen_hint: 'signup' });
-      document.getElementById('btnLogout').onclick = () =>
-        auth0.logout({ returnTo: window.location.origin });
+      // 4) Wire up your buttons
+      document.getElementById('btnLogin').onclick  = () => auth0.loginWithRedirect();
+      document.getElementById('btnSignup').onclick = () => auth0.loginWithRedirect({ screen_hint: 'signup' });
+      document.getElementById('btnLogout').onclick = () => auth0.logout({ returnTo: window.location.origin });
 
-      // 5) Show/hide UI elements based on auth state
+      // 5) Show/hide UI
       document.getElementById('btnLogin').hidden       = isAuthenticated;
       document.getElementById('btnSignup').hidden      = isAuthenticated;
       document.getElementById('btnLogout').hidden      = !isAuthenticated;
@@ -89,14 +86,14 @@
       document.body.style.visibility = 'visible';
 
       if (isAuthenticated) {
-        // 6) Display basic user info
+        // 6) Display user info
         const user = await auth0.getUser();
         document.getElementById('userName').textContent = user.name;
         const pic = document.getElementById('userPicture');
         pic.src    = user.picture;
         pic.hidden = false;
 
-        // 7) Fetch & populate profile metadata from your API
+        // 7) Fetch & populate profile metadata
         const token   = await auth0.getTokenSilently();
         const profile = await fetch('/api/profile', {
           headers: { Authorization: `Bearer ${token}` }
@@ -105,7 +102,7 @@
         document.getElementById('profileDisplayName').value = profile.displayName || '';
         document.getElementById('profileColor').value       = profile.color       || '#ffffff';
 
-        // 8) Handle profile updates
+        // 8) Save profile updates
         document.getElementById('profileForm').onsubmit = async e => {
           e.preventDefault();
           const updates = {
@@ -133,7 +130,7 @@
     <button id="btnSignup">Sign Up</button>
     <button id="btnLogout">Log Out</button>
     <span id="userName"></span>
-    <img id="userPicture" alt="Profile Picture" hidden>
+    <img   id="userPicture" alt="Profile Picture" hidden>
   </nav>
 
   <section id="profileSection">
