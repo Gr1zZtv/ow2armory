@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <title>The Armory — Viewer</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="viewerstyles.css">
 </head>
 <body>
 
+  <!-- Hero selector + admin link -->
   <div class="hero-selector">
     Hero:
     <select id="heroSelect"></select>
-    <a href="admin.html" style="color:#f96302; text-decoration:none; margin-left:12px;">
-      Admin
-    </a>
+    <a href="admin.html" class="admin-link">Admin</a>
   </div>
-<!-- Add next to your hero selector or build panel -->
-<div id="save-share">
-  <button id="btnSaveBuild">Save & Share Build</button>
-  <span id="shareLink" style="display:none;">
-    Shareable link: <a href="#" target="_blank" id="buildLink"></a>
-  </span>
-</div>
 
+  <!-- Save & Share -->
+  <div id="save-share">
+    <button id="btnSaveBuild">Save & Share Build</button>
+    <div id="shareLink" style="display:none; margin-top:8px;">
+      Shareable link: <a href="#" target="_blank" id="buildLink"></a>
+    </div>
+  </div>
+
+  <!-- Main Armory -->
   <div class="armory">
 
     <!-- HEADER -->
@@ -31,14 +33,13 @@
         <h1>The Armory</h1>
         <h2></h2>
       </div>
-      <!-- stats moved here -->
       <div class="stats header-stats" id="statsContainer"></div>
     </div>
 
     <!-- ABILITY TABS -->
     <div class="tabs" id="tabsContainer"></div>
 
-    <!-- BUY AREA (single build panel) -->
+    <!-- BUILD PANEL -->
     <div class="left-panel">
       <div class="build-cost">
         <img src="" class="cost-icon" alt="Cost">
@@ -74,13 +75,18 @@
       <div class="grid" id="epicGrid"></div>
     </div>
 
-    <!-- (no more bottom-stats here) -->
-
   </div>
 
+  <!-- Tooltip -->
   <div class="tooltip" id="tooltip"></div>
-  <!-- admin.html (and likewise viewer.html) -->
-<!-- admin.html (and likewise viewer.html) -->
+
+  <!-- Community Builds -->
+  <section id="community">
+    <h2>Community Builds</h2>
+    <div id="communityGrid" class="community-grid"></div>
+  </section>
+
+  <!-- Data + Logic -->
   <script src="initialData.js"></script>
   <script src="viewerfunctions.js"></script>
 </body>
