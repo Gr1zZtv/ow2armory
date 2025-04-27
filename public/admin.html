@@ -50,40 +50,52 @@
   <h2>Existing Heroes</h2>
   <div id="heroesList"></div>
 
-  <!-- 1) Auth0 SDK -->
+<!-- 1) Auth0 SDK -->
 <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
 
 <script>
-  // 2) Initialize Auth0 client
+  // Hide everything until we know if the user is logged in
+  document.body.style.visibility = 'hidden';
+
   let auth0 = null;
-  async function initAuth0() {
+  window.onload = async () => {
+    // 2) Initialize Auth0 client
     auth0 = await createAuth0Client({
-      domain:   'genai-32211481474906933.us.auth0.com',
-      client_id:'flwQvmWzV0SdoHGXk7tmji0mQJUdZWmb',
+      domain:        'genai-32211481474906933.us.auth0.com',      // e.g. 'gr1zZtv.us.auth0.com'
+      client_id:     'flwQvmWzV0SdoHGXk7tmji0mQJUdZWmb',   // e.g. 'ABC123xyz...'
       cacheLocation: 'localstorage',
       useRefreshTokens: true
     });
 
-    // 3) If returning from Auth0 redirect:
-    if (window.location.search.includes('code=')) {
-      await auth0.handleRedirectCallback();
+    // 3) Handle the redirect back from Auth0
+    if (window.location.search.includes('code=') &&
+        window.location.search.includes('state=')) {
+      try {
+        await auth0.handleRedirectCallback();
+      } catch (err) {
+        console.error('Error handling redirect callback:', err);
+      }
+      // clean up the URL
       window.history.replaceState({}, document.title, '/admin.html');
     }
 
-    // 4) If not logged in, kick off login flow
+    // 4) Check auth state
     const isAuthenticated = await auth0.isAuthenticated();
     if (!isAuthenticated) {
-      return auth0.loginWithRedirect({ redirect_uri: window.location.origin + '/admin.html' });
+      // kick off the login redirect
+      return auth0.loginWithRedirect({
+        redirect_uri: window.location.origin + '/admin.html'
+      });
     }
 
-    // 5) You’re logged in! Show the page
+    // 5) If we get here, the user is logged in
     document.body.style.visibility = 'visible';
-  }
-
-  // Hide the page until Auth0 finishes
-  document.body.style.visibility = 'hidden';
-  window.onload = initAuth0;
+  };
 </script>
+
+<!-- your existing admin UI code -->
+<script src="adminfunctions.js"></script>
+
 
 <!-- admin.html (and likewise viewer.html) -->
   <script src="./initialData.js"></script>
