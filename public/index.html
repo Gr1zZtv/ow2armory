@@ -2,131 +2,179 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>The Armory</title>
+  <title>Armory Home</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    /* ── Reset & Base ───────────────────────────────────────── */
-    body, h1, p, a, button { margin: 0; padding: 0; font-family: sans-serif; }
-    body { background: #f0f0f0; color: #333; }
-
-    /* ── Hero Section ──────────────────────────────────────── */
-    .hero {
+    /* ──────────────────────────────────────────────────────────────────────────
+       RESET & BASE
+    ────────────────────────────────────────────────────────────────────────── */
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      color: #333;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 60vh;
-      background: url('assets/hero-bg.jpg') center/cover no-repeat;
-      text-align: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    h1 { margin-bottom:16px; }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       NAV LINKS
+    ────────────────────────────────────────────────────────────────────────── */
+    nav {
+      margin-bottom: 24px;
+    }
+    nav button {
+      background: #2d6a2d;
       color: #fff;
-    }
-    .hero h1 {
-      font-size: 4rem;
-      text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-      margin-bottom: 0.5em;
-    }
-    .hero p {
-      font-size: 1.25rem;
-      margin-bottom: 1.5em;
-      max-width: 600px;
-    }
-    .hero .btn {
-      padding: 0.75em 1.5em;
-      font-size: 1rem;
-      margin: 0 0.5em;
       border: none;
       border-radius: 4px;
+      padding: 10px 20px;
+      margin: 0 8px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background .2s;
     }
-    .btn-primary {
-      background: #f96302;
-      color: #fff;
-    }
-    .btn-primary:hover {
-      background: #e25801;
-    }
-    .btn-secondary {
-      background: rgba(255,255,255,0.9);
-      color: #333;
-    }
-    .btn-secondary:hover {
-      background: #fff;
+    nav button:hover {
+      background: #3e8e3e;
     }
 
-    /* ── Features Section ──────────────────────────────────── */
-    .features {
+    /* ──────────────────────────────────────────────────────────────────────────
+       COMMUNITY BUILDS GRID
+    ────────────────────────────────────────────────────────────────────────── */
+    .builds-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 1000px;
+      margin-bottom: 40px;
+    }
+    .build-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       display: flex;
-      justify-content: center;
-      gap: 2em;
-      padding: 3em 1em;
-      background: #fff;
+      flex-direction: column;
     }
-    .feature {
-      max-width: 200px;
-      text-align: center;
+    .build-header {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      background: #fafafa;
+      border-bottom: 1px solid #eee;
     }
-    .feature h3 {
-      margin-bottom: 0.5em;
+    .build-header img {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 4px;
     }
-    .feature p {
-      font-size: 0.95rem;
-      color: #666;
+    .hero-name {
+      margin-left: 12px;
+      font-weight: bold;
+      font-size: 1.1em;
     }
 
-    /* ── Footer ────────────────────────────────────────────── */
-    footer {
-      text-align: center;
-      padding: 2em 1em;
-      font-size: 0.85rem;
-      color: #999;
+    /* ──────────────────────────────────────────────────────────────────────────
+       ABILITIES ROW
+    ────────────────────────────────────────────────────────────────────────── */
+    .build-abilities {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
     }
-    footer a {
-      color: #f96302;
-      text-decoration: none;
+    .ability-card {
+      width: 48px; height: 48px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .ability-card img {
+      width:100%; height:100%; object-fit:cover;
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       BUILD COST
+    ────────────────────────────────────────────────────────────────────────── */
+    .build-cost {
+      margin: 0 12px 12px;
+      font-weight: bold;
+      font-size: 0.95em;
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       FOOTER LINKS
+    ────────────────────────────────────────────────────────────────────────── */
+    .container {
+      margin-top: auto;
+      text-align: center;
+      width: 100%;
+    }
+    .container button {
+      background: #1e5a87;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 12px 24px;
+      margin: 0 10px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .container button:hover {
+      background: #326c9b;
     }
   </style>
 </head>
 <body>
 
-  <!-- Hero/Header -->
-  <section class="hero">
-    <h1>The Armory</h1>
-    <p>Build and share your ultimate hero loadouts—mix powers, items and stats to craft the perfect strategy.</p>
-    <div>
-      <button class="btn btn-primary" onclick="location.href='viewer.html'">
-        Go to Viewer
-      </button>
-      <button class="btn btn-secondary" onclick="location.href='admin.html'">
-        Go to Admin
-      </button>
-    </div>
-  </section>
+  <h1>Most Recent Community Builds</h1>
 
-  <!-- Optional Features -->
-  <section class="features">
-    <div class="feature">
-      <h3>Browse Heroes</h3>
-      <p>See every hero’s abilities, stats, and skins in one place.</p>
+  <div class="builds-grid">
+    <!-- Build #1 (placeholder) -->
+    <div class="build-card">
+      <div class="build-header">
+        <img src="images/hero-placeholder.png" alt="Placeholder Hero">
+        <div class="hero-name">Placeholder Hero</div>
+      </div>
+      <div class="build-abilities">
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability 1"></div>
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability 2"></div>
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability 3"></div>
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability 4"></div>
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Item 1"></div>
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Item 2"></div>
+      </div>
+      <div class="build-cost">Total Cost: 12,345</div>
     </div>
-    <div class="feature">
-      <h3>Custom Builds</h3>
-      <p>Drag & drop powers and items to create unique loadouts.</p>
-    </div>
-    <div class="feature">
-      <h3>Save & Export</h3>
-      <p>Download your build as JSON or share with friends.</p>
-    </div>
-  </section>
 
-  <!-- Footer -->
-  <footer>
-    <p>
-      <a href="https://github.com/Gr1zZtv/ow2armory" target="_blank">
-        View Source on GitHub
-      </a>
-      &nbsp;·&nbsp; v1.0.0
-    </p>
-  </footer>
+    <!-- Build #2 (placeholder) -->
+    <div class="build-card">
+      <div class="build-header">
+        <img src="images/hero-placeholder2.png" alt="Another Hero">
+        <div class="hero-name">Another Hero</div>
+      </div>
+      <div class="build-abilities">
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability A"></div>
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability B"></div>
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability C"></div>
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Item X"></div>
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Item Y"></div>
+        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Item Z"></div>
+      </div>
+      <div class="build-cost">Total Cost: 8,765</div>
+    </div>
+  </div>
+
+  <div class="container">
+    <button onclick="location.href='viewer.html'">Go to Viewer</button>
+    <button onclick="location.href='admin.html'">Go to Admin</button>
+  </div>
 
 </body>
 </html>
