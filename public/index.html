@@ -22,6 +22,56 @@
       cursor: pointer;
     }
   </style>
+  
+  <!-- 1) Auth0 SPA SDK -->
+<script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
+
+<script>
+  // hide until we know if the user’s authenticated
+  document.body.style.visibility = 'hidden';
+  let auth0 = null;
+
+  window.onload = async () => {
+    auth0 = await createAuth0Client({
+      domain:        'YOUR_AUTH0_DOMAIN',       // from your Viewer app
+      client_id:     'YOUR_AUTH0_CLIENT_ID',    // from your Viewer app
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true,
+      // request an API token for your own backend
+      audience:      'https://my-armory-api',   
+      redirect_uri:  window.location.origin + '/index.html'
+    });
+
+    // 1a) Handle the redirect callback
+    if (location.search.includes('code=') && location.search.includes('state=')) {
+      await auth0.handleRedirectCallback();
+      window.history.replaceState({}, document.title, '/index.html');
+    }
+
+    // 2) If not logged in, send them to Auth0
+    if (!(await auth0.isAuthenticated())) {
+      return auth0.loginWithRedirect({
+        redirect_uri: window.location.origin + '/index.html',
+        screen_hint:  'signup'   // optional: go straight to sign-up
+      });
+    }
+
+    // 3) Now logged in
+    document.body.style.visibility = 'visible';
+
+    // 4) Display user info in your UI
+    const user = await auth0.getUser();
+    document.getElementById('userName').textContent = user.name;
+    document.getElementById('userPicture').src      = user.picture;
+
+    // 5) Fetch & render their profile from your backend
+    const token = await auth0.getTokenSilently();
+    const profile = await fetch('/api/profile', {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then(r=>r.json());
+    // now fill your “My Profile” form fields with `profile`
+  };
+</script>
 </head>
 <body>
   <div class="container">
