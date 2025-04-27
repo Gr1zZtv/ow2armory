@@ -9,7 +9,7 @@ const jwksRsa            = require('jwks-rsa');
 const app = express();
 
 // ── Load Auth0 config from env vars ────────────────────────────────────────
-const AUTH0_DOMAIN        = process.env.AUTH0_DOMAIN;            // e.g. 'dev-...auth0.com'
+const AUTH0_DOMAIN        = process.env.AUTH0_DOMAIN;            // e.g. 'dev-…auth0.com'
 const MGMT_CLIENT_ID      = process.env.AUTH0_MGMT_CLIENT_ID;    // from your M2M app
 const MGMT_CLIENT_SECRET  = process.env.AUTH0_MGMT_CLIENT_SECRET;
 if (!AUTH0_DOMAIN || !MGMT_CLIENT_ID || !MGMT_CLIENT_SECRET) {
@@ -20,10 +20,12 @@ if (!AUTH0_DOMAIN || !MGMT_CLIENT_ID || !MGMT_CLIENT_SECRET) {
 // ── JWT middleware to protect API endpoints ───────────────────────────────
 const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
-    cache: true, rateLimit: true,
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 5,
     jwksUri: `https://${AUTH0_DOMAIN}/.well-known/jwks.json`
   }),
-  // accept tokens issued for your Armory API
+  // accept tokens issued for your custom Armory API
   audience: 'https://my-armory-api',
   issuer:   `https://${AUTH0_DOMAIN}/`,
   algorithms: ['RS256']
@@ -44,7 +46,9 @@ async function renewMgmtToken() {
     mgmtToken = resp.data.access_token;
     console.log('✅ Obtained new Auth0 Management API token');
   } catch (err) {
-    console.error('❌ Failed to obtain Management API token', err.response?.data || err.message);
+    console.error('❌ Failed to obtain Management API token',
+      err.response?.data || err.message
+    );
   }
 }
 
@@ -52,11 +56,11 @@ async function renewMgmtToken() {
 renewMgmtToken();
 setInterval(renewMgmtToken, 1000 * 60 * 60 * 24);
 
-// ── Static assets ─────────────────────────────────────────────────────────
+// ── Middleware & Static Assets ────────────────────────────────────────────
+app.use(express.json()); // for parsing JSON bodies (PATCH /api/profile)
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json()); // for parsing JSON in PATCH /api/profile
 
-// ── Protected profile endpoints ───────────────────────────────────────────
+// ── Protected Profile Endpoints ────────────────────────────────────────────
 
 // GET /api/profile → returns the user_metadata object
 app.get('/api/profile', checkJwt, async (req, res) => {
