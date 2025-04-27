@@ -20,12 +20,11 @@ if (!AUTH0_DOMAIN || !MGMT_CLIENT_ID || !MGMT_CLIENT_SECRET) {
 // ── JWT middleware to protect API endpoints ───────────────────────────────
 const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
+    cache: true, rateLimit: true,
     jwksUri: `https://${AUTH0_DOMAIN}/.well-known/jwks.json`
   }),
-  audience: `https://${AUTH0_DOMAIN}/api/v2/`,
+  // accept tokens issued for your Armory API
+  audience: 'https://my-armory-api',
   issuer:   `https://${AUTH0_DOMAIN}/`,
   algorithms: ['RS256']
 });
