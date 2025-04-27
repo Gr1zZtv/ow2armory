@@ -8,146 +8,37 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: center;
       min-height: 100vh;
       margin: 0;
       background-color: #f0f0f0;
-      visibility: hidden; /* will be shown once auth state is known */
       font-family: sans-serif;
       padding: 20px;
     }
-    nav { margin-bottom: 20px; }
-    nav button { padding: 8px 16px; margin: 0 8px; }
-    #userName { margin-left: 16px; font-weight: bold; }
-    #userPicture {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-    #profileSection {
-      background: #fff;
-      padding: 16px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    h1 {
       margin-bottom: 24px;
-      width: 300px;
     }
-    #profileSection h2 { margin-top: 0; }
-    #profileSection label { display: block; margin: 8px 0; }
-    #profileSection input { margin-left: 8px; }
-    .container { text-align: center; margin-top: auto; }
-    .container button { padding: 12px 24px; margin: 0 10px; }
+    .container {
+      text-align: center;
+    }
+    .container button {
+      padding: 12px 24px;
+      margin: 0 10px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      background-color: #2d6a2d;
+      color: #fff;
+      transition: background-color 0.2s;
+    }
+    .container button:hover {
+      background-color: #3e8e3e;
+    }
   </style>
-
-  <!-- Auth0 SPA SDK -->
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
-  <script>
-    // ── AUTH0 CONFIG ─────────────────────────────────────────────────────────
-    const AUTH0_DOMAIN   = 'dev-bx2itlkpy8ayes2m.us.auth0.com';
-    const AUTH0_CLIENTID = '8atIKcYNagiPIjaNlzpELb0nhrOEzA3M';
-    const AUTH0_AUDIENCE = 'https://ow2-armory';
-    // ─────────────────────────────────────────────────────────────────────────────
-
-    let auth0;
-    window.onload = async () => {
-      // 1) Initialize Auth0 client — note `client_id` here instead of `clientId`
-      auth0 = await createAuth0Client({
-        domain: AUTH0_DOMAIN,
-        client_id: AUTH0_CLIENTID,
-        cacheLocation: 'localstorage',
-        useRefreshTokens: true,
-        authorizationParams: {
-          audience:     AUTH0_AUDIENCE,
-          redirect_uri: window.location.origin
-        }
-      });
-
-      // 2) Handle the redirect callback if present
-      if (window.location.search.includes('code=') &&
-          window.location.search.includes('state=')) {
-        await auth0.handleRedirectCallback();
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-
-      // 3) Check authentication state
-      const isAuthenticated = await auth0.isAuthenticated();
-
-      // 4) Wire up your buttons
-      document.getElementById('btnLogin').onclick  = () => auth0.loginWithRedirect();
-      document.getElementById('btnSignup').onclick = () => auth0.loginWithRedirect({ screen_hint: 'signup' });
-      document.getElementById('btnLogout').onclick = () => auth0.logout({ returnTo: window.location.origin });
-
-      // 5) Show/hide UI
-      document.getElementById('btnLogin').hidden       = isAuthenticated;
-      document.getElementById('btnSignup').hidden      = isAuthenticated;
-      document.getElementById('btnLogout').hidden      = !isAuthenticated;
-      document.getElementById('profileSection').hidden = !isAuthenticated;
-      document.body.style.visibility = 'visible';
-
-      if (isAuthenticated) {
-        // 6) Display user info
-        const user = await auth0.getUser();
-        document.getElementById('userName').textContent = user.name;
-        const pic = document.getElementById('userPicture');
-        pic.src    = user.picture;
-        pic.hidden = false;
-
-        // 7) Fetch & populate profile metadata
-        const token   = await auth0.getTokenSilently();
-        const profile = await fetch('/api/profile', {
-          headers: { Authorization: `Bearer ${token}` }
-        }).then(r => r.json());
-
-        document.getElementById('profileDisplayName').value = profile.displayName || '';
-        document.getElementById('profileColor').value       = profile.color       || '#ffffff';
-
-        // 8) Save profile updates
-        document.getElementById('profileForm').onsubmit = async e => {
-          e.preventDefault();
-          const updates = {
-            displayName: document.getElementById('profileDisplayName').value,
-            color:       document.getElementById('profileColor').value
-          };
-          const res = await fetch('/api/profile', {
-            method:  'PATCH',
-            headers: {
-              'Content-Type':  'application/json',
-              Authorization:   `Bearer ${token}`
-            },
-            body: JSON.stringify(updates)
-          });
-          alert(res.ok ? 'Profile saved!' : 'Error saving profile');
-        };
-      }
-    };
-  </script>
 </head>
-
 <body>
-  <nav>
-    <button id="btnLogin">Log In</button>
-    <button id="btnSignup">Sign Up</button>
-    <button id="btnLogout">Log Out</button>
-    <span id="userName"></span>
-    <img   id="userPicture" alt="Profile Picture" hidden>
-  </nav>
-
-  <section id="profileSection">
-    <h2>My Profile</h2>
-    <form id="profileForm">
-      <label>
-        Display Name:
-        <input id="profileDisplayName" type="text">
-      </label>
-      <label>
-        Favorite Color:
-        <input id="profileColor" type="color">
-      </label>
-      <button type="submit">Save Profile</button>
-    </form>
-  </section>
-
+  <h1>Welcome to The Armory</h1>
   <div class="container">
     <button onclick="location.href='viewer.html'">Go to Viewer</button>
     <button onclick="location.href='admin.html'">Go to Admin</button>
