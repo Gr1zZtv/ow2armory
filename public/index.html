@@ -12,7 +12,7 @@
       min-height: 100vh;
       margin: 0;
       background-color: #f0f0f0;
-      visibility: hidden; /* shown once auth state is known */
+      visibility: hidden; /* will be shown once auth state is known */
       font-family: sans-serif;
       padding: 20px;
     }
@@ -43,11 +43,11 @@
   <!-- Auth0 SPA SDK -->
   <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
   <script>
-    // ── CONFIGURE THESE ─────────────────────────────────────────────────────────
+    // ── AUTH0 CONFIG ─────────────────────────────────────────────────────────
     const AUTH0_DOMAIN   = 'dev-bx2itlkpy8ayes2m.us.auth0.com';
-    const AUTH0_CLIENTID = 'sUgQncsj6HR0JA9urvxKhLqdDkj4VqJn';
-    const AUTH0_AUDIENCE = 'https://my-armory-api';
-    // ───────────────────────────────────────────────────────────────────────────────
+    const AUTH0_CLIENTID = '8atIKcYNagiPIjaNlzpELb0nhrOEzA3M';
+    const AUTH0_AUDIENCE = 'https://ow2-armory';
+    // ─────────────────────────────────────────────────────────────────────────────
 
     let auth0;
     window.onload = async () => {
@@ -58,15 +58,15 @@
         cacheLocation: 'localstorage',
         useRefreshTokens: true,
         authorizationParams: {
-          audience: AUTH0_AUDIENCE,
+          audience:     AUTH0_AUDIENCE,
           redirect_uri: window.location.origin
         }
       });
 
       // 2) Handle the redirect callback if present
-      if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
+      if (window.location.search.includes('code=') &&
+          window.location.search.includes('state=')) {
         await auth0.handleRedirectCallback();
-        // remove code & state from the URL
         window.history.replaceState({}, document.title, window.location.pathname);
       }
 
