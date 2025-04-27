@@ -2,91 +2,184 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Home</title>
+  <title>Armory Home</title>
   <style>
     body {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
+      justify-content: flex-start;
+      min-height: 100vh;
       margin: 0;
       background-color: #f0f0f0;
+      visibility: hidden; /* will be shown once auth state is known */
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    nav {
+      margin-bottom: 20px;
+    }
+    nav button {
+      padding: 8px 16px;
+      margin: 0 8px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    #userName {
+      margin-left: 16px;
+      font-weight: bold;
+    }
+    #userPicture {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+    #profileSection {
+      background: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+      width: 300px;
+    }
+    #profileSection h2 {
+      margin-top: 0;
+    }
+    #profileSection label {
+      display: block;
+      margin: 8px 0;
+    }
+    #profileSection input[type="text"],
+    #profileSection input[type="color"] {
+      margin-left: 8px;
     }
     .container {
       text-align: center;
+      margin-top: auto;
     }
-    button {
+    .container button {
       padding: 12px 24px;
       margin: 0 10px;
       font-size: 16px;
       cursor: pointer;
     }
   </style>
-  
+
   <!-- 1) Auth0 SPA SDK -->
-<script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.19/auth0-spa-js.production.js"></script>
+  <script>
+    let auth0;
 
-<script>
-  // hide until we know if the user’s authenticated
-  document.body.style.visibility = 'hidden';
-  let auth0 = null;
-
-  window.onload = async () => {
-    auth0 = await createAuth0Client({
-      domain:        'YOUR_AUTH0_DOMAIN',       // from your Viewer app
-      client_id:     'YOUR_AUTH0_CLIENT_ID',    // from your Viewer app
-      cacheLocation: 'localstorage',
-      useRefreshTokens: true,
-      // request an API token for your own backend
-      audience:      'https://my-armory-api',   
-      redirect_uri:  window.location.origin + '/index.html'
-    });
-
-    // 1a) Handle the redirect callback
-    if (location.search.includes('code=') && location.search.includes('state=')) {
-      await auth0.handleRedirectCallback();
-      window.history.replaceState({}, document.title, '/index.html');
-    }
-
-    // 2) If not logged in, send them to Auth0
-    if (!(await auth0.isAuthenticated())) {
-      return auth0.loginWithRedirect({
-        redirect_uri: window.location.origin + '/index.html',
-        screen_hint:  'signup'   // optional: go straight to sign-up
+    window.onload = async () => {
+      // 2) Initialize Auth0 client
+      auth0 = await createAuth0Client({
+        domain:        'YOUR_AUTH0_DOMAIN',     // ← replace with your Auth0 domain
+        client_id:     'YOUR_AUTH0_CLIENT_ID',  // ← replace with your SPA client ID
+        cacheLocation: 'localstorage',
+        useRefreshTokens: true,
+        audience:      'https://my-armory-api',
+        redirect_uri:  window.location.origin + '/index.html'
       });
-    }
 
-    // 3) Now logged in
-    document.body.style.visibility = 'visible';
+      // 3) Handle redirect callback if present
+      if (window.location.search.includes('code=') && window.location.search.includes('state=')) {
+        await auth0.handleRedirectCallback();
+        window.history.replaceState({}, document.title, '/index.html');
+      }
 
-    // 4) Display user info in your UI
-    const user = await auth0.getUser();
-    document.getElementById('userName').textContent = user.name;
-    document.getElementById('userPicture').src      = user.picture;
+      // 4) Check authentication state
+      const isAuthenticated = await auth0.isAuthenticated();
 
-    // 5) Fetch & render their profile from your backend
-    const token = await auth0.getTokenSilently();
-    const profile = await fetch('/api/profile', {
-      headers: { Authorization: `Bearer ${token}` }
-    }).then(r=>r.json());
-    // now fill your “My Profile” form fields with `profile`
-  };
-</script>
+      // 5) Wire up buttons
+      document.getElementById('btnLogin').onclick = () =>
+        auth0.loginWithRedirect({ redirect_uri: window.location.origin + '/index.html' });
+      document.getElementById('btnSignup').onclick = () =>
+        auth0.loginWithRedirect({
+          redirect_uri: window.location.origin + '/index.html',
+          screen_hint:  'signup'
+        });
+      document.getElementById('btnLogout').onclick = () =>
+        auth0.logout({ returnTo: window.location.origin + '/index.html' });
+
+      // 6) Show/hide UI based on auth
+      document.getElementById('btnLogin').hidden      = isAuthenticated;
+      document.getElementById('btnSignup').hidden     = isAuthenticated;
+      document.getElementById('btnLogout').hidden     = !isAuthenticated;
+      document.getElementById('profileSection').hidden = !isAuthenticated;
+
+      // 7) Reveal the page now that we know auth state
+      document.body.style.visibility = 'visible';
+
+      if (isAuthenticated) {
+        // Display basic user info
+        const user = await auth0.getUser();
+        document.getElementById('userName').textContent   = user.name;
+        const pic = document.getElementById('userPicture');
+        pic.src    = user.picture;
+        pic.hidden = false;
+
+        // Fetch and populate their profile metadata
+        const token   = await auth0.getTokenSilently();
+        const profile = await fetch('/api/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        }).then(r => r.json());
+
+        document.getElementById('profileDisplayName').value = profile.displayName || '';
+        document.getElementById('profileColor').value       = profile.color       || '#ffffff';
+
+        // Handle profile form submission
+        document.getElementById('profileForm').onsubmit = async e => {
+          e.preventDefault();
+          const updates = {
+            displayName: document.getElementById('profileDisplayName').value,
+            color:       document.getElementById('profileColor').value
+          };
+          const res = await fetch('/api/profile', {
+            method:  'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization:  `Bearer ${token}`
+            },
+            body: JSON.stringify(updates)
+          });
+          if (res.ok) alert('Profile saved!');
+          else alert('Error saving profile');
+        };
+      }
+    };
+  </script>
 </head>
 <body>
-  <button id="btnLogout">Log Out</button>
-<script>
-  document.getElementById('btnLogout').onclick = () => {
-    auth0.logout({ returnTo: window.location.origin + '/index.html' });
-  };
-</script>
+
+  <nav>
+    <button id="btnLogin">Log In</button>
+    <button id="btnSignup">Sign Up</button>
+    <button id="btnLogout">Log Out</button>
+    <span id="userName"></span>
+    <img id="userPicture" alt="Profile Picture" hidden>
+  </nav>
+
+  <section id="profileSection">
+    <h2>My Profile</h2>
+    <form id="profileForm">
+      <label>
+        Display Name:
+        <input id="profileDisplayName" type="text">
+      </label>
+      <label>
+        Favorite Color:
+        <input id="profileColor" type="color">
+      </label>
+      <button type="submit">Save Profile</button>
+    </form>
+  </section>
+
   <div class="container">
-    <button onclick="window.location.href='viewer.html'">
-      Go to Viewer
-    </button>
-    <button onclick="window.location.href='admin.html'">
-      Go to Admin
-    </button>
+    <button onclick="window.location.href='viewer.html'">Go to Viewer</button>
+    <button onclick="window.location.href='admin.html'">Go to Admin</button>
   </div>
+
 </body>
 </html>
