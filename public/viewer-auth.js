@@ -4,8 +4,8 @@ let auth0;
 window.addEventListener('DOMContentLoaded', async () => {
   // 1) Initialize the Auth0 client
   auth0 = await createAuth0Client({
-    domain:        'YOUR_AUTH0_DOMAIN',      // e.g. dev-xxx.us.auth0.com
-    client_id:     'YOUR_VIEWER_CLIENT_ID',  // from your SPA app
+    domain:        'dev-bx2itlkpy8ayes2m.us.auth0.com',      // e.g. dev-xxx.us.auth0.com
+    client_id:     'sUgQncsj6HR0JA9urvxKhLqdDkj4VqJn',  // from your SPA app
     cacheLocation: 'localstorage',
     useRefreshTokens: true,
     audience:      'https://my-armory-api',  // match your server's JWT audience
