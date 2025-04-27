@@ -2,179 +2,271 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Armory Home</title>
+  <title>OW2 Armory</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    /* ──────────────────────────────────────────────────────────────────────────
-       RESET & BASE
-    ────────────────────────────────────────────────────────────────────────── */
-    * { box-sizing: border-box; margin:0; padding:0; }
-    body {
-      font-family: sans-serif;
-      background: #f0f0f0;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px;
-      min-height: 100vh;
+    :root {
+      --brand-primary: #1e5a87;
+      --brand-secondary: #f96302;
+      --gray-light: #f5f5f5;
+      --gray-medium: #ddd;
+      --text-dark: #222;
+      --text-light: #555;
+      --radius: 6px;
     }
-    h1 { margin-bottom:16px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-dark);
+      background: var(--gray-light);
+      line-height: 1.5;
+    }
+    a { color: var(--brand-primary); text-decoration: none; }
+    a:hover { text-decoration: underline; }
 
     /* ──────────────────────────────────────────────────────────────────────────
-       NAV LINKS
+       NAVBAR
     ────────────────────────────────────────────────────────────────────────── */
-    nav {
-      margin-bottom: 24px;
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--gray-medium);
+      padding: 12px 24px;
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    nav button {
-      background: #2d6a2d;
+    .logo { font-size: 1.5em; font-weight: bold; color: var(--brand-primary); }
+    nav ul {
+      list-style: none;
+      display: flex; gap: 16px;
+    }
+    nav li a {
+      font-size: 0.95em;
+      padding: 8px;
+      transition: background .2s, color .2s;
+    }
+    nav li a:hover {
+      background: var(--brand-secondary);
       color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 10px 20px;
+      border-radius: var(--radius);
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       HERO SECTION
+    ────────────────────────────────────────────────────────────────────────── */
+    .hero {
+      background: url('images/hero-bg.jpg') center/cover no-repeat;
+      color: #fff;
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .hero h1 { font-size: 2.8em; margin-bottom: 16px; }
+    .hero p { font-size: 1.1em; margin-bottom: 24px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .hero .cta-buttons button {
       margin: 0 8px;
+      padding: 12px 24px;
+      font-size: 1em;
+      border: none;
+      border-radius: var(--radius);
       cursor: pointer;
       transition: background .2s;
     }
-    nav button:hover {
-      background: #3e8e3e;
+    .hero .btn-primary {
+      background: var(--brand-primary);
+      color: #fff;
     }
+    .hero .btn-primary:hover { background: #16476b; }
+    .hero .btn-secondary {
+      background: var(--brand-secondary);
+      color: #fff;
+    }
+    .hero .btn-secondary:hover { background: #d35201; }
 
     /* ──────────────────────────────────────────────────────────────────────────
-       COMMUNITY BUILDS GRID
+       FEATURES
     ────────────────────────────────────────────────────────────────────────── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+      gap: 24px;
+      padding: 60px 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .feature {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .feature img {
+      width: 64px; height: 64px;
+      margin-bottom: 16px;
+    }
+    .feature h3 { margin-bottom: 12px; font-size: 1.2em; }
+    .feature p { font-size: 0.95em; color: var(--text-light); }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       COMMUNITY BUILDS
+    ────────────────────────────────────────────────────────────────────────── */
+    .section-title {
+      text-align: center;
+      font-size: 1.6em;
+      margin: 40px 0 16px;
+      color: var(--text-dark);
+    }
     .builds-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-      gap: 16px;
-      width: 100%;
-      max-width: 1000px;
-      margin-bottom: 40px;
+      grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+      gap: 20px;
+      padding: 0 24px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
     .build-card {
       background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
+      border-radius: var(--radius);
       overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
     }
     .build-header {
       display: flex;
       align-items: center;
-      padding: 12px;
-      background: #fafafa;
-      border-bottom: 1px solid #eee;
+      padding: 16px;
+      background: var(--gray-light);
+      border-bottom: 1px solid var(--gray-medium);
     }
     .build-header img {
-      width: 48px;
-      height: 48px;
+      width: 48px; height: 48px; border-radius: var(--radius);
       object-fit: cover;
-      border-radius: 4px;
     }
-    .hero-name {
-      margin-left: 12px;
-      font-weight: bold;
-      font-size: 1.1em;
-    }
-
-    /* ──────────────────────────────────────────────────────────────────────────
-       ABILITIES ROW
-    ────────────────────────────────────────────────────────────────────────── */
+    .hero-name { margin-left: 12px; font-weight: bold; flex: 1; }
     .build-abilities {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 12px;
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 16px;
     }
     .ability-card {
       width: 48px; height: 48px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      border: 1px solid var(--gray-medium);
+      border-radius: var(--radius);
       overflow: hidden;
+      flex-shrink: 0;
     }
-    .ability-card img {
-      width:100%; height:100%; object-fit:cover;
-    }
-
-    /* ──────────────────────────────────────────────────────────────────────────
-       BUILD COST
-    ────────────────────────────────────────────────────────────────────────── */
+    .ability-card img { width:100%; height:100%; object-fit:cover; }
     .build-cost {
-      margin: 0 12px 12px;
+      margin: 0 16px 16px;
       font-weight: bold;
-      font-size: 0.95em;
+      color: var(--text-dark);
     }
 
     /* ──────────────────────────────────────────────────────────────────────────
-       FOOTER LINKS
+       FOOTER
     ────────────────────────────────────────────────────────────────────────── */
-    .container {
-      margin-top: auto;
+    footer {
+      background: #fff;
+      border-top: 1px solid var(--gray-medium);
+      padding: 24px;
       text-align: center;
-      width: 100%;
+      font-size: 0.9em;
+      color: var(--text-light);
     }
-    .container button {
-      background: #1e5a87;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 12px 24px;
-      margin: 0 10px;
-      cursor: pointer;
-      transition: background .2s;
-    }
-    .container button:hover {
-      background: #326c9b;
-    }
+    footer a { color: var(--brand-primary); }
   </style>
 </head>
 <body>
 
-  <h1>Most Recent Community Builds</h1>
+  <!-- NAVBAR -->
+  <header>
+    <div class="logo">OW2 Armory</div>
+    <nav>
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#community">Community Builds</a></li>
+        <li><a href="viewer.html">Viewer</a></li>
+        <li><a href="admin.html">Admin</a></li>
+      </ul>
+    </nav>
+  </header>
 
+  <!-- HERO BANNER -->
+  <section class="hero">
+    <h1>Build. Compare. Conquer.</h1>
+    <p>Customize your loadout, share your builds with the community, and outplay the competition in Overwatch 2.</p>
+    <div class="cta-buttons">
+      <button class="btn-primary" onclick="location.href='viewer.html'">Try the Viewer</button>
+      <button class="btn-secondary" onclick="location.href='admin.html'">Go to Admin</button>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="features">
+    <div class="feature">
+      <img src="images/icon-customize.png" alt="Customize">
+      <h3>Fully Customizable</h3>
+      <p>Create and tweak hero builds exactly how you like—stats, abilities, and more.</p>
+    </div>
+    <div class="feature">
+      <img src="images/icon-share.png" alt="Share">
+      <h3>Share with Community</h3>
+      <p>Save your favorite loadouts and share links so others can try them too.</p>
+    </div>
+    <div class="feature">
+      <img src="images/icon-stats.png" alt="Stats">
+      <h3>Live Stat Calculation</h3>
+      <p>See your aggregated stats update in real time as you pick powers and items.</p>
+    </div>
+    <div class="feature">
+      <img src="images/icon-seamless.png" alt="Seamless">
+      <h3>Seamless Integration</h3>
+      <p>Easily manage your heroes and global abilities via our intuitive admin panel.</p>
+    </div>
+  </section>
+
+  <!-- COMMUNITY BUILDS -->
+  <h2 id="community" class="section-title">Most Recent Community Builds</h2>
   <div class="builds-grid">
-    <!-- Build #1 (placeholder) -->
+    <!-- Placeholder Build 1 -->
     <div class="build-card">
       <div class="build-header">
-        <img src="images/hero-placeholder.png" alt="Placeholder Hero">
-        <div class="hero-name">Placeholder Hero</div>
+        <img src="images/hero-placeholder.png" alt="Hero">
+        <div class="hero-name">Reaper</div>
       </div>
       <div class="build-abilities">
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability 1"></div>
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability 2"></div>
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability 3"></div>
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability 4"></div>
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Item 1"></div>
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Item 2"></div>
+        <div class="ability-card"><img src="images/ability1.png" alt=""></div>
+        <div class="ability-card"><img src="images/ability2.png" alt=""></div>
+        <div class="ability-card"><img src="images/ability3.png" alt=""></div>
+        <div class="ability-card"><img src="images/ability4.png" alt=""></div>
+        <div class="ability-card"><img src="images/item1.png" alt=""></div>
+        <div class="ability-card"><img src="images/item2.png" alt=""></div>
       </div>
-      <div class="build-cost">Total Cost: 12,345</div>
+      <div class="build-cost">Total Cost: 14,320</div>
     </div>
-
-    <!-- Build #2 (placeholder) -->
+    <!-- Placeholder Build 2 -->
     <div class="build-card">
       <div class="build-header">
-        <img src="images/hero-placeholder2.png" alt="Another Hero">
-        <div class="hero-name">Another Hero</div>
+        <img src="images/hero-placeholder2.png" alt="Hero">
+        <div class="hero-name">Tracer</div>
       </div>
       <div class="build-abilities">
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability A"></div>
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability B"></div>
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Ability C"></div>
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Item X"></div>
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Item Y"></div>
-        <div class="ability-card"><img src="images/ability-placeholder.png" alt="Item Z"></div>
+        <div class="ability-card"><img src="images/ability1.png" alt=""></div>
+        <div class="ability-card"><img src="images/ability2.png" alt=""></div>
+        <div class="ability-card"><img src="images/ability3.png" alt=""></div>
+        <div class="ability-card"><img src="images/ability4.png" alt=""></div>
+        <div class="ability-card"><img src="images/item1.png" alt=""></div>
+        <div class="ability-card"><img src="images/item2.png" alt=""></div>
       </div>
-      <div class="build-cost">Total Cost: 8,765</div>
+      <div class="build-cost">Total Cost: 9,780</div>
     </div>
+    <!-- add more cards… -->
   </div>
 
-  <div class="container">
-    <button onclick="location.href='viewer.html'">Go to Viewer</button>
-    <button onclick="location.href='admin.html'">Go to Admin</button>
-  </div>
+  <!-- FOOTER -->
+  <footer>
+    &copy; 2025 OW2 Armory. Built with ❤️ for the Overwatch 2 community.  
+    <a href="https://github.com/Gr1zZtv/ow2armory" target="_blank">GitHub Repo</a>
+  </footer>
 
 </body>
 </html>
