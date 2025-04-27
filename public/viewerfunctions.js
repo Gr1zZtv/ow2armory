@@ -1,5 +1,7 @@
 // viewerfunctions.js
 document.addEventListener("DOMContentLoaded", () => {
+  // ── CONSTANTS & STORAGE KEYS ─────────────────────────────────────────────
+  const STORAGE_KEY = 'armoryData';
   const STAT_DEFS = [
     { key: 'life',             label: 'Life',               icon: 'images/stats/stat-life.png' },
     { key: 'weaponPower',      label: 'Weapon Power',       icon: 'images/stats/weaponpowericon.png' },
@@ -15,13 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
     { key: 'criticalDamage',   label: 'Critical Damage',     icon: 'images/stats/stat-critical-dmg.png' },
   ];
 
-  const STORAGE_KEY = 'armoryData';
-
-  // Load + normalize data
+  // ── LOAD + NORMALIZE LOCAL DATA ──────────────────────────────────────────
   let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-  data.heroes = Array.isArray(data.heroes) ? data.heroes : [];
+  data.heroes          = Array.isArray(data.heroes)          ? data.heroes          : [];
   data.globalAbilities = Array.isArray(data.globalAbilities) ? data.globalAbilities : [];
-
   data.heroes.forEach(h => {
     h.tabs        = Array.isArray(h.tabs)        ? h.tabs        : ['Weapon','Ability','Survival','Power'];
     h.abilities   = Array.isArray(h.abilities)   ? h.abilities   : [];
@@ -38,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const tooltip = document.getElementById('tooltip');
 
-  // TOOLTIP
+  // ── TOOLTIP HANDLERS ──────────────────────────────────────────────────────
   function showTooltip(a) {
     const statLines = (a.stats||[]).map(s => {
       const def = STAT_DEFS.find(d=>d.key===s.key) || {label:s.key,icon:''};
@@ -62,9 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>`;
     tooltip.style.display = 'block';
   }
-  function hideTooltip() {
-    tooltip.style.display = 'none';
-  }
+  function hideTooltip() { tooltip.style.display = 'none'; }
   function onMouseMove(e) {
     if (tooltip.style.display==='block') {
       tooltip.style.left = (e.pageX + 12) + 'px';
@@ -72,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // STAT CALCULATION & RENDER
+  // ── STAT CALCULATION & RENDER ─────────────────────────────────────────────
   function calculateStats(hero) {
     const out = {};
     STAT_DEFS.forEach(s => out[s.key] = 0);
@@ -96,12 +93,14 @@ document.addEventListener("DOMContentLoaded", () => {
       statEl.innerHTML = `
         <img class="icon" src="${icon}" alt="${label}">
         <span class="stat-label">${label}</span>
-        <div class="bar" data-percent="${pct}"><div class="fill" style="width:${pct}%;"></div></div>`;
+        <div class="bar" data-percent="${pct}">
+          <div class="fill" style="width:${pct}%;"></div>
+        </div>`;
       cont.appendChild(statEl);
     });
   }
 
-  // TABS
+  // ── TAB RENDERING ─────────────────────────────────────────────────────────
   function renderTabs() {
     const container = document.getElementById('tabsContainer');
     container.innerHTML = '';
@@ -120,18 +119,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ABILITIES (merge global + hero-specific)
+  // ── ABILITY GRID ──────────────────────────────────────────────────────────
   function renderAbilities() {
     const hero = data.heroes[selectedHeroIdx];
-    const combined = [
-      ...data.globalAbilities,
-      ...(hero.abilities||[])
-    ];
+    const combined = [...data.globalAbilities, ...(hero.abilities||[])];
     ['common','rare','epic'].forEach(rarity => {
       const grid = document.getElementById(rarity + 'Grid');
       grid.innerHTML = '';
       combined
-        .filter(a => a.tabIdx === selectedTabIdx && a.category === rarity)
+        .filter(a => a.tabIdx===selectedTabIdx && a.category===rarity)
         .forEach(a => {
           const wrap = document.createElement('div');
           wrap.className = 'ability';
@@ -139,8 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
           card.className = 'card';
           card.__ability = a;
           card.innerHTML = `<img src="${a.icon}" alt="">`;
-          card.addEventListener('click',    () => purchaseAbility(a));
-          card.addEventListener('mouseover',() => showTooltip(a));
+          card.addEventListener('click',    ()=> purchaseAbility(a));
+          card.addEventListener('mouseover',()=> showTooltip(a));
           card.addEventListener('mousemove', onMouseMove);
           card.addEventListener('mouseout',  hideTooltip);
           wrap.appendChild(card);
@@ -153,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // BUILD PANEL
+  // ── BUILD PANEL ───────────────────────────────────────────────────────────
   function renderBuildSlots() {
     const hero = data.heroes[selectedHeroIdx];
     // total cost
@@ -169,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.innerHTML = a
           ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
           : '';
-        el.style.cursor = a ? 'pointer' : 'default';
+        el.style.cursor = a?'pointer':'default';
         el.onmouseover = ()=> a && showTooltip(a);
         el.onmousemove = onMouseMove;
         el.onmouseout  = hideTooltip;
@@ -189,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.innerHTML = a
           ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
           : '';
-        el.style.cursor = a ? 'pointer' : 'default';
+        el.style.cursor = a?'pointer':'default';
         el.onmouseover = ()=> a && showTooltip(a);
         el.onmousemove = onMouseMove;
         el.onmouseout  = hideTooltip;
@@ -203,15 +199,15 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  // PURCHASE
+  // ── PURCHASE LOGIC ────────────────────────────────────────────────────────
   function purchaseAbility(a) {
-    const hero = data.heroes[selectedHeroIdx];
-    const isPower = hero.tabs[selectedTabIdx] === 'Power';
+    const hero   = data.heroes[selectedHeroIdx];
+    const isPower= hero.tabs[selectedTabIdx]==='Power';
     if (isPower) {
-      if (hero.buildPowers.length >= 4) return alert('Power slots full');
+      if (hero.buildPowers.length>=4) return alert('Power slots full');
       hero.buildPowers.push(a);
     } else {
-      if (hero.buildItems.length >= 6) return alert('Item slots full');
+      if (hero.buildItems.length>=6) return alert('Item slots full');
       hero.buildItems.push(a);
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -219,11 +215,12 @@ document.addEventListener("DOMContentLoaded", () => {
     renderStats(calculateStats(hero));
   }
 
-  // INIT
+  // ── INIT VIEWER & HOOKS ──────────────────────────────────────────────────
   function initViewer() {
     const sel = document.getElementById('heroSelect');
     sel.innerHTML = data.heroes
-      .map((h,i)=>`<option value="${i}">${h.name}</option>`).join('');
+      .map((h,i)=>`<option value="${i}">${h.name}</option>`)
+      .join('');
     sel.value = selectedHeroIdx;
     sel.onchange = () => {
       selectedHeroIdx = +sel.value;
@@ -240,6 +237,74 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAbilities();
     renderBuildSlots();
     renderStats(calculateStats(data.heroes[selectedHeroIdx]));
+
+    bindSaveShare();
+    loadBuildFromURL();
+    renderCommunity();
+  }
+
+  // ── SAVE & SHARE ──────────────────────────────────────────────────────────
+  function bindSaveShare() {
+    document.getElementById('btnSaveBuild')
+      .addEventListener('click', async () => {
+        const hero = data.heroes[selectedHeroIdx];
+        const build = {
+          heroName:  hero.name,
+          powers:    hero.buildPowers.map(a=>a.name),
+          items:     hero.buildItems.map(a=>a.name),
+          timestamp: Date.now()
+        };
+        const resp = await fetch('/api/builds', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(build)
+        });
+        const { id } = await resp.json();
+        const link  = `${window.location.origin}/viewer.html?buildId=${id}`;
+        const a     = document.getElementById('buildLink');
+        a.href      = link;
+        a.textContent = link;
+        document.getElementById('shareLink').style.display = 'block';
+      });
+  }
+
+  // ── LOAD BUILD FROM ?buildId=… ───────────────────────────────────────────
+  async function loadBuildFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('buildId')) return;
+    const { buildId } = Object.fromEntries(params);
+    const resp = await fetch(`/api/builds/${buildId}`);
+    if (!resp.ok) return;
+    const saved = await resp.json();
+    // re-select hero
+    selectedHeroIdx = data.heroes.findIndex(h=>h.name===saved.heroName);
+    document.getElementById('heroSelect').value = selectedHeroIdx;
+
+    // reconstruct slots
+    const pool = [...data.globalAbilities, ...data.heroes[selectedHeroIdx].abilities];
+    data.heroes[selectedHeroIdx].buildPowers =
+      pool.filter(a=> saved.powers.includes(a.name));
+    data.heroes[selectedHeroIdx].buildItems  =
+      pool.filter(a=> saved.items.includes(a.name));
+
+    renderTabs();
+    renderAbilities();
+    renderBuildSlots();
+    renderStats(calculateStats(data.heroes[selectedHeroIdx]));
+  }
+
+  // ── COMMUNITY GALLERY ─────────────────────────────────────────────────────
+  async function renderCommunity() {
+    const grid   = document.getElementById('communityGrid');
+    const builds = await fetch('/api/builds').then(r=>r.json());
+    grid.innerHTML = builds.map(b=>`
+      <div class="community-card">
+        <strong>${b.heroName}</strong><br>
+        Powers: ${b.powers.join(', ')}<br>
+        Items:  ${b.items.join(', ')}<br>
+        <a href="viewer.html?buildId=${b.id}">Load Build</a>
+      </div>
+    `).join('');
   }
 
   initViewer();
