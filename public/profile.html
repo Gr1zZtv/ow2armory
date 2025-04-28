@@ -12,75 +12,39 @@
   </header>
 
   <section>
-    <h2>Community Builds</h2>
-    <div id="buildsContainer" class="builds-grid">
-      <!-- builds will go here -->
-    </div>
+    <h2>About</h2>
+    <p id="lblColor">Favorite color: <span id="clrDisplay"></span></p>
   </section>
 
   <script type="module">
     import { db } from './firebase-config.js';
-    import {
-      doc, getDoc,
-      collection, query, where, orderBy, getDocs
-    } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+    import { doc, getDoc }
+      from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
 
     (async function() {
       const params = new URLSearchParams(location.search);
       const uid = params.get('uid');
-      if (!uid) return document.body.textContent = 'No user specified.';
+      if (!uid) {
+        document.body.textContent = 'No user specified.';
+        return;
+      }
 
-      // --- Fetch and show user metadata ---
-      const profileRef = doc(db, 'profiles', uid);
-      const profileSnap = await getDoc(profileRef);
-      if (profileSnap.exists()) {
-        const { displayName, color } = profileSnap.data();
-        document.getElementById('lblName').textContent = displayName || 'Unnamed Hero';
-        const avatar = document.getElementById('imgAvatar');
-        avatar.src      = profileSnap.data().avatarURL || '/images/default-avatar.png';
-        avatar.hidden   = false;
-        if (color) document.body.style.setProperty('--accent', color);
-      } else {
+      // fetch profile data
+      const ref = doc(db, 'profiles', uid);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
         document.getElementById('lblName').textContent = 'Unknown User';
+        return;
       }
 
-      // --- Query their community builds ---
-      const buildsQ = query(
-        collection(db, 'communityBuilds'),
-        where('ownerId','==', uid),
-        orderBy('createdAt','desc')
-      );
-      const snap = await getDocs(buildsQ);
-      const cont = document.getElementById('buildsContainer');
+      const { displayName, color, avatarURL } = snap.data();
+      document.getElementById('lblName').textContent = displayName || 'Unnamed';
+      const img = document.getElementById('imgAvatar');
+      img.src    = avatarURL || '/images/default-avatar.png';
+      img.hidden = false;
 
-      snap.forEach(docSnap => {
-        const b = docSnap.data();
-        const card = document.createElement('div');
-        card.className = 'build-card';
-        card.innerHTML = `
-          <div class="card-header">
-            <img src="/images/avatars/${b.heroId}.png" alt="${b.heroName}">
-            <h3>${b.heroName}</h3>
-          </div>
-          <div class="card-body">
-            <div class="squares">
-              ${b.powerIds.map(id =>
-                `<div class="square"><img src="/images/abilities/${id}.png"></div>`
-              ).join('')}
-            </div>
-            <div class="circles">
-              ${b.itemIds.map(id =>
-                `<div class="circle"><img src="/images/abilities/${id}.png"></div>`
-              ).join('')}
-            </div>
-            <div class="cost">Total: ${b.totalCost.toLocaleString()}</div>
-          </div>`;
-        cont.appendChild(card);
-      });
-
-      if (snap.empty) {
-        cont.textContent = 'No builds yet.';
-      }
+      document.getElementById('clrDisplay').textContent = color || '—';
+      document.body.style.setProperty('--accent', color || '#888');
     })();
   </script>
 </body>
