@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <!-- ensure mobile scaling -->
   <title>Armory Login / Signup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: sans-serif;
@@ -12,7 +12,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px;
+      padding: 20px;
     }
     h1 { margin-bottom: 16px; }
     .tabs {
@@ -47,23 +47,23 @@
       font-size: 14px;
     }
     input {
-      padding: 8px;
+      padding: 10px;
       margin-top: 4px;
       border: none;
       border-radius: 4px;
+      font-size: 16px;
     }
     button.submit {
       background: #2d6a2d;
       color: #fff;
       border: none;
-      padding: 10px;
+      padding: 14px;
+      font-size: 16px;
       cursor: pointer;
       border-radius: 4px;
       margin-top: 12px;
-      /* mobile‐tap optimizations */
-      touch-action: manipulation;
-      position: relative;
-      z-index: 1;
+      /* ensure taps register */
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
     }
     .error {
       color: #f88;
@@ -72,10 +72,10 @@
     }
   </style>
 
-  <!-- 1) Your env.js must load first -->
+  <!-- 1) env.js first -->
   <script src="/env.js"></script>
 
-  <!-- 2) Firebase “compat” SDKs -->
+  <!-- 2) Firebase compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
@@ -87,7 +87,7 @@
     <button id="tabSignUp">Sign Up</button>
   </div>
 
-  <form id="formSignIn" class="active">
+  <form id="formSignIn" class="active" novalidate>
     <div id="errorSignIn" class="error"></div>
     <label>Email
       <input type="email" id="signInEmail" required>
@@ -95,10 +95,11 @@
     <label>Password
       <input type="password" id="signInPassword" required>
     </label>
-    <button type="submit" class="submit">Sign In</button>
+    <!-- give the button an ID so we can also listen for click -->
+    <button type="submit" id="signInBtn" class="submit">Sign In</button>
   </form>
 
-  <form id="formSignUp">
+  <form id="formSignUp" novalidate>
     <div id="errorSignUp" class="error"></div>
     <label>Email
       <input type="email" id="signUpEmail" required>
@@ -109,83 +110,98 @@
     <label>Confirm
       <input type="password" id="signUpPassword2" required>
     </label>
-    <button type="submit" class="submit">Sign Up</button>
+    <button type="submit" id="signUpBtn" class="submit">Sign Up</button>
   </form>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('🔑 Login page loaded');
-      console.log('🌱 env.js:', window.__env__);
+      console.log('🔑 Login page loaded', window.__env__);
 
-      // ── Init Firebase ───────────────────────────────────────────
-      const fbCfg = window.__env__ || {};
-      try {
-        firebase.initializeApp({
-          apiKey:            fbCfg.FIREBASE_API_KEY,
-          authDomain:        fbCfg.FIREBASE_AUTH_DOMAIN,
-          projectId:         fbCfg.FIREBASE_PROJECT_ID,
-          storageBucket:     fbCfg.FIREBASE_STORAGE_BUCKET,
-          messagingSenderId: fbCfg.FIREBASE_MESSAGING_SENDER_ID,
-          appId:             fbCfg.FIREBASE_APP_ID
-        });
-      } catch(e) {
-        console.error('⚠️ Firebase init error', e);
-      }
+      // Initialize Firebase
+      const cfg = window.__env__||{};
+      firebase.initializeApp({
+        apiKey: cfg.FIREBASE_API_KEY,
+        authDomain: cfg.FIREBASE_AUTH_DOMAIN,
+        projectId: cfg.FIREBASE_PROJECT_ID,
+        storageBucket: cfg.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: cfg.FIREBASE_MESSAGING_SENDER_ID,
+        appId: cfg.FIREBASE_APP_ID
+      });
       const auth = firebase.auth();
 
-      // ── Tab logic ────────────────────────────────────────────────
+      // Tabs
       const tabIn  = document.getElementById('tabSignIn');
       const tabUp  = document.getElementById('tabSignUp');
       const formIn = document.getElementById('formSignIn');
       const formUp = document.getElementById('formSignUp');
-      tabIn .onclick = () => {
-        tabIn .classList.add('active');
-        tabUp .classList.remove('active');
+      tabIn.onclick = () => {
+        tabIn.classList.add('active');
+        tabUp.classList.remove('active');
         formIn.classList.add('active');
         formUp.classList.remove('active');
       };
-      tabUp .onclick = () => {
-        tabUp .classList.add('active');
-        tabIn .classList.remove('active');
+      tabUp.onclick = () => {
+        tabUp.classList.add('active');
+        tabIn.classList.remove('active');
         formUp.classList.add('active');
         formIn.classList.remove('active');
       };
 
-      // ── Sign In ──────────────────────────────────────────────────
-      formIn.addEventListener('submit', async e => {
-        e.preventDefault();
-        document.getElementById('errorSignIn').textContent = '';
+      // Sign-in logic
+      async function handleSignIn(evt) {
+        if(evt) evt.preventDefault();
+        const errEl = document.getElementById('errorSignIn');
+        errEl.textContent = '';
         const email = document.getElementById('signInEmail').value;
         const pw    = document.getElementById('signInPassword').value;
+        console.log('Attempting signIn:', email);
         try {
           await auth.signInWithEmailAndPassword(email, pw);
-          window.location.href = '/index.html';
+          console.log('✅ Sign-in success');
+          location.href = '/index.html';
         } catch(err) {
-          document.getElementById('errorSignIn').textContent = err.message;
+          console.error('❌ Sign-in error', err);
+          errEl.textContent = err.message;
         }
-      });
+      }
 
-      // ── Sign Up ──────────────────────────────────────────────────
-      formUp.addEventListener('submit', async e => {
-        e.preventDefault();
-        document.getElementById('errorSignUp').textContent = '';
+      // Sign-up logic
+      async function handleSignUp(evt) {
+        if(evt) evt.preventDefault();
+        const errEl = document.getElementById('errorSignUp');
+        errEl.textContent = '';
         const email = document.getElementById('signUpEmail').value;
         const pw    = document.getElementById('signUpPassword').value;
         const pw2   = document.getElementById('signUpPassword2').value;
-        if (pw !== pw2) {
-          return document.getElementById('errorSignUp').textContent = 'Passwords must match.';
+        if(pw!==pw2) {
+          errEl.textContent = 'Passwords must match.';
+          return;
         }
+        console.log('Attempting signUp:', email);
         try {
           await auth.createUserWithEmailAndPassword(email, pw);
-          window.location.href = '/index.html';
+          console.log('🎉 Sign-up success');
+          location.href = '/index.html';
         } catch(err) {
-          document.getElementById('errorSignUp').textContent = err.message;
+          console.error('❌ Sign-up error', err);
+          errEl.textContent = err.message;
         }
-      });
+      }
 
-      // ── If already signed in → redirect home ─────────────────────
+      // Wire up both form submit *and* button click for mobile
+      document.getElementById('formSignIn')
+              .addEventListener('submit', handleSignIn);
+      document.getElementById('signInBtn')
+              .addEventListener('click',  handleSignIn);
+
+      document.getElementById('formSignUp')
+              .addEventListener('submit', handleSignUp);
+      document.getElementById('signUpBtn')
+              .addEventListener('click',  handleSignUp);
+
+      // If already logged in, redirect home
       auth.onAuthStateChanged(u => {
-        if (u) window.location.href = '/index.html';
+        if(u) location.href = '/index.html';
       });
     });
   </script>
