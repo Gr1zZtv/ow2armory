@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login — The Armory</title>
+  <!-- FirebaseUI styles -->
+  <link
+    rel="stylesheet"
+    href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css"
+  />
+  <style>
+    /* center the login box on a dark background */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #0b1625;
+      font-family: sans-serif;
+      color: #fff;
+    }
+    #firebaseui-auth-container {
+      width: 320px;
+    }
+  </style>
+</head>
+<body>
+  <!-- where FirebaseUI will render -->
+  <div id="firebaseui-auth-container"></div>
+
+  <!-- our login logic (ES module) -->
+  <script type="module" src="login.js"></script>
+</body>
+</html>
