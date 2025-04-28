@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <title>The Armory — Home</title>
   <link rel="stylesheet" href="index.css">
+
+  <!-- 1) Expose your Render env vars -->
+  <script src="/env.js"></script>
+  <!-- 2) Initialize Firebase using those vars -->
+  <script type="module" src="/firebase-config.js"></script>
 </head>
 <body>
 
@@ -27,12 +32,14 @@
           <h3>Hero A</h3>
         </div>
         <div class="card-body">
+          <!-- 4 squares -->
           <div class="squares">
             <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
             <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
             <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
             <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
           </div>
+          <!-- 2 rows of 3 circles -->
           <div class="circles">
             <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
             <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
@@ -123,7 +130,6 @@
   <section class="section">
     <h2>Latest Builds</h2>
     <div class="latest-builds">
-      <!-- Same .build-card structure repeated -->
       <!-- Hero E -->
       <div class="build-card">
         <div class="card-header">
