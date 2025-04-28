@@ -3,7 +3,7 @@ const express = require('express');
 const path    = require('path');
 const app     = express();
 
-// ── 1) Expose your Firebase config via an env.js endpoint ──────────────────
+// ── 1) Expose your Firebase config to the client ─────────────────────────
 app.get('/env.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.send(`
@@ -18,14 +18,14 @@ app.get('/env.js', (req, res) => {
   `);
 });
 
-// ── 2) Serve static assets ─────────────────────────────────────────────────
+// ── 2) Serve your static files ────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ── 3) Fallback to index.html for client-side routing ──────────────────────
+// ── 3) Fallback all other routes to index.html ───────────────────────────
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
-// ── 4) Start the server ────────────────────────────────────────────────────
+// ── 4) Start the server ───────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
