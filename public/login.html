@@ -2,45 +2,81 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Armory Login</title>
+  <title>Armory Login / Signup</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-
   <style>
     body {
       font-family: sans-serif;
       background: #0b1625;
       color: #fff;
-      display: flex; flex-direction: column; align-items: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 40px;
     }
-    h1 { margin-bottom: 16px; }
-    .tabs { display: flex; margin-bottom: 24px; width:100%; max-width:360px; }
-    .tabs button {
-      flex:1; padding:8px; background:#1a2738; border:none; color:#fff;
-      cursor:pointer;
+    h1 {
+      margin-bottom: 16px;
     }
-    .tabs button.active { background: #f96302; }
+    .tabs {
+      display: flex;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 360px;
+    }
+    .tabs button {
+      flex: 1;
+      padding: 8px;
+      background: #1a2738;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+    }
+    .tabs button.active {
+      background: #f96302;
+    }
     form {
       background: rgba(255,255,255,0.05);
       padding: 24px;
       border-radius: 8px;
-      width:100%; max-width:360px;
-      display:none; flex-direction:column; gap:12px;
+      width: 100%;
+      max-width: 360px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
     }
-    form.active { display:flex; }
-    label { display:flex; flex-direction:column; font-size:14px; }
-    input { padding:8px; margin-top:4px; border:none; border-radius:4px; }
+    form.active {
+      display: flex;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+    }
+    input {
+      padding: 8px;
+      margin-top: 4px;
+      border: none;
+      border-radius: 4px;
+    }
     button.submit {
-      background:#2d6a2d; color:#fff; border:none;
-      padding:10px; cursor:pointer; border-radius:4px; margin-top:12px;
+      background: #2d6a2d;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 12px;
     }
-    .error { color:#f88; min-height:18px; font-size:14px; }
+    .error {
+      color: #f88;
+      min-height: 18px;
+      font-size: 14px;
+    }
   </style>
 
-  <!-- 1) Your env.js must be first -->
+  <!-- 1) Your env.js must come first -->
   <script src="/env.js"></script>
-
-  <!-- 2) Firebase “compat” SDKs -->
+  <!-- 2) Firebase “compat” SDKs for Auth -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
@@ -52,55 +88,69 @@
     <button id="tabSignUp">Sign Up</button>
   </div>
 
+  <!-- SIGN IN FORM -->
   <form id="formSignIn" class="active">
     <div id="errorSignIn" class="error"></div>
-    <label>Email<input type="email" id="signInEmail" required></label>
-    <label>Password<input type="password" id="signInPassword" required></label>
+    <label>Email
+      <input type="email" id="signInEmail" required>
+    </label>
+    <label>Password
+      <input type="password" id="signInPassword" required>
+    </label>
     <button type="submit" class="submit">Sign In</button>
   </form>
 
-  <!-- public/login.html -->
-<form id="formSignUp">
-  <div id="errorSignUp" class="error"></div>
-  <label>Username
-    <input type="text" id="signUpUsername" required>
-  </label>
-  <label>Email
-    <input type="email" id="signUpEmail" required>
-  </label>
-  <label>Password
-    <input type="password" id="signUpPassword" required>
-  </label>
-  <label>Confirm
-    <input type="password" id="signUpPassword2" required>
-  </label>
-  <button type="submit" class="submit">Sign Up</button>
-</form>
-
+  <!-- SIGN UP FORM -->
+  <form id="formSignUp">
+    <div id="errorSignUp" class="error"></div>
+    <label>Username
+      <input type="text" id="signUpUsername" required>
+    </label>
+    <label>Email
+      <input type="email" id="signUpEmail" required>
+    </label>
+    <label>Password
+      <input type="password" id="signUpPassword" required>
+    </label>
+    <label>Confirm
+      <input type="password" id="signUpPassword2" required>
+    </label>
+    <button type="submit" class="submit">Sign Up</button>
+  </form>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // 1) Initialise Firebase
-      const fb = window.__env__;
+      // 1) Initialize Firebase from /env.js
+      const e = window.__env__;
       firebase.initializeApp({
-        apiKey:            fb.FIREBASE_API_KEY,
-        authDomain:        fb.FIREBASE_AUTH_DOMAIN,
-        projectId:         fb.FIREBASE_PROJECT_ID,
-        storageBucket:     fb.FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: fb.FIREBASE_MESSAGING_SENDER_ID,
-        appId:             fb.FIREBASE_APP_ID
+        apiKey:            e.FIREBASE_API_KEY,
+        authDomain:        e.FIREBASE_AUTH_DOMAIN,
+        projectId:         e.FIREBASE_PROJECT_ID,
+        storageBucket:     e.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: e.FIREBASE_MESSAGING_SENDER_ID,
+        appId:             e.FIREBASE_APP_ID
       });
       const auth = firebase.auth();
 
-      // 2) Tabs
+      // 2) Tab switch logic
       const tabIn  = document.getElementById('tabSignIn');
       const tabUp  = document.getElementById('tabSignUp');
       const formIn = document.getElementById('formSignIn');
       const formUp = document.getElementById('formSignUp');
-      tabIn .onclick = () => { tabIn.classList.add('active'); tabUp.classList.remove('active'); formIn.classList.add('active'); formUp.classList.remove('active'); };
-      tabUp .onclick = () => { tabUp.classList.add('active'); tabIn.classList.remove('active'); formUp.classList.add('active'); formIn.classList.remove('active'); };
+      tabIn.onclick = () => {
+        tabIn.classList.add('active');
+        tabUp.classList.remove('active');
+        formIn.classList.add('active');
+        formUp.classList.remove('active');
+      };
+      tabUp.onclick = () => {
+        tabUp.classList.add('active');
+        tabIn.classList.remove('active');
+        formUp.classList.add('active');
+        formIn.classList.remove('active');
+      };
 
-      // 3) Sign In
+      // 3) Sign In handler
       formIn.addEventListener('submit', async e => {
         e.preventDefault();
         document.getElementById('errorSignIn').textContent = '';
@@ -115,26 +165,30 @@
         }
       });
 
-      // 4) Sign Up
+      // 4) Sign Up handler (with username → saved to Auth profile)
       formUp.addEventListener('submit', async e => {
         e.preventDefault();
         document.getElementById('errorSignUp').textContent = '';
+        const u  = document.getElementById('signUpUsername').value.trim();
         const pw = document.getElementById('signUpPassword').value;
         if (pw !== document.getElementById('signUpPassword2').value) {
           return document.getElementById('errorSignUp').textContent = 'Passwords must match.';
         }
         try {
-          await auth.createUserWithEmailAndPassword(
+          // create user
+          const cred = await auth.createUserWithEmailAndPassword(
             document.getElementById('signUpEmail').value,
             pw
           );
+          // set their displayName = username
+          await cred.user.updateProfile({ displayName: u });
           window.location.href = '/index.html';
         } catch(err) {
           document.getElementById('errorSignUp').textContent = err.message;
         }
       });
 
-      // 5) If already logged in, go home
+      // 5) If already signed in, redirect home
       auth.onAuthStateChanged(u => {
         if (u) window.location.href = '/index.html';
       });
