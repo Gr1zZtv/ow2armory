@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Account Settings</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <h1>Account Settings</h1>
+  <button id="btnLogout">Log Out</button>
+
+  <section id="settingsSection">
+    <h2>Your Profile</h2>
+    <form id="settingsForm">
+      <label>
+        Display Name:
+        <input id="inpDisplayName" type="text" />
+      </label>
+      <label>
+        Favorite Color:
+        <input id="inpColor" type="color" />
+      </label>
+      <button type="submit">Save Changes</button>
+    </form>
+  </section>
+
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+    import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) return location.href = '/login.html';
+
+      // --- Log out button ---
+      document.getElementById('btnLogout').onclick = () =>
+        signOut(auth).then(() => location.href = '/login.html');
+
+      // --- Load existing profile data ---
+      const ref = doc(db, 'profiles', user.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const { displayName, color } = snap.data();
+        document.getElementById('inpDisplayName').value = displayName || '';
+        document.getElementById('inpColor').value       = color       || '#ffffff';
+      }
+
+      // --- Save updates ---
+      document.getElementById('settingsForm').onsubmit = async e => {
+        e.preventDefault();
+        await setDoc(ref, {
+          displayName: document.getElementById('inpDisplayName').value,
+          color:       document.getElementById('inpColor').value
+        }, { merge: true });
+        alert('Saved!');
+      };
+    });
+  </script>
+</body>
+</html>
