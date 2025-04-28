@@ -13,6 +13,14 @@
 <body>
 <button onclick="location.href='login.html'">Log In</button>
 
+  <!-- ── NAV (User info + Logout) ─────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="user-info">
+      <img id="userPic" class="user-pic" alt="Avatar" hidden>
+      <span id="userName" class="user-name"></span>
+      <button id="btnLogout" class="btn-logout" hidden>Log Out</button>
+    </div>
+  </nav>  
   <!-- ── BANNER ─────────────────────────────────────────────────────────────── -->
   <section class="banner">
     <h1>Welcome to the Armory</h1>
@@ -229,6 +237,38 @@
       </div>
     </div>
   </section>
+  <script type="module">
+    // 1) Pull in your initialized Firebase auth instance
+    import { auth } from './firebase-config.js';
+    // 2) And the listener
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+
+    const userNameElem = document.getElementById('userName');
+    const userPicElem  = document.getElementById('userPic');
+    const btnLogout    = document.getElementById('btnLogout');
+
+    // 3) React to auth state changes
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        // show name or email
+        userNameElem.textContent = user.displayName || user.email;
+        // show photoURL or a fallback
+        userPicElem.src       = user.photoURL || 'images/default-avatar.png';
+        userPicElem.hidden    = false;
+        btnLogout.hidden      = false;
+      } else {
+        // signed out — hide them
+        userNameElem.textContent = '';
+        userPicElem.hidden       = true;
+        btnLogout.hidden         = true;
+      }
+    });
+
+    // 4) Wire up the logout button
+    btnLogout.addEventListener('click', () => {
+      auth.signOut();
+    });
+  </script>
 
 </body>
 </html>
