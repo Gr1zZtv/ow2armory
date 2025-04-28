@@ -1,27 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Log In — The Armory</title>
-  <link rel="stylesheet"
-        href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css" />
-  <style>
-    body {
-      display: flex; justify-content: center; align-items: center;
-      height:100vh; margin:0;
-      background:#0b1625; color:#fff; font-family:sans-serif;
-    }
-    #firebaseui-auth-container {
-      width:320px; padding:24px;
-      background:#1a2738; border-radius:8px;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Armory Login</title>
+  <!-- FirebaseUI CSS -->
+  <link
+    rel="stylesheet"
+    href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css"
+  />
+  <!-- 1) Inject env vars -->
+  <script src="/env.js"></script>
+  <!-- 2) Load and initialize Firebase SDK -->
+  <script type="module" src="./firebase-config.js"></script>
+  <!-- 3) Our login logic -->
+  <script type="module" src="./login.js"></script>
 </head>
 <body>
-
+  <h1>Sign In / Sign Up</h1>
   <div id="firebaseui-auth-container"></div>
-
-  <!-- No global Firebase scripts here: we’re using modules -->
-  <script type="module" src="login.js"></script>
 </body>
 </html>
