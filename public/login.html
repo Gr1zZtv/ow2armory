@@ -4,74 +4,43 @@
   <meta charset="utf-8">
   <title>Armory Login</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+
   <style>
     body {
       font-family: sans-serif;
       background: #0b1625;
       color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display: flex; flex-direction: column; align-items: center;
       padding: 40px;
     }
     h1 { margin-bottom: 16px; }
-    .tabs {
-      display: flex;
-      margin-bottom: 24px;
-      width: 100%;
-      max-width: 360px;
-    }
+    .tabs { display: flex; margin-bottom: 24px; width:100%; max-width:360px; }
     .tabs button {
-      flex: 1;
-      padding: 8px;
-      background: #1a2738;
-      border: none;
-      color: #fff;
-      cursor: pointer;
+      flex:1; padding:8px; background:#1a2738; border:none; color:#fff;
+      cursor:pointer;
     }
     .tabs button.active { background: #f96302; }
     form {
       background: rgba(255,255,255,0.05);
       padding: 24px;
       border-radius: 8px;
-      width: 100%;
-      max-width: 360px;
-      display: none;
-      flex-direction: column;
-      gap: 12px;
+      width:100%; max-width:360px;
+      display:none; flex-direction:column; gap:12px;
     }
-    form.active { display: flex; }
-    label {
-      display: flex;
-      flex-direction: column;
-      font-size: 14px;
-    }
-    input {
-      padding: 8px;
-      margin-top: 4px;
-      border: none;
-      border-radius: 4px;
-    }
+    form.active { display:flex; }
+    label { display:flex; flex-direction:column; font-size:14px; }
+    input { padding:8px; margin-top:4px; border:none; border-radius:4px; }
     button.submit {
-      background: #2d6a2d;
-      color: #fff;
-      border: none;
-      padding: 10px;
-      cursor: pointer;
-      border-radius: 4px;
-      margin-top: 12px;
+      background:#2d6a2d; color:#fff; border:none;
+      padding:10px; cursor:pointer; border-radius:4px; margin-top:12px;
     }
-    .error {
-      color: #f88;
-      font-size: 14px;
-      min-height: 18px;
-    }
+    .error { color:#f88; min-height:18px; font-size:14px; }
   </style>
 
-  <!-- 1) Your env vars -->
+  <!-- 1) Your env.js must be first -->
   <script src="/env.js"></script>
 
-  <!-- 2) Firebase compat -->
+  <!-- 2) Firebase “compat” SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 </head>
@@ -100,88 +69,63 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('🔑 Login page loaded');
-      console.log('🌱 env.js:', window.__env__);
-
-      // ── Init Firebase ───────────────────────────────────────────
-      const fbCfg = window.__env__ || {};
-      try {
-        firebase.initializeApp({
-          apiKey:            fbCfg.FIREBASE_API_KEY,
-          authDomain:        fbCfg.FIREBASE_AUTH_DOMAIN,
-          projectId:         fbCfg.FIREBASE_PROJECT_ID,
-          storageBucket:     fbCfg.FIREBASE_STORAGE_BUCKET,
-          messagingSenderId: fbCfg.FIREBASE_MESSAGING_SENDER_ID,
-          appId:             fbCfg.FIREBASE_APP_ID
-        });
-      } catch(e) {
-        console.error('⚠️ Firebase init error', e);
-      }
+      // 1) Initialise Firebase
+      const fb = window.__env__;
+      firebase.initializeApp({
+        apiKey:            fb.FIREBASE_API_KEY,
+        authDomain:        fb.FIREBASE_AUTH_DOMAIN,
+        projectId:         fb.FIREBASE_PROJECT_ID,
+        storageBucket:     fb.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: fb.FIREBASE_MESSAGING_SENDER_ID,
+        appId:             fb.FIREBASE_APP_ID
+      });
       const auth = firebase.auth();
 
-      // ── Tab logic ────────────────────────────────────────────────
+      // 2) Tabs
       const tabIn  = document.getElementById('tabSignIn');
       const tabUp  = document.getElementById('tabSignUp');
       const formIn = document.getElementById('formSignIn');
       const formUp = document.getElementById('formSignUp');
+      tabIn .onclick = () => { tabIn.classList.add('active'); tabUp.classList.remove('active'); formIn.classList.add('active'); formUp.classList.remove('active'); };
+      tabUp .onclick = () => { tabUp.classList.add('active'); tabIn.classList.remove('active'); formUp.classList.add('active'); formIn.classList.remove('active'); };
 
-      tabIn .onclick = () => {
-        tabIn .classList.add('active');
-        tabUp .classList.remove('active');
-        formIn.classList.add('active');
-        formUp.classList.remove('active');
-      };
-      tabUp .onclick = () => {
-        tabUp .classList.add('active');
-        tabIn .classList.remove('active');
-        formUp.classList.add('active');
-        formIn.classList.remove('active');
-      };
-
-      // ── Sign In ──────────────────────────────────────────────────
+      // 3) Sign In
       formIn.addEventListener('submit', async e => {
         e.preventDefault();
-        console.log('✉️ Signing in...');
         document.getElementById('errorSignIn').textContent = '';
-        const email = document.getElementById('signInEmail').value;
-        const pw    = document.getElementById('signInPassword').value;
         try {
-          await auth.signInWithEmailAndPassword(email, pw);
-          console.log('✅ Signed in!');
+          await auth.signInWithEmailAndPassword(
+            document.getElementById('signInEmail').value,
+            document.getElementById('signInPassword').value
+          );
           window.location.href = '/index.html';
         } catch(err) {
-          console.error('❌ Sign-in error', err);
           document.getElementById('errorSignIn').textContent = err.message;
         }
       });
 
-      // ── Sign Up ──────────────────────────────────────────────────
+      // 4) Sign Up
       formUp.addEventListener('submit', async e => {
         e.preventDefault();
-        console.log('🆕 Signing up...');
         document.getElementById('errorSignUp').textContent = '';
-        const email = document.getElementById('signUpEmail').value;
-        const pw    = document.getElementById('signUpPassword').value;
-        const pw2   = document.getElementById('signUpPassword2').value;
-        if (pw !== pw2) {
+        const pw = document.getElementById('signUpPassword').value;
+        if (pw !== document.getElementById('signUpPassword2').value) {
           return document.getElementById('errorSignUp').textContent = 'Passwords must match.';
         }
         try {
-          await auth.createUserWithEmailAndPassword(email, pw);
-          console.log('🎉 Signed up!');
+          await auth.createUserWithEmailAndPassword(
+            document.getElementById('signUpEmail').value,
+            pw
+          );
           window.location.href = '/index.html';
         } catch(err) {
-          console.error('❌ Sign-up error', err);
           document.getElementById('errorSignUp').textContent = err.message;
         }
       });
 
-      // ── If already signed in → go home ───────────────────────────
+      // 5) If already logged in, go home
       auth.onAuthStateChanged(u => {
-        if (u) {
-          console.log('👤 Already logged in, redirecting…');
-          window.location.href = '/index.html';
-        }
+        if (u) window.location.href = '/index.html';
       });
     });
   </script>
