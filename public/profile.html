@@ -2,74 +2,207 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>My Profile — Armory</title>
+  <title>My Profile — The Armory</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="index.css"><!-- or your global CSS -->
+
+  <!-- your global CSS -->
+  <link rel="stylesheet" href="index.css">
 
   <style>
     body {
       background: #0b1625;
       color: #fff;
       font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
+      margin: 0;
+      padding: 20px;
     }
-    h1 { margin-bottom: 24px; }
-    form {
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    nav a, nav button {
+      color: #f96302;
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    main {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    section {
       background: rgba(255,255,255,0.05);
-      padding: 24px;
+      padding: 20px;
       border-radius: 8px;
-      width: 100%;
-      max-width: 360px;
+    }
+    section h2 {
+      margin-top: 0;
+    }
+
+    /* Account Info */
+    #accountInfo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    #accountInfo img {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #f96302;
+    }
+
+    /* Preferences Form */
+    #preferences form {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-    label {
+    #preferences label {
       display: flex;
       flex-direction: column;
-      font-size: 14px;
     }
-    input {
+    #preferences input {
       margin-top: 4px;
       padding: 8px;
       border: none;
       border-radius: 4px;
     }
-    button {
-      margin-top: 16px;
+    #preferences button {
+      margin-top: 12px;
       padding: 10px;
       background: #f96302;
       border: none;
       color: #fff;
-      cursor: pointer;
       border-radius: 4px;
+      cursor: pointer;
     }
-    #logoutBtn {
-      background: #a83232;
-      margin-top: 8px;
+
+    /* Saved Builds & Discussions */
+    .build-list, .discussion-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+      gap: 16px;
+    }
+    .build-card {
+      background: rgba(15,25,39,0.7);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .build-card .card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: rgba(0,0,0,0.2);
+    }
+    .build-card .card-header img {
+      width: 32px; height: 32px;
+      border-radius: 4px;
+      object-fit: cover;
+    }
+    .build-card .card-header h3 {
+      margin: 0;
+      font-size: 14px;
+      flex: 1;
+    }
+    .build-card .card-body {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .build-card .squares,
+    .build-card .circles {
+      display: grid;
+      gap: 4px;
+    }
+    .build-card .squares {
+      grid-template-columns: repeat(4,1fr);
+    }
+    .build-card .circles {
+      grid-template-columns: repeat(3,1fr);
+    }
+    .build-card .square,
+    .build-card .circle {
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+    .build-card .circle {
+      border-radius: 50%;
+    }
+    .build-card .icon {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .build-card .cost {
+      text-align: right;
+      font-size: 12px;
+      color: #ddd;
     }
   </style>
 </head>
 <body>
 
-  <h1>My Profile</h1>
+  <nav>
+    <a href="viewer.html">← Builder</a>
+    <button id="logoutBtn">Log Out</button>
+  </nav>
 
-  <form id="profileForm">
-    <label>
-      Display Name
-      <input type="text" id="displayName" placeholder="Your name">
-    </label>
-    <label>
-      Favorite Color
-      <input type="color" id="favoriteColor" value="#ffffff">
-    </label>
-    <button type="submit">Save Profile</button>
-  </form>
+  <main>
+    <!-- Account Info -->
+    <section id="accountInfo">
+      <img id="avatar" src="images/placeholders/hero.png" alt="Avatar">
+      <div>
+        <h2 id="displayNameHeader">User Name</h2>
+        <p><strong>Email:</strong> <span id="email"></span></p>
+        <p><strong>Member since:</strong> <span id="createdAt"></span></p>
+      </div>
+    </section>
 
-  <button id="logoutBtn">Log Out</button>
+    <!-- Preferences -->
+    <section id="preferences">
+      <h2>Preferences</h2>
+      <form id="profileForm">
+        <label>
+          Display Name
+          <input type="text" id="displayName" placeholder="Your name">
+        </label>
+        <label>
+          Favorite Color
+          <input type="color" id="favoriteColor" value="#ffffff">
+        </label>
+        <button type="submit">Save Preferences</button>
+      </form>
+    </section>
+
+    <!-- Saved Builds -->
+    <section>
+      <h2>My Saved Builds</h2>
+      <div id="savedBuilds" class="build-list">
+        <!-- build cards will be injected here -->
+      </div>
+    </section>
+
+    <!-- Discussions (placeholder) -->
+    <section>
+      <h2>My Discussions</h2>
+      <div id="myDiscussions" class="discussion-list">
+        <p style="grid-column:1/-1;color:#888;">(coming soon…)</p>
+      </div>
+    </section>
+  </main>
 
   <script type="module" src="profile.js"></script>
 </body>
