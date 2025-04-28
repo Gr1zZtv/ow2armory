@@ -1,65 +1,60 @@
-/* ── RESET / BASE ───────────────────────────────────────────────────────── */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-body {
-  background: #0b1625;
-  color: #fff;
-  font-family: sans-serif;
-}
-
-/* ── BANNER ──────────────────────────────────────────────────────────────── */
+/* ── BANNER ───────────────────────────────────────────────────────────────── */
 .banner {
   background: #0f1927;
-  height: 300px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+  color: #fff;
+  text-align: left;
+  padding: 48px 24px;
 }
 .banner h1 {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
+  font-size: 2.5rem;
+  margin-bottom: 8px;
 }
 .banner p {
-  font-size: 1.25rem;
-  color: #ccc;
-}
-
-/* ── SECTION TITLES ─────────────────────────────────────────────────────── */
-.section {
-  padding: 32px 24px;
-}
-.section h2 {
-  font-size: 1.75rem;
+  font-size: 1.1rem;
   margin-bottom: 16px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  opacity: 0.85;
+}
+.btn-start {
+  background: #f96302;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-start:hover {
+  background: #e65500;
 }
 
-/* ── GRIDS ───────────────────────────────────────────────────────────────── */
-.trending-builds {
+/* ── LAYOUT ───────────────────────────────────────────────────────────────── */
+.home-content {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 24px;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+  padding: 24px;
+  background: #0b1625;
 }
-.latest-builds {
+
+/* ── TRENDING BUILDS ───────────────────────────────────────────────────────── */
+.trending-builds h2 {
+  grid-column: 1 / -1;
+  color: #fff;
+  margin-bottom: 16px;
+}
+.build-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
 }
 
-/* ── BUILD CARD ─────────────────────────────────────────────────────────── */
+/* ── BUILD CARD ───────────────────────────────────────────────────────────── */
 .build-card {
-  background: rgba(15,25,39,0.8);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(15,25,39,0.7);
   border-radius: 8px;
-  display: flex;
-  flex-direction: column;
   padding: 16px;
+  color: #fff;
 }
 .card-header {
   display: flex;
@@ -68,111 +63,74 @@ body {
   margin-bottom: 12px;
 }
 .card-header img {
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 4px;
-  background: #1a2738;
-}
-.card-header h3 {
-  font-size: 1.25rem;
-}
-
-/* ── SQUARES + CIRCLES ──────────────────────────────────────────────────── */
-.card-body .squares,
-.card-body .circles {
-  display: grid;
-  gap: 8px;
-}
-.card-body .squares {
-  grid-template-columns: repeat(4, 1fr);
-}
-.card-body .circles {
-  grid-template-columns: repeat(3, 1fr);
-  margin-top: 12px;
-}
-
-.square,
-.circle {
-  background: #1a2738;
-  border: 1px solid #2a2f3a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.square {
-  aspect-ratio: 1 / 1;
-  border-radius: 4px;
-}
-.circle {
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-}
-
-.square .icon,
-.circle .icon {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: inherit;
-}
-
-/* ── COST FOOTER ───────────────────────────────────────────────────────── */
-.cost {
-  margin-top: auto;
-  text-align: right;
-  font-weight: bold;
-  color: #ccc;
-}
-
-/* ── RESPONSIVE PADDING ─────────────────────────────────────────────────── */
-@media (max-width: 600px) {
-  .banner { height: 220px; }
-  .banner h1 { font-size: 2.25rem; }
-  .section { padding: 24px 16px; }
-}
-/* ── CARD SIZING TWEAKS ──────────────────────────────────────────────────── */
-
-/* limit how wide each build‐card can grow */
-.trending-builds .build-card,
-.latest-builds .build-card {
-  max-width: 360px;
-  padding: 12px;
-}
-
-/* slightly smaller hero thumbnail */
-.build-card .card-header img {
   width: 40px;
   height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+.hero-name {
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
-/* tighten up the grid gap */
-.trending-builds {
-  gap: 16px;
+/* SQUARES ROW */
+.card-body .squares {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
 }
-.latest-builds {
-  gap: 16px;
-}
-
-/* cap the square & circle slot size */
-.card-body .squares .square,
-.card-body .circles .circle {
-  max-width: 60px;
-  /* aspect‐ratio: 1 enforces square/circle */
-}
-
-/* make the font a hair smaller for totals */
-.build-card .cost {
-  font-size: 0.9rem;
+.card-body .square {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #1a2738;
 }
 
-/* if you also want to pull in the banner a bit: */
-.banner {
-  height: 240px;
+/* CIRCLES GRID: 2 rows of 3, centered */
+.card-body .circles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  justify-items: center;
 }
-.banner h1 {
-  font-size: 2.5rem;
+.card-body .circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #1a2738;
+  border: 1px solid #444;
 }
-.banner p {
-  font-size: 1rem;
+
+/* FOOTER */
+.card-footer {
+  text-align: right;
+  margin-top: 12px;
+}
+.card-footer .cost {
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+/* ── LATEST BUILDS ─────────────────────────────────────────────────────────── */
+.latest-builds h2 {
+  color: #fff;
+  margin-bottom: 16px;
+}
+.latest-list {
+  list-style: none;
+  padding: 0;
+}
+.latest-list li {
+  background: rgba(15,25,39,0.7);
+  border-radius: 6px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  color: #fff;
+}
+.latest-list .cost {
+  font-weight: bold;
 }
