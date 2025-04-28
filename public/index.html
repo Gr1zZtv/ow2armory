@@ -5,9 +5,7 @@
   <title>The Armory — Home</title>
   <link rel="stylesheet" href="viewerstyles.css">
   <style>
-    /* ──────────────────────────────────────────────────────────────────────────
-       BASE LAYOUT
-    ────────────────────────────────────────────────────────────────────────── */
+    /* ─────── Reset & Base ─────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: #0b1625;
@@ -19,193 +17,228 @@
     }
     a { color: inherit; text-decoration: none; }
 
-    /* ──────────────────────────────────────────────────────────────────────────
-       TOP BANNER
-    ────────────────────────────────────────────────────────────────────────── */
+    /* ─────── Banner ─────── */
     header.banner {
+      width: 100%;
       background: #111f33;
       text-align: center;
-      padding: 60px 20px;
+      padding: 80px 20px;
     }
     header.banner h1 {
-      font-size: 36px;
-      margin-bottom: 16px;
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
     }
     header.banner p {
-      font-size: 18px;
+      font-size: 1.125rem;
       color: #ccc;
-      margin-bottom: 24px;
+      margin-bottom: 1.5rem;
     }
     header.banner button {
       background: #f96302;
       color: #000;
       border: none;
-      padding: 14px 28px;
-      font-size: 16px;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
       font-weight: bold;
       border-radius: 6px;
       cursor: pointer;
     }
 
-    /* ──────────────────────────────────────────────────────────────────────────
-       MAIN CONTENT ROW
-    ────────────────────────────────────────────────────────────────────────── */
+    /* ─────── Main Row ─────── */
     main.homepage-row {
       display: flex;
-      gap: 20px;
+      gap: 2rem;
       flex-wrap: wrap;
       max-width: 1200px;
-      margin: 40px auto;
-      padding: 0 20px;
+      margin: 2.5rem auto;
+      padding: 0 1rem;
       flex: 1;
     }
-    .section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
+    .section { flex: 1; display: flex; flex-direction: column; }
     .section h2 {
-      font-size: 20px;
-      margin-bottom: 16px;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.5rem;
     }
 
-    /* ──────────────────────────────────────────────────────────────────────────
-       TRENDING CARDS
-    ────────────────────────────────────────────────────────────────────────── */
+    /* ─────── Trending Builds ─────── */
     .builds-list {
       display: grid;
-      gap: 16px;
+      row-gap: 1rem;
     }
     .build-card {
       background: rgba(15,25,39,0.8);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 8px;
-      padding: 16px;
+      padding: 1rem;
       display: flex;
       flex-direction: column;
     }
     .build-card .card-header {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
     }
-    .build-card .card-header .avatar {
-      width: 40px;
-      height: 40px;
+    .build-card .avatar {
+      width: 40px; height: 40px;
       border-radius: 6px;
-      object-fit: cover;
       background: #1a2738;
     }
-    .build-card .card-header .hero-name {
+    .build-card .hero-name {
       font-weight: bold;
-      font-size: 16px;
+      font-size: 1rem;
     }
     .build-card .card-body {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
       flex-wrap: wrap;
     }
-    .build-card .card-body .ability-card {
-      width: 48px;
-      height: 48px;
+    .ability-card {
+      width: 48px; height: 48px;
       background: rgba(255,255,255,0.05);
       border-radius: 6px;
     }
-    .build-card .card-body .circle {
-      width: 32px;
-      height: 32px;
+    .circle {
+      width: 32px; height: 32px;
       border: 2px solid rgba(255,255,255,0.2);
       border-radius: 50%;
-      background: transparent;
     }
     .build-card .card-footer {
+      margin-left: auto;
       display: flex;
-      justify-content: flex-end;
       align-items: center;
-      gap: 4px;
-    }
-    .build-card .card-footer .cost {
+      gap: 0.25rem;
       font-weight: bold;
-      font-size: 16px;
+      font-size: 1rem;
     }
 
-    /* ──────────────────────────────────────────────────────────────────────────
-       LATEST LIST
-    ────────────────────────────────────────────────────────────────────────── */
+    /* ─────── Latest Builds ─────── */
     .latest-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 0.75rem;
     }
     .latest-card {
       background: rgba(15,25,39,0.8);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 8px;
-      padding: 12px 16px;
+      padding: 0.75rem 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .latest-card .cost {
-      font-weight: bold;
-    }
+    .latest-card .cost { font-weight: bold; }
 
-    /* ──────────────────────────────────────────────────────────────────────────
-       FOOTER
-    ────────────────────────────────────────────────────────────────────────── */
+    /* ─────── Footer ─────── */
     footer {
       text-align: center;
       color: #666;
-      padding: 32px 0;
-      font-size: 14px;
+      padding: 2rem 0;
+      font-size: 0.875rem;
     }
   </style>
 </head>
 <body>
 
-  <!-- full-width banner -->
+  <!-- Banner -->
   <header class="banner">
     <h1>Welcome to The Armory</h1>
     <p>Your one-stop place to build, compare, and share the perfect loadouts.</p>
     <button onclick="location.href='viewer.html'">Start Building →</button>
   </header>
 
-  <!-- trending vs. latest -->
+  <!-- Trending & Latest -->
   <main class="homepage-row">
 
     <!-- Trending Builds -->
     <section class="section trending-section">
       <h2>🔥 Trending Builds</h2>
       <div class="builds-list">
-        <!-- Example Card -->
+        <!-- 4 sample cards -->
         <div class="build-card">
           <div class="card-header">
             <div class="avatar"></div>
             <span class="hero-name">Shadow Hunter</span>
           </div>
           <div class="card-body">
-            <!-- 4 squares -->
             <div class="ability-card"></div>
             <div class="ability-card"></div>
             <div class="ability-card"></div>
             <div class="ability-card"></div>
-            <!-- 3 circles -->
             <div class="circle"></div>
             <div class="circle"></div>
             <div class="circle"></div>
           </div>
           <div class="card-footer">
             <img src="assets/diamond-icon.png" alt="Cost" width="16">
-            <span class="cost">12,500</span>
+            <span>12,500</span>
           </div>
         </div>
-        <!-- repeat .build-card for more… -->
+
+        <div class="build-card">
+          <div class="card-header">
+            <div class="avatar"></div>
+            <span class="hero-name">Arcane Mage</span>
+          </div>
+          <div class="card-body">
+            <div class="ability-card"></div>
+            <div class="ability-card"></div>
+            <div class="ability-card"></div>
+            <div class="ability-card"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+          </div>
+          <div class="card-footer">
+            <img src="assets/diamond-icon.png" alt="Cost" width="16">
+            <span>14,300</span>
+          </div>
+        </div>
+
+        <div class="build-card">
+          <div class="card-header">
+            <div class="avatar"></div>
+            <span class="hero-name">Iron Defender</span>
+          </div>
+          <div class="card-body">
+            <div class="ability-card"></div>
+            <div class="ability-card"></div>
+            <div class="ability-card"></div>
+            <div class="ability-card"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+          </div>
+          <div class="card-footer">
+            <img src="assets/diamond-icon.png" alt="Cost" width="16">
+            <span>11,800</span>
+          </div>
+        </div>
+
+        <div class="build-card">
+          <div class="card-header">
+            <div class="avatar"></div>
+            <span class="hero-name">Vengeful Huntress</span>
+          </div>
+          <div class="card-body">
+            <div class="ability-card"></div>
+            <div class="ability-card"></div>
+            <div class="ability-card"></div>
+            <div class="ability-card"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+            <div class="circle"></div>
+          </div>
+          <div class="card-footer">
+            <img src="assets/diamond-icon.png" alt="Cost" width="16">
+            <span>11,300</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -215,11 +248,11 @@
       <ul class="latest-list">
         <li class="latest-card">
           <span>Vengeful Huntress</span>
-          <span class="cost">11,800</span>
+          <span class="cost">11,300</span>
         </li>
         <li class="latest-card">
           <span>Iron Defender</span>
-          <span class="cost">11,300</span>
+          <span class="cost">11,800</span>
         </li>
         <li class="latest-card">
           <span>Arcane Mage</span>
@@ -235,8 +268,7 @@
   </main>
 
   <footer>
-    &copy; 2025 The Armory — Build &amp; Share Your Ultimate Loadouts
+    &copy; 2025 The Armory — Build & Share Your Ultimate Loadouts
   </footer>
-
 </body>
 </html>
