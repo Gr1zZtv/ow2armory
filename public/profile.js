@@ -1,11 +1,12 @@
-// 1) Firebase imports
+// public/profile.js
+
 import { auth, db } from './firebase-config.js';
 import {
   doc, getDoc, setDoc,
   collection, query, where, orderBy, getDocs
 } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
 
-// 2) Helper to build a card element
+// helper to render a build card
 function createBuildCard(data) {
   const card = document.createElement('div');
   card.className = 'build-card';
@@ -32,60 +33,85 @@ function createBuildCard(data) {
   return card;
 }
 
-// 3) Wait for auth
 auth.onAuthStateChanged(async user => {
   if (!user) {
     return window.location.href = '/login.html';
   }
 
-  // Account info
+  // --- Account Info Elements ---
+  const headerEl      = document.getElementById('displayNameHeader');
+  const avatarEl      = document.getElementById('avatar');
+  const emailEl       = document.getElementById('email');
+  const createdAtEl   = document.getElementById('createdAt');
+
+  // pull out auth info
   const { displayName, email, photoURL, metadata } = user;
-  document.getElementById('displayNameHeader').textContent = displayName || '—';
-  document.getElementById('email').textContent            = email;
-  document.getElementById('avatar').src                   = photoURL || 'images/placeholders/hero.png';
-  document.getElementById('createdAt').textContent        =
-    new Date(metadata.creationTime).toLocaleDateString();
+  emailEl.textContent     = email;
+  avatarEl.src            = photoURL || 'images/placeholders/hero.png';
+  createdAtEl.textContent = new Date(metadata.creationTime).toLocaleDateString();
 
-  // Preferences form
+  // --- Load preferences from Firestore ---
   const profileRef = doc(db, 'profiles', user.uid);
-  const snap = await getDoc(profileRef);
-  const profileData = snap.exists() ? snap.data() : {};
-  document.getElementById('displayName').value    = profileData.displayName || displayName || '';
-  document.getElementById('favoriteColor').value  = profileData.color       || '#ffffff';
+  let profileData  = {};
+  try {
+    const snap = await getDoc(profileRef);
+    if (snap.exists()) profileData = snap.data();
+  } catch (err) {
+    console.error('Error reading profile:', err);
+  }
 
+  // effective display name (= saved prefs OR auth displayName OR placeholder)
+  const effectiveName = profileData.displayName || displayName || '—';
+  headerEl.textContent = effectiveName;
+
+  // apply favorite color to avatar border
+  const favColor = profileData.color || '#ffffff';
+  avatarEl.style.borderColor = favColor;
+
+  // populate the form fields
+  document.getElementById('displayName').value   = profileData.displayName || displayName || '';
+  document.getElementById('favoriteColor').value = favColor;
+
+  // --- Handle preferences form submit ---
   document.getElementById('profileForm').onsubmit = async e => {
     e.preventDefault();
-    const updates = {
-      displayName: document.getElementById('displayName').value,
-      color:       document.getElementById('favoriteColor').value
-    };
-    await setDoc(profileRef, updates, { merge: true });
-    alert('Preferences saved!');
+    const newName  = document.getElementById('displayName').value.trim();
+    const newColor = document.getElementById('favoriteColor').value;
+    const updates  = { displayName: newName, color: newColor };
+
+    try {
+      await setDoc(profileRef, updates, { merge: true });
+      // immediately reflect the changes in the UI
+      headerEl.textContent           = newName || '—';
+      avatarEl.style.borderColor     = newColor;
+      alert('Preferences saved!');
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      alert('❌ Error saving preferences');
+    }
   };
 
-  // Log out
+  // --- Log out button ---
   document.getElementById('logoutBtn').onclick = () => {
     auth.signOut().then(() => window.location.href = '/login.html');
   };
 
-  // Saved Builds
-  const buildsQ = query(
+  // --- Load & render Saved Builds ---
+  const buildsQ    = query(
     collection(db,'builds'),
-    where('owner','==',user.uid),
+    where('owner','==', user.uid),
     orderBy('createdAt','desc')
   );
   const buildsSnap = await getDocs(buildsQ);
-  const container = document.getElementById('savedBuilds');
+  const container  = document.getElementById('savedBuilds');
+  container.innerHTML = ''; // clear any placeholder
   if (buildsSnap.empty) {
     container.innerHTML = `<p style="grid-column:1/-1;color:#888;">
       You have no saved builds yet.
     </p>`;
   } else {
     buildsSnap.forEach(doc => {
-      const b = doc.data();
-      container.appendChild(createBuildCard(b));
+      container.appendChild(createBuildCard(doc.data()));
     });
   }
-
-  // Discussions placeholder (you can later fetch from `collection(db,'discussions')`)
 });
