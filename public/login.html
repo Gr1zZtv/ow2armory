@@ -59,13 +59,24 @@
     <button type="submit" class="submit">Sign In</button>
   </form>
 
-  <form id="formSignUp">
-    <div id="errorSignUp" class="error"></div>
-    <label>Email<input type="email" id="signUpEmail" required></label>
-    <label>Password<input type="password" id="signUpPassword" required></label>
-    <label>Confirm<input type="password" id="signUpPassword2" required></label>
-    <button type="submit" class="submit">Sign Up</button>
-  </form>
+  <!-- public/login.html -->
+<form id="formSignUp">
+  <div id="errorSignUp" class="error"></div>
+  <label>Username
+    <input type="text" id="signUpUsername" required>
+  </label>
+  <label>Email
+    <input type="email" id="signUpEmail" required>
+  </label>
+  <label>Password
+    <input type="password" id="signUpPassword" required>
+  </label>
+  <label>Confirm
+    <input type="password" id="signUpPassword2" required>
+  </label>
+  <button type="submit" class="submit">Sign Up</button>
+</form>
+
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
