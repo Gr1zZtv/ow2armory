@@ -1,10 +1,4 @@
-/* index.css */
-
-/* ──────────────────────────────────────────────────────────────────────────
-   IMPORTS & RESET
-───────────────────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap');
-
+/* ── RESET / BASE ───────────────────────────────────────────────────────── */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -13,136 +7,127 @@
 body {
   background: #0b1625;
   color: #fff;
-  font-family: 'Oswald', sans-serif;
-  line-height: 1.4;
+  font-family: sans-serif;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   BANNER
-───────────────────────────────────────────────────────────────────────── */
+/* ── BANNER ──────────────────────────────────────────────────────────────── */
 .banner {
-  background: rgba(0,0,0,0.5) url('banner.jpg') center/cover no-repeat;
-  padding: 80px 24px;
+  background: #0f1927;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
 }
 .banner h1 {
-  font-size: 48px;
-  margin-bottom: 16px;
-  text-transform: uppercase;
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
 }
 .banner p {
-  font-size: 20px;
-  opacity: 0.8;
+  font-size: 1.25rem;
+  color: #ccc;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   SECTION HEADERS
-───────────────────────────────────────────────────────────────────────── */
+/* ── SECTION TITLES ─────────────────────────────────────────────────────── */
 .section {
-  padding: 40px 24px;
+  padding: 32px 24px;
 }
 .section h2 {
-  font-size: 28px;
-  margin-bottom: 24px;
+  font-size: 1.75rem;
+  margin-bottom: 16px;
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   TRENDING & LATEST BUILDS LAYOUT
-───────────────────────────────────────────────────────────────────────── */
+/* ── GRIDS ───────────────────────────────────────────────────────────────── */
 .trending-builds {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 24px;
 }
 .latest-builds {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
-  margin-top: 32px;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   BUILD CARD
-───────────────────────────────────────────────────────────────────────── */
+/* ── BUILD CARD ─────────────────────────────────────────────────────────── */
 .build-card {
   background: rgba(15,25,39,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
+  padding: 16px;
 }
-
-/* Card header (hero info) */
-.build-card .card-header {
+.card-header {
   display: flex;
   align-items: center;
-  padding: 12px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
-.build-card .card-header img {
-  width: 40px;
-  height: 40px;
-  border-radius: 4px;
+.card-header img {
+  width: 48px;
+  height: 48px;
   object-fit: cover;
-  margin-right: 12px;
+  border-radius: 4px;
+  background: #1a2738;
 }
-.build-card .card-header h3 {
-  font-size: 18px;
+.card-header h3 {
+  font-size: 1.25rem;
 }
 
-/* Card body (abilities + cost) */
-.build-card .card-body {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
+/* ── SQUARES + CIRCLES ──────────────────────────────────────────────────── */
+.card-body .squares,
+.card-body .circles {
+  display: grid;
   gap: 8px;
 }
-
-/* ── Top row: 4 squared slots ───────────────────────────────────────────── */
-.build-card .card-body .squares {
-  display: flex;
-  gap: 0.5rem;
-  width: 100%;
-  justify-content: space-between;
+.card-body .squares {
+  grid-template-columns: repeat(4, 1fr);
 }
-.build-card .card-body .squares .square {
-  flex: 1;
-  aspect-ratio: 1;
-  background: rgba(0,0,0,0.15);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ── Bottom two rows: 6 circular slots ─────────────────────────────────── */
-.build-card .card-body .circles {
-  display: grid;
+.card-body .circles {
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-  width: 100%;
-  justify-items: center;
+  margin-top: 12px;
 }
-.build-card .card-body .circles .circle {
-  aspect-ratio: 1;
-  background: rgba(0,0,0,0.15);
-  border-radius: 50%;
+
+.square,
+.circle {
+  background: #1a2738;
+  border: 1px solid #2a2f3a;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
-/* Cost footer */
-.build-card .card-body .cost {
-  margin-top: 12px;
-  text-align: right;
-  font-size: 16px;
+.square {
+  aspect-ratio: 1 / 1;
+  border-radius: 4px;
+}
+.circle {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
 }
 
-/* Utility */
-.build-card img.icon {
+.square .icon,
+.circle .icon {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: inherit;
+}
+
+/* ── COST FOOTER ───────────────────────────────────────────────────────── */
+.cost {
+  margin-top: auto;
+  text-align: right;
+  font-weight: bold;
+  color: #ccc;
+}
+
+/* ── RESPONSIVE PADDING ─────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .banner { height: 220px; }
+  .banner h1 { font-size: 2.25rem; }
+  .section { padding: 24px 16px; }
 }
