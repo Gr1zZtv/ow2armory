@@ -9,10 +9,9 @@
        PAGE HEADER
     ────────────────────────────────────────────────────────────────────────── */
     .site-header {
-      width: 100%;
       max-width: 1220px;
-      margin-bottom: 32px;
-      padding: 32px 24px;
+      margin: 40px auto 24px;
+      padding: 32px;
       background: rgba(15,25,39,0.8);
       border: 2px solid rgba(255,255,255,0.15);
       border-radius: 12px;
@@ -22,11 +21,10 @@
       gap: 16px;
     }
     .site-header .avatar {
-      width: 64px;
-      height: 64px;
-      object-fit: cover;
+      width: 64px; height: 64px;
       border-radius: 8px;
       border: 2px solid rgba(255,255,255,0.2);
+      object-fit: cover;
     }
     .site-header .titles h1 {
       margin: 0;
@@ -41,15 +39,14 @@
     }
 
     /* ──────────────────────────────────────────────────────────────────────────
-       NAVIGATION BUTTONS
+       NAVIGATION
     ────────────────────────────────────────────────────────────────────────── */
     .nav {
-      width: 100%;
       max-width: 1220px;
+      margin: 0 auto 40px;
       display: flex;
       justify-content: flex-end;
       gap: 12px;
-      margin-bottom: 24px;
     }
     .nav button {
       background: #f96302;
@@ -61,14 +58,144 @@
       font-weight: bold;
       color: #000;
     }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       INTRO BANNER
+    ────────────────────────────────────────────────────────────────────────── */
+    .intro {
+      max-width: 1220px;
+      margin: 0 auto 48px;
+      padding: 24px;
+      background: rgba(15,25,39,0.7);
+      border-radius: 8px;
+      text-align: center;
+      color: #eee;
+    }
+    .intro h2 {
+      margin-bottom: 16px;
+      font-size: 28px;
+    }
+    .intro p {
+      font-size: 16px;
+      line-height: 1.5;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       HOW IT WORKS
+    ────────────────────────────────────────────────────────────────────────── */
+    .how-it-works {
+      max-width: 1220px;
+      margin: 0 auto 48px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+      gap: 24px;
+    }
+    .step-card {
+      background: rgba(15,25,39,0.7);
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      color: #eee;
+    }
+    .step-card h3 {
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+    .step-card p {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       FEATURED BUILD
+    ────────────────────────────────────────────────────────────────────────── */
+    .featured-build {
+      max-width: 1220px;
+      margin: 0 auto 48px;
+    }
+    .featured-build h2 {
+      color: #eee;
+      margin-bottom: 16px;
+    }
+    .featured-card {
+      background: rgba(15,25,39,0.8);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+    .featured-card .avatar {
+      width: 80px; height: 80px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .featured-card .info {
+      flex: 1;
+      color: #eee;
+    }
+    .featured-card .info h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+    .featured-card .info .build-cost {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .featured-card .info .abilities {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .featured-card .info .abilities .ability-card,
+    .featured-card .info .abilities .circle {
+      width: 40px; height: 40px;
+      background: #222;
+      border: 1px solid #444;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .featured-card .info .abilities .circle { border-radius: 50%; }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       RECENT BUILDS GRID (reuse previous styles)
+    ────────────────────────────────────────────────────────────────────────── */
+    .recent-builds h2 {
+      max-width: 1220px;
+      margin: 0 auto 16px;
+      color: #eee;
+      text-transform: uppercase;
+    }
+    .builds-grid {
+      max-width: 1220px;
+      margin: 0 auto 80px;
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       FOOTER
+    ────────────────────────────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      color: #888;
+      padding: 24px 0;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
 
   <!-- SITE HEADER -->
   <header class="site-header">
-    <!-- you can swap this for your own logo if you like -->
-    <img src="assets/logo.png" class="avatar" alt="The Armory Logo">
+    <img src="assets/logo.png" class="avatar" alt="Armory Logo">
     <div class="titles">
       <h1>The Armory</h1>
       <h2>Community Builds Hub</h2>
@@ -81,51 +208,74 @@
     <button onclick="location.href='admin.html'">Admin</button>
   </div>
 
-  <!-- MOST RECENT BUILDS -->
-  <section class="recent-builds">
-    <h2 style="max-width:1220px; width:100%; color:#eee; text-transform:uppercase; margin-bottom:16px;">
-      Most Recent Community Builds
-    </h2>
-    <div class="builds-grid" style="max-width:1220px; width:100%; display:grid; gap:24px; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));">
-      
-      <!-- Repeat this .build-card block for as many as you like -->
-      <div class="build-card" style="background:rgba(15,25,39,0.8);border:2px solid rgba(255,255,255,0.15);border-radius:12px;padding:16px;backdrop-filter:blur(6px);display:flex;flex-direction:column;gap:12px;">
-        <div class="build-header" style="display:flex;align-items:center;gap:12px;">
-          <img src="images/hero-placeholder.png" class="avatar" alt="Hero Avatar" style="width:48px;height:48px;border-radius:8px;border:2px solid rgba(255,255,255,0.2);object-fit:cover;">
-          <span class="hero-name" style="font-size:20px;text-transform:uppercase;color:#eef2f5;">Placeholder Hero</span>
-        </div>
-        <div class="build-cost" style="display:flex;align-items:center;gap:8px;font-size:16px;text-transform:uppercase;">
-          <img src="assets/diamond-icon.png" class="cost-icon" alt="Cost" style="width:24px;">
-          <span class="cost-value">12 345</span>
-        </div>
-        <div class="build-abilities" style="display:flex;flex-direction:column;gap:8px;">
-          <!-- 4 squares -->
-          <div class="powers-row" style="display:flex;gap:8px;">
-            <div class="ability-card"><img src="images/ability1.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-            <div class="ability-card"><img src="images/ability2.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-            <div class="ability-card"><img src="images/ability3.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-            <div class="ability-card"><img src="images/ability4.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-          </div>
-          <!-- first 3 circles -->
-          <div class="items-row" style="display:flex;gap:8px;">
-            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item1.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item2.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item3.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-          </div>
-          <!-- next 3 circles -->
-          <div class="items-row" style="display:flex;gap:8px;">
-            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item4.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item5.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item6.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
-          </div>
-        </div>
-      </div>
-      <!-- / .build-card -->
+  <!-- INTRO -->
+  <section class="intro">
+    <h2>Welcome to the Armory</h2>
+    <p>Discover, build, and share your ultimate hero loadouts. Browse the latest community creations or dive straight into the builder to craft your own perfect setup.</p>
+  </section>
 
-      <!-- repeat .build-card #2, #3, #4 as you like… -->
-      
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works">
+    <div class="step-card">
+      <h3>1. Choose a Hero</h3>
+      <p>Select your favorite hero from our ever-growing roster.</p>
+    </div>
+    <div class="step-card">
+      <h3>2. Pick Abilities</h3>
+      <p>Equip powers and items to tailor your playstyle.</p>
+    </div>
+    <div class="step-card">
+      <h3>3. Save & Share</h3>
+      <p>Save your build and post the link for friends or the whole community.</p>
     </div>
   </section>
+
+  <!-- FEATURED BUILD -->
+  <section class="featured-build">
+    <h2>Featured Build</h2>
+    <div class="featured-card">
+      <img src="images/hero-placeholder.png" class="avatar" alt="Hero">
+      <div class="info">
+        <h3>Elite Slayer</h3>
+        <div class="build-cost">
+          <img src="assets/diamond-icon.png" width="24" alt="Cost">
+          <span>13,200</span>
+        </div>
+        <div class="abilities">
+          <!-- 4 squares -->
+          <div class="ability-card"><img src="images/ability1.png" alt=""></div>
+          <div class="ability-card"><img src="images/ability2.png" alt=""></div>
+          <div class="ability-card"><img src="images/ability3.png" alt=""></div>
+          <div class="ability-card"><img src="images/ability4.png" alt=""></div>
+          <!-- 3 circles -->
+          <div class="circle"><img src="images/item1.png" alt=""></div>
+          <div class="circle"><img src="images/item2.png" alt=""></div>
+          <div class="circle"><img src="images/item3.png" alt=""></div>
+          <!-- next 3 circles -->
+          <div class="circle"><img src="images/item4.png" alt=""></div>
+          <div class="circle"><img src="images/item5.png" alt=""></div>
+          <div class="circle"><img src="images/item6.png" alt=""></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECENT BUILDS -->
+  <section class="recent-builds">
+    <h2>Most Recent Community Builds</h2>
+    <div class="builds-grid">
+      <!-- placeholder cards (repeat 4+) -->
+      <div class="build-card">…</div>
+      <div class="build-card">…</div>
+      <div class="build-card">…</div>
+      <div class="build-card">…</div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    &copy; 2025 The Armory • Build & Share your Ultimate Loadouts
+  </footer>
 
 </body>
 </html>
