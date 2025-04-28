@@ -70,11 +70,16 @@
       },
       signInFlow: 'popup',
       signInOptions: [
-        // Email/password
-        firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        // Google
+        // Email/password provider configured as an object:
+        {
+          provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          signInMethod: firebase.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD,
+          requireDisplayName: false    // existing users won’t be forced to re-enter a display name
+        },
+        // Google OAuth
         firebase.auth.GoogleAuthProvider.PROVIDER_ID
-      ]
+      ],
+      // By default FirebaseUI will show both “Sign in” & “Sign up” tabs
     };
 
     // ── start FirebaseUI ─────────────────────────────────────────────────────
