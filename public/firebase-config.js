@@ -1,31 +1,33 @@
 // public/firebase-config.js
-// ——————————
-// 1) Pull in exactly the bits we need from the CDN (modular v9)
-// ——————————
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
-import { getAuth }        from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
-import { getFirestore }   from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
 
-// ——————————
-// 2) Your Firebase project settings (from the console “SDK setup”)
-// ——————————
+// ── 1) Pull in only the bits we need from Firebase’s CDN (v9 modular) ─────────────────
+import { initializeApp }               from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+import { getAuth }                     from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+import { getFirestore }                from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+
+// ── 2) Read your Firebase config from Render’s env vars ────────────────────────────────
+// In your Render service settings, add these keys under “Environment Variables”:
+//   FIREBASE_API_KEY
+//   FIREBASE_AUTH_DOMAIN
+//   FIREBASE_PROJECT_ID
+//   FIREBASE_STORAGE_BUCKET
+//   FIREBASE_MESSAGING_SENDER_ID
+//   FIREBASE_APP_ID
+//
+// Then Render will inject them at runtime.
 const firebaseConfig = {
-  apiKey:            "firebaseapikey",
-  authDomain:        "armoryapi-37b1a.firebaseapp.com",
-  projectId:         "armoryapi-37b1a",
-  storageBucket:     "armoryapi-37b1a.appspot.com",
-  messagingSenderId: "892353609908",
-  appId:             "1:892353609908:web:6eaf26924b3224799f57e1"
+  apiKey:            window.__env__.FIREBASE_API_KEY,
+  authDomain:        window.__env__.FIREBASE_AUTH_DOMAIN,
+  projectId:         window.__env__.FIREBASE_PROJECT_ID,
+  storageBucket:     window.__env__.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: window.__env__.FIREBASE_MESSAGING_SENDER_ID,
+  appId:             window.__env__.FIREBASE_APP_ID
 };
 
-// ——————————
-// 3) Initialize the core services
-// ——————————
+// ── 3) Initialize the SDKs ─────────────────────────────────────────────────────────────
 const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db   = getFirestore(app);
 
-// ——————————
-// 4) Export them for use elsewhere in your scripts
-// ——————————
+// ── 4) Export for use in your other modules ────────────────────────────────────────────
 export { auth, db };
