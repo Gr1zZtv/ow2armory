@@ -5,24 +5,51 @@
   <title>Armory Home</title>
   <link rel="stylesheet" href="viewerstyles.css">
   <style>
-    body {
-      background: #0b1625;
-      color: #fff;
-      font-family: 'Oswald', sans-serif;
-      margin: 0;
-      padding: 24px;
+    /* ──────────────────────────────────────────────────────────────────────────
+       PAGE HEADER
+    ────────────────────────────────────────────────────────────────────────── */
+    .site-header {
+      width: 100%;
+      max-width: 1220px;
+      margin-bottom: 32px;
+      padding: 32px 24px;
+      background: rgba(15,25,39,0.8);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      backdrop-filter: blur(6px);
       display: flex;
-      flex-direction: column;
       align-items: center;
+      gap: 16px;
     }
-    /* Navigation */
+    .site-header .avatar {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    .site-header .titles h1 {
+      margin: 0;
+      font-size: 32px;
+      text-transform: uppercase;
+      color: #eef2f5;
+    }
+    .site-header .titles h2 {
+      margin: 4px 0 0;
+      font-size: 18px;
+      color: #ccc;
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       NAVIGATION BUTTONS
+    ────────────────────────────────────────────────────────────────────────── */
     .nav {
       width: 100%;
       max-width: 1220px;
       display: flex;
       justify-content: flex-end;
       gap: 12px;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
     }
     .nav button {
       background: #f96302;
@@ -34,227 +61,69 @@
       font-weight: bold;
       color: #000;
     }
-    /* Recent Builds Section */
-    .recent-builds {
-      width: 100%;
-      max-width: 1220px;
-    }
-    .recent-builds h2 {
-      font-size: 24px;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      color: #eee;
-    }
-    .builds-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 24px;
-    }
-    /* Individual Build Card */
-    .build-card {
-      background: rgba(15,25,39,0.8);
-      border: 2px solid rgba(255,255,255,0.15);
-      border-radius: 12px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      backdrop-filter: blur(6px);
-    }
-    .build-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .build-header .avatar {
-      width: 48px; height: 48px;
-      border-radius: 8px;
-      object-fit: cover;
-      border: 2px solid rgba(255,255,255,0.2);
-    }
-    .build-header .hero-name {
-      font-size: 20px;
-      text-transform: uppercase;
-      color: #eef2f5;
-    }
-    .build-cost {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 16px;
-      text-transform: uppercase;
-    }
-    .build-cost .cost-icon {
-      width: 24px;
-    }
-    /* Slot Rows */
-    .build-abilities {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .powers-row,
-    .items-row {
-      display: flex;
-      gap: 8px;
-    }
-    .ability-card {
-      width: 48px;
-      height: 48px;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 8px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .ability-card.circle {
-      border-radius: 50%;
-    }
-    .ability-card img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
   </style>
 </head>
 <body>
 
-  <!-- navigation -->
+  <!-- SITE HEADER -->
+  <header class="site-header">
+    <!-- you can swap this for your own logo if you like -->
+    <img src="assets/logo.png" class="avatar" alt="The Armory Logo">
+    <div class="titles">
+      <h1>The Armory</h1>
+      <h2>Community Builds Hub</h2>
+    </div>
+  </header>
+
+  <!-- NAVIGATION -->
   <div class="nav">
     <button onclick="location.href='viewer.html'">Viewer</button>
     <button onclick="location.href='admin.html'">Admin</button>
   </div>
 
-  <!-- Most Recent Builds -->
+  <!-- MOST RECENT BUILDS -->
   <section class="recent-builds">
-    <h2>Most Recent Community Builds</h2>
-    <div class="builds-grid">
-
-      <!-- Build Card #1 -->
-      <div class="build-card">
-        <div class="build-header">
-          <img src="images/hero-placeholder.png" class="avatar" alt="Hero Avatar">
-          <span class="hero-name">Placeholder Hero</span>
+    <h2 style="max-width:1220px; width:100%; color:#eee; text-transform:uppercase; margin-bottom:16px;">
+      Most Recent Community Builds
+    </h2>
+    <div class="builds-grid" style="max-width:1220px; width:100%; display:grid; gap:24px; grid-template-columns:repeat(auto-fill,minmax(260px,1fr));">
+      
+      <!-- Repeat this .build-card block for as many as you like -->
+      <div class="build-card" style="background:rgba(15,25,39,0.8);border:2px solid rgba(255,255,255,0.15);border-radius:12px;padding:16px;backdrop-filter:blur(6px);display:flex;flex-direction:column;gap:12px;">
+        <div class="build-header" style="display:flex;align-items:center;gap:12px;">
+          <img src="images/hero-placeholder.png" class="avatar" alt="Hero Avatar" style="width:48px;height:48px;border-radius:8px;border:2px solid rgba(255,255,255,0.2);object-fit:cover;">
+          <span class="hero-name" style="font-size:20px;text-transform:uppercase;color:#eef2f5;">Placeholder Hero</span>
         </div>
-        <div class="build-cost">
-          <img src="assets/diamond-icon.png" class="cost-icon" alt="Cost">
+        <div class="build-cost" style="display:flex;align-items:center;gap:8px;font-size:16px;text-transform:uppercase;">
+          <img src="assets/diamond-icon.png" class="cost-icon" alt="Cost" style="width:24px;">
           <span class="cost-value">12 345</span>
         </div>
-        <div class="build-abilities">
-          <!-- 4 square power-ups -->
-          <div class="powers-row">
-            <div class="ability-card"><img src="images/ability1.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability2.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability3.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability4.png" alt=""></div>
+        <div class="build-abilities" style="display:flex;flex-direction:column;gap:8px;">
+          <!-- 4 squares -->
+          <div class="powers-row" style="display:flex;gap:8px;">
+            <div class="ability-card"><img src="images/ability1.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+            <div class="ability-card"><img src="images/ability2.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+            <div class="ability-card"><img src="images/ability3.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+            <div class="ability-card"><img src="images/ability4.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
           </div>
-          <!-- first 3 circle items -->
-          <div class="items-row">
-            <div class="ability-card circle"><img src="images/item1.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item2.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item3.png" alt=""></div>
+          <!-- first 3 circles -->
+          <div class="items-row" style="display:flex;gap:8px;">
+            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item1.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item2.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item3.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
           </div>
-          <!-- next 3 circle items -->
-          <div class="items-row">
-            <div class="ability-card circle"><img src="images/item4.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item5.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item6.png" alt=""></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Build Card #2 -->
-      <div class="build-card">
-        <div class="build-header">
-          <img src="images/hero-placeholder.png" class="avatar" alt="Hero Avatar">
-          <span class="hero-name">Another Hero</span>
-        </div>
-        <div class="build-cost">
-          <img src="assets/diamond-icon.png" class="cost-icon" alt="Cost">
-          <span class="cost-value"> 9 876 </span>
-        </div>
-        <div class="build-abilities">
-          <div class="powers-row">
-            <div class="ability-card"><img src="images/ability1.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability2.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability3.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability4.png" alt=""></div>
-          </div>
-          <div class="items-row">
-            <div class="ability-card circle"><img src="images/item1.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item2.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item3.png" alt=""></div>
-          </div>
-          <div class="items-row">
-            <div class="ability-card circle"><img src="images/item4.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item5.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item6.png" alt=""></div>
+          <!-- next 3 circles -->
+          <div class="items-row" style="display:flex;gap:8px;">
+            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item4.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item5.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
+            <div class="ability-card circle" style="border-radius:50%;overflow:hidden;"><img src="images/item6.png" alt="" style="width:100%;height:100%;object-fit:cover;"></div>
           </div>
         </div>
       </div>
+      <!-- / .build-card -->
 
-      <!-- Build Card #3 -->
-      <div class="build-card">
-        <div class="build-header">
-          <img src="images/hero-placeholder.png" class="avatar" alt="Hero Avatar">
-          <span class="hero-name">Third Hero</span>
-        </div>
-        <div class="build-cost">
-          <img src="assets/diamond-icon.png" class="cost-icon" alt="Cost">
-          <span class="cost-value"> 4 321 </span>
-        </div>
-        <div class="build-abilities">
-          <div class="powers-row">
-            <div class="ability-card"><img src="images/ability1.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability2.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability3.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability4.png" alt=""></div>
-          </div>
-          <div class="items-row">
-            <div class="ability-card circle"><img src="images/item1.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item2.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item3.png" alt=""></div>
-          </div>
-          <div class="items-row">
-            <div class="ability-card circle"><img src="images/item4.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item5.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item6.png" alt=""></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Build Card #4 -->
-      <div class="build-card">
-        <div class="build-header">
-          <img src="images/hero-placeholder.png" class="avatar" alt="Hero Avatar">
-          <span class="hero-name">Final Hero</span>
-        </div>
-        <div class="build-cost">
-          <img src="assets/diamond-icon.png" class="cost-icon" alt="Cost">
-          <span class="cost-value"> 7 890 </span>
-        </div>
-        <div class="build-abilities">
-          <div class="powers-row">
-            <div class="ability-card"><img src="images/ability1.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability2.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability3.png" alt=""></div>
-            <div class="ability-card"><img src="images/ability4.png" alt=""></div>
-          </div>
-          <div class="items-row">
-            <div class="ability-card circle"><img src="images/item1.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item2.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item3.png" alt=""></div>
-          </div>
-          <div class="items-row">
-            <div class="ability-card circle"><img src="images/item4.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item5.png" alt=""></div>
-            <div class="ability-card circle"><img src="images/item6.png" alt=""></div>
-          </div>
-        </div>
-      </div>
-
+      <!-- repeat .build-card #2, #3, #4 as you like… -->
+      
     </div>
   </section>
 
