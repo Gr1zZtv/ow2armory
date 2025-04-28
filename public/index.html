@@ -8,34 +8,48 @@
     /* ──────────────────────────────────────────────────────────────────────────
        RESET & BASE
     ────────────────────────────────────────────────────────────────────────── */
-    * { box-sizing: border-box; margin:0; padding:0; }
-    html, body { height:100%; background:#0b1625; color:#eef2f5; font-family: sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0b1625; color: #eef2f5; font-family: sans-serif; line-height: 1.4; }
     a { color: inherit; text-decoration: none; }
 
     /* ──────────────────────────────────────────────────────────────────────────
-       LAYOUT
+       FULL-WIDTH TOP BANNER
+    ────────────────────────────────────────────────────────────────────────── */
+    .banner {
+      background: #111f33;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .banner h1 {
+      font-size: 36px;
+      margin-bottom: 16px;
+    }
+    .banner p {
+      font-size: 18px;
+      color: #ccc;
+      margin-bottom: 24px;
+    }
+    .banner button {
+      background: #f96302;
+      color: #000;
+      border: none;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* ──────────────────────────────────────────────────────────────────────────
+       TRENDS & LATEST CONTAINER
     ────────────────────────────────────────────────────────────────────────── */
     .homepage-container {
       display: flex;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
       flex-wrap: wrap;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 40px 20px;
-      gap: 20px;
-    }
-    .banner {
-      flex: 1 1 300px;
-      background: #111f33;
-      border-radius: 8px;
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-    .builds-wrapper {
-      flex: 2 1 600px;
-      display: flex;
-      gap: 20px;
     }
     .section {
       flex: 1;
@@ -51,36 +65,10 @@
     }
 
     /* ──────────────────────────────────────────────────────────────────────────
-       BANNER STYLES
-    ────────────────────────────────────────────────────────────────────────── */
-    .banner h1 {
-      font-size: 36px;
-      margin-bottom: 12px;
-    }
-    .banner p {
-      font-size: 16px;
-      color: #ccc;
-      margin-bottom: 24px;
-      line-height: 1.4;
-    }
-    .banner button {
-      background: #f96302;
-      color: #000;
-      border: none;
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
-      align-self: flex-start;
-    }
-
-    /* ──────────────────────────────────────────────────────────────────────────
-       TRENDING BUILD CARDS
+       TRENDING CARDS
     ────────────────────────────────────────────────────────────────────────── */
     .builds-list {
       overflow-y: auto;
-      padding-right: 4px;
     }
     .build-card {
       background: rgba(15,25,39,0.7);
@@ -97,13 +85,13 @@
       align-items: center;
       gap: 12px;
     }
-    .card-header .avatar {
+    .avatar {
       width: 48px; height: 48px;
       border-radius: 6px;
       background: #333;
       object-fit: cover;
     }
-    .card-header .hero-name {
+    .hero-name {
       font-size: 18px;
       font-weight: bold;
     }
@@ -150,7 +138,7 @@
     }
 
     /* ──────────────────────────────────────────────────────────────────────────
-       LATEST BUILDS (RIGHT COLUMN)
+       LATEST BUILDS
     ────────────────────────────────────────────────────────────────────────── */
     .latest-list {
       list-style: none;
@@ -184,77 +172,75 @@
 </head>
 <body>
 
-  <div class="homepage-container">
+  <!-- full-width banner -->
+  <header class="banner">
+    <h1>Welcome to The Armory</h1>
+    <p>Your one-stop place to build, compare, and share the perfect loadouts.</p>
+    <button onclick="location.href='viewer.html'">Start Building →</button>
+  </header>
 
-    <!-- LEFT: HERO BANNER -->
-    <section class="banner">
-      <h1>Welcome to The Armory</h1>
-      <p>Build, compare, and share your ultimate loadouts with the community.</p>
-      <button onclick="location.href='viewer.html'">Start Building →</button>
-    </section>
+  <!-- trending & latest below -->
+  <main class="homepage-container">
 
-    <!-- RIGHT: TRENDING & LATEST -->
-    <section class="builds-wrapper">
-
-      <!-- TRENDING -->
-      <div class="section trending-section">
-        <h2>🔥 Trending Builds</h2>
-        <div class="builds-list">
-          <!-- 4 placeholder cards -->
-          <div class="build-card">
-            <div class="card-header">
-              <img src="images/hero1.png" class="avatar" alt="Shadow Hunter">
-              <span class="hero-name">Shadow Hunter</span>
-            </div>
-            <div class="card-body">
-              <div class="ability-card"><img src="images/power1.png" alt=""></div>
-              <div class="ability-card"><img src="images/power2.png" alt=""></div>
-              <div class="ability-card"><img src="images/power3.png" alt=""></div>
-              <div class="ability-card"><img src="images/power4.png" alt=""></div>
-              <div class="circle"><img src="images/item1.png" alt=""></div>
-              <div class="circle"><img src="images/item2.png" alt=""></div>
-              <div class="circle"><img src="images/item3.png" alt=""></div>
-              <div class="circle"><img src="images/item4.png" alt=""></div>
-              <div class="circle"><img src="images/item5.png" alt=""></div>
-              <div class="circle"><img src="images/item6.png" alt=""></div>
-            </div>
-            <div class="card-footer">
-              <img src="assets/diamond-icon.png" alt="Cost">
-              <span class="cost">12,500</span>
-            </div>
+    <!-- Trending Builds -->
+    <section class="section trending-section">
+      <h2>🔥 Trending Builds</h2>
+      <div class="builds-list">
+        <!-- Placeholder card #1 -->
+        <div class="build-card">
+          <div class="card-header">
+            <img src="images/hero1.png" class="avatar" alt="Shadow Hunter">
+            <span class="hero-name">Shadow Hunter</span>
           </div>
-          <!-- copy/paste and adjust for the other three… -->
-        </div>
-      </div>
-
-      <!-- LATEST -->
-      <div class="section latest-section">
-        <h2>✨ Latest Builds</h2>
-        <ul class="latest-list">
-          <li class="latest-card">
-            <span>Vengeful Huntress</span>
-            <span class="cost">11,800</span>
-          </li>
-          <li class="latest-card">
-            <span>Iron Defender</span>
-            <span class="cost">11,300</span>
-          </li>
-          <li class="latest-card">
-            <span>Arcane Mage</span>
-            <span class="cost">14,300</span>
-          </li>
-          <li class="latest-card">
-            <span>Shadow Hunter</span>
+          <div class="card-body">
+            <div class="ability-card"><img src="images/power1.png" alt=""></div>
+            <div class="ability-card"><img src="images/power2.png" alt=""></div>
+            <div class="ability-card"><img src="images/power3.png" alt=""></div>
+            <div class="ability-card"><img src="images/power4.png" alt=""></div>
+            <div class="circle"><img src="images/item1.png" alt=""></div>
+            <div class="circle"><img src="images/item2.png" alt=""></div>
+            <div class="circle"><img src="images/item3.png" alt=""></div>
+            <div class="circle"><img src="images/item4.png" alt=""></div>
+            <div class="circle"><img src="images/item5.png" alt=""></div>
+            <div class="circle"><img src="images/item6.png" alt=""></div>
+          </div>
+          <div class="card-footer">
+            <img src="assets/diamond-icon.png" alt="Cost">
             <span class="cost">12,500</span>
-          </li>
-        </ul>
+          </div>
+        </div>
+        <!-- Copy/paste to add more trending cards… -->
       </div>
-
     </section>
-  </div>
+
+    <!-- Latest Builds -->
+    <section class="section latest-section">
+      <h2>✨ Latest Builds</h2>
+      <ul class="latest-list">
+        <li class="latest-card">
+          <span>Vengeful Huntress</span>
+          <span class="cost">11,800</span>
+        </li>
+        <li class="latest-card">
+          <span>Iron Defender</span>
+          <span class="cost">11,300</span>
+        </li>
+        <li class="latest-card">
+          <span>Arcane Mage</span>
+          <span class="cost">14,300</span>
+        </li>
+        <li class="latest-card">
+          <span>Shadow Hunter</span>
+          <span class="cost">12,500</span>
+        </li>
+      </ul>
+    </section>
+
+  </main>
 
   <footer>
     &copy; 2025 The Armory — Build & Share Your Ultimate Loadouts
   </footer>
+
 </body>
 </html>
