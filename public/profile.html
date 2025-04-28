@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>User Profile</title>
   <link rel="stylesheet" href="profile.css">
-  <!-- load env.js first, always -->
+  <!-- 1) Load env.js first so firebase-config.js can see window.__env__ -->
   <script src="/env.js"></script>
 </head>
 <body>
@@ -15,22 +15,26 @@
 
   <section>
     <h2>About</h2>
-    <p id="lblColor">Favorite color: <span id="clrDisplay"></span></p>
+    <p id="lblColor">
+      Favorite color: <span id="clrDisplay">—</span>
+    </p>
   </section>
 
   <script type="module">
+    // 2) Import your Firestore instance
     import { db } from './firebase-config.js';
-    import { doc, getDoc }
-      from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+    import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
 
     (async function() {
-      const params = new URLSearchParams(location.search);
+      // 3) Read ?uid=XYZ from the URL
+      const params = new URLSearchParams(window.location.search);
       const uid = params.get('uid');
       if (!uid) {
         document.body.textContent = 'No user specified.';
         return;
       }
 
+      // 4) Fetch their profile doc
       const ref  = doc(db, 'profiles', uid);
       const snap = await getDoc(ref);
       if (!snap.exists()) {
@@ -38,13 +42,17 @@
         return;
       }
 
+      // 5) Pull out fields and render
       const { displayName, color, avatarURL } = snap.data();
       document.getElementById('lblName').textContent = displayName || 'Unnamed';
+
       const img = document.getElementById('imgAvatar');
       img.src    = avatarURL || '/images/default-avatar.png';
       img.hidden = false;
 
       document.getElementById('clrDisplay').textContent = color || '—';
+
+      // 6) Optionally theme the page using their favorite color
       document.body.style.setProperty('--accent', color || '#888');
     })();
   </script>
