@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <title>Account Settings</title>
   <link rel="stylesheet" href="settings.css">
+  <!-- 1) load env.js first -->
+  <script src="/env.js"></script>
 </head>
 <body>
   <h1>Account Settings</h1>
@@ -24,6 +26,7 @@
     </form>
   </section>
 
+  <!-- 2) now import your firebase-config module -->
   <script type="module">
     import { auth, db } from './firebase-config.js';
     import { onAuthStateChanged, signOut }
@@ -34,12 +37,10 @@
     onAuthStateChanged(auth, async user => {
       if (!user) return location.href = '/login.html';
 
-      // logout
       document.getElementById('btnLogout').onclick = () =>
         signOut(auth).then(() => location.href = '/login.html');
 
-      // load existing
-      const ref = doc(db, 'profiles', user.uid);
+      const ref  = doc(db, 'profiles', user.uid);
       const snap = await getDoc(ref);
       if (snap.exists()) {
         const { displayName, color } = snap.data();
@@ -47,7 +48,6 @@
         document.getElementById('inpColor').value       = color       || '#ffffff';
       }
 
-      // save updates
       document.getElementById('settingsForm').onsubmit = async e => {
         e.preventDefault();
         await setDoc(ref, {
