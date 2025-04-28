@@ -2,98 +2,86 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Armory Profile</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-    body { font-family:sans-serif; background:#0b1625; color:#fff; padding:24px; }
-    .header { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
-    #userpic { width:48px; height:48px; border-radius:50%; }
-    #btnLogout, #btnHome { margin-left:auto; padding:8px 16px; border:none; background:#f96302; color:#fff; cursor:pointer; }
-    form { display:none; flex-direction:column; gap:12px; max-width:360px; background:rgba(255,255,255,0.05); padding:24px; border-radius:8px; }
-    form.active { display:flex; }
-    label { display:flex; flex-direction:column; font-size:14px; }
-    input { padding:8px; margin-top:4px; border:none; border-radius:4px; }
-    button.save { background:#3e8e3e; color:#fff; border:none; padding:10px; cursor:pointer; border-radius:4px; }
-  </style>
-
-  <!-- 1) env.js first -->
-  <script src="/env.js"></script>
-
-  <!-- 2) Firebase compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <title>User Profile</title>
+  <link rel="stylesheet" href="profile.css">
 </head>
 <body>
-  <div class="header">
-    <img id="userpic" hidden>
-    <span id="username"></span>
-    <button id="btnHome" hidden onclick="location.href='index.html'">Home</button>
-    <button id="btnLogout" hidden>Log Out</button>
-  </div>
+  <header>
+    <h1 id="lblName">Loading…</h1>
+    <img id="imgAvatar" src="" alt="Avatar" hidden>
+  </header>
 
-  <form id="profileForm">
-    <h2>My Profile</h2>
-    <label>
-      Display Name:
-      <input id="displayName" type="text">
-    </label>
-    <label>
-      Favorite Color:
-      <input id="favoriteColor" type="color">
-    </label>
-    <button type="submit" class="save">Save Profile</button>
-  </form>
+  <section>
+    <h2>Community Builds</h2>
+    <div id="buildsContainer" class="builds-grid">
+      <!-- builds will go here -->
+    </div>
+  </section>
 
-  <script>
-    // ── Init Firebase ───────────────────────────────────────────
-    const cfg = window.__env__;
-    firebase.initializeApp({
-      apiKey:            cfg.FIREBASE_API_KEY,
-      authDomain:        cfg.FIREBASE_AUTH_DOMAIN,
-      projectId:         cfg.FIREBASE_PROJECT_ID,
-      storageBucket:     cfg.FIREBASE_STORAGE_BUCKET,
-      messagingSenderId: cfg.FIREBASE_MESSAGING_SENDER_ID,
-      appId:             cfg.FIREBASE_APP_ID
-    });
-    const auth = firebase.auth();
-    const db   = firebase.firestore();
+  <script type="module">
+    import { db } from './firebase-config.js';
+    import {
+      doc, getDoc,
+      collection, query, where, orderBy, getDocs
+    } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
 
-    // ── Protect + load profile ───────────────────────────────────
-    auth.onAuthStateChanged(async user => {
-      if (!user) return location.href = '/login.html';
+    (async function() {
+      const params = new URLSearchParams(location.search);
+      const uid = params.get('uid');
+      if (!uid) return document.body.textContent = 'No user specified.';
 
-      // show header
-      document.getElementById('username').textContent = user.displayName || user.email;
-      const pic = document.getElementById('userpic');
-      pic.src    = user.photoURL || '/images/default-avatar.png';
-      pic.hidden = false;
-      document.getElementById('btnLogout').hidden = false;
-      document.getElementById('btnHome').hidden   = false;
-
-      // load Firestore profile doc
-      const ref = db.collection('profiles').doc(user.uid);
-      const snap = await ref.get();
-      if (snap.exists) {
-        const data = snap.data();
-        document.getElementById('displayName').value   = data.displayName || '';
-        document.getElementById('favoriteColor').value = data.color       || '#ffffff';
+      // --- Fetch and show user metadata ---
+      const profileRef = doc(db, 'profiles', uid);
+      const profileSnap = await getDoc(profileRef);
+      if (profileSnap.exists()) {
+        const { displayName, color } = profileSnap.data();
+        document.getElementById('lblName').textContent = displayName || 'Unnamed Hero';
+        const avatar = document.getElementById('imgAvatar');
+        avatar.src      = profileSnap.data().avatarURL || '/images/default-avatar.png';
+        avatar.hidden   = false;
+        if (color) document.body.style.setProperty('--accent', color);
+      } else {
+        document.getElementById('lblName').textContent = 'Unknown User';
       }
-      document.getElementById('profileForm').classList.add('active');
 
-      // logout
-      document.getElementById('btnLogout').onclick = () => auth.signOut().then(()=> location.href='/login.html');
+      // --- Query their community builds ---
+      const buildsQ = query(
+        collection(db, 'communityBuilds'),
+        where('ownerId','==', uid),
+        orderBy('createdAt','desc')
+      );
+      const snap = await getDocs(buildsQ);
+      const cont = document.getElementById('buildsContainer');
 
-      // save changes
-      document.getElementById('profileForm').onsubmit = async e => {
-        e.preventDefault();
-        await ref.set({
-          displayName:   document.getElementById('displayName').value,
-          color:         document.getElementById('favoriteColor').value
-        }, { merge:true });
-        alert('Profile saved!');
-      };
-    });
+      snap.forEach(docSnap => {
+        const b = docSnap.data();
+        const card = document.createElement('div');
+        card.className = 'build-card';
+        card.innerHTML = `
+          <div class="card-header">
+            <img src="/images/avatars/${b.heroId}.png" alt="${b.heroName}">
+            <h3>${b.heroName}</h3>
+          </div>
+          <div class="card-body">
+            <div class="squares">
+              ${b.powerIds.map(id =>
+                `<div class="square"><img src="/images/abilities/${id}.png"></div>`
+              ).join('')}
+            </div>
+            <div class="circles">
+              ${b.itemIds.map(id =>
+                `<div class="circle"><img src="/images/abilities/${id}.png"></div>`
+              ).join('')}
+            </div>
+            <div class="cost">Total: ${b.totalCost.toLocaleString()}</div>
+          </div>`;
+        cont.appendChild(card);
+      });
+
+      if (snap.empty) {
+        cont.textContent = 'No builds yet.';
+      }
+    })();
   </script>
 </body>
 </html>
