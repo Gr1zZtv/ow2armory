@@ -3,27 +3,17 @@
 <head>
   <meta charset="utf-8">
   <title>Log In — The Armory</title>
-  <!-- FirebaseUI CSS -->
-  <link
-    rel="stylesheet"
-    href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css"
-  />
+  <link rel="stylesheet"
+        href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css" />
   <style>
     body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: #0b1625;
-      color: #fff;
-      font-family: sans-serif;
+      display: flex; justify-content: center; align-items: center;
+      height:100vh; margin:0;
+      background:#0b1625; color:#fff; font-family:sans-serif;
     }
     #firebaseui-auth-container {
-      width: 320px;
-      padding: 24px;
-      background: #1a2738;
-      border-radius: 8px;
+      width:320px; padding:24px;
+      background:#1a2738; border-radius:8px;
     }
   </style>
 </head>
@@ -31,27 +21,7 @@
 
   <div id="firebaseui-auth-container"></div>
 
-  <!-- 1) Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js"></script>
-  <!-- 2) FirebaseUI JS -->
-  <script src="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.js"></script>
-
-  <!-- 3) Your own config (or pull from window.__env__ if you’ve wired Render env vars) -->
-  <script>
-    // Replace these with your real values or use window.__env__ for each.
-    const firebaseConfig = {
-      apiKey:            "YOUR_FIREBASE_API_KEY",
-      authDomain:        "armoryapi-37b1a.firebaseapp.com",
-      projectId:         "armoryapi-37b1a",
-      storageBucket:     "armoryapi-37b1a.appspot.com",
-      messagingSenderId: "892353609908",
-      appId:             "1:892353609908:web:6eaf26924b3224799f57e1"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
-
-  <!-- 4) Kick off FirebaseUI -->
-  <script src="login.js"></script>
+  <!-- No global Firebase scripts here: we’re using modules -->
+  <script type="module" src="login.js"></script>
 </body>
 </html>
