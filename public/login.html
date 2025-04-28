@@ -1,35 +1,38 @@
+<!-- public/login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <title>Login — The Armory</title>
-  <!-- FirebaseUI styles -->
-  <link
-    rel="stylesheet"
+  <!-- FirebaseUI CSS -->
+  <link 
+    rel="stylesheet" 
     href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css"
   />
   <style>
-    /* center the login box on a dark background */
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background: #0b1625;
+    body { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+      margin: 0; 
+      background: #0b1625; 
+      color: #fff; 
       font-family: sans-serif;
-      color: #fff;
     }
     #firebaseui-auth-container {
       width: 320px;
+      padding: 24px;
+      background: #1a2738;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <!-- where FirebaseUI will render -->
   <div id="firebaseui-auth-container"></div>
 
-  <!-- our login logic (ES module) -->
+  <!-- Firebase SDKs & your login.js as module -->
+  <script type="module" src="firebase-config.js"></script>
   <script type="module" src="login.js"></script>
 </body>
 </html>
