@@ -5,10 +5,10 @@
   <title>Armory Login</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <!-- 1) Inject your Render env-vars at runtime -->
+  <!-- 1) Your Render‐injected env vars -->
   <script src="/env.js"></script>
 
-  <!-- 2) Firebase “compat” libraries (so we can use the familiar namespace API inline) -->
+  <!-- 2) Firebase compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 
@@ -22,12 +22,12 @@
   <style>
     body {
       font-family: sans-serif;
+      background: #0b1625;
+      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 40px;
-      background: #0b1625;
-      color: #fff;
     }
     h1 {
       margin-bottom: 24px;
@@ -35,7 +35,7 @@
     #firebaseui-auth-container {
       width: 100%;
       max-width: 320px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
       padding: 16px;
       border-radius: 8px;
     }
@@ -47,7 +47,7 @@
   <div id="firebaseui-auth-container"></div>
 
   <script>
-    // ── 1) Initialize Firebase using Render’s env.js ────────────────────────────
+    // ── initialize Firebase from your env.js ─────────────────────────────────
     const fbConfig = {
       apiKey:            window.__env__.FIREBASE_API_KEY,
       authDomain:        window.__env__.FIREBASE_AUTH_DOMAIN,
@@ -58,25 +58,25 @@
     };
     firebase.initializeApp(fbConfig);
 
-    // ── 2) Configure FirebaseUI ─────────────────────────────────────────────────
+    // ── configure FirebaseUI ─────────────────────────────────────────────────
     const uiConfig = {
       callbacks: {
         signInSuccessWithAuthResult: () => {
-          // Redirect back to your homepage (or wherever)
+          // on success, go back home
           window.location.href = '/index.html';
-          return false; // Don’t auto-redirect by FirebaseUI
+          return false; // prevent automatic redirect
         }
       },
       signInFlow: 'popup',
       signInOptions: [
-        // email/password
-        firebaseui.auth.AuthUI.EmailAuthProvider.PROVIDER_ID,
+        // Email/password
+        firebase.auth.EmailAuthProvider.PROVIDER_ID,
         // Google
-        firebaseui.auth.AuthUI.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID
       ]
     };
 
-    // ── 3) Launch FirebaseUI ────────────────────────────────────────────────────
+    // ── start FirebaseUI ─────────────────────────────────────────────────────
     const ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start('#firebaseui-auth-container', uiConfig);
   </script>
