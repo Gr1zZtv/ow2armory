@@ -4,8 +4,27 @@
   <meta charset="utf-8">
   <title>Armory Login</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #0b1625;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+    h1 { margin-bottom: 24px; }
+    #firebaseui-auth-container {
+      width: 100%;
+      max-width: 360px;
+      background: rgba(255,255,255,0.05);
+      padding: 16px;
+      border-radius: 8px;
+    }
+  </style>
 
-  <!-- 1) Your Render‐injected env vars -->
+  <!-- 1) Your env.js must inject window.__env__ with your Firebase config -->
   <script src="/env.js"></script>
 
   <!-- 2) Firebase compat SDKs -->
@@ -18,29 +37,6 @@
     href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css"
   />
   <script src="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.js"></script>
-
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #0b1625;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
-      margin: 0;
-    }
-    h1 {
-      margin-bottom: 24px;
-    }
-    #firebaseui-auth-container {
-      width: 100%;
-      max-width: 320px;
-      background: rgba(255,255,255,0.05);
-      padding: 16px;
-      border-radius: 8px;
-    }
-  </style>
 </head>
 <body>
 
@@ -48,7 +44,7 @@
   <div id="firebaseui-auth-container"></div>
 
   <script>
-    // ── initialize Firebase from your env.js ─────────────────────────────────
+    // ── 1) Initialize Firebase from your env.js ────────────────────────────
     const fbConfig = {
       apiKey:            window.__env__.FIREBASE_API_KEY,
       authDomain:        window.__env__.FIREBASE_AUTH_DOMAIN,
@@ -59,30 +55,23 @@
     };
     firebase.initializeApp(fbConfig);
 
-    // ── configure FirebaseUI ─────────────────────────────────────────────────
+    // ── 2) Configure FirebaseUI to use ONLY email/password provider ────────
     const uiConfig = {
-      callbacks: {
-        signInSuccessWithAuthResult: () => {
-          // on success, go back home
-          window.location.href = '/index.html';
-          return false; // prevent automatic redirect
-        }
-      },
       signInFlow: 'popup',
       signInOptions: [
-        // Email/password provider configured as an object:
-        {
-          provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-          signInMethod: firebase.auth.EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD,
-          requireDisplayName: false    // existing users won’t be forced to re-enter a display name
-        },
-        // Google OAuth
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID
+        // This single entry gives both Sign-In & Sign-Up tabs:
+        firebase.auth.EmailAuthProvider.PROVIDER_ID
       ],
-      // By default FirebaseUI will show both “Sign in” & “Sign up” tabs
+      callbacks: {
+        signInSuccessWithAuthResult: () => {
+          // redirect back home on success
+          window.location.href = '/index.html';
+          return false; // don't let FirebaseUI do another redirect
+        }
+      }
     };
 
-    // ── start FirebaseUI ─────────────────────────────────────────────────────
+    // ── 3) Launch FirebaseUI ────────────────────────────────────────────────
     const ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start('#firebaseui-auth-container', uiConfig);
   </script>
