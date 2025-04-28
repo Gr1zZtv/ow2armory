@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <title>Armory Login / Signup</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
   <style>
     body {
       font-family: sans-serif;
@@ -28,6 +29,7 @@
       border: none;
       color: #fff;
       cursor: pointer;
+      font-size: 16px;
     }
     .tabs button.active { background: #f96302; }
     form {
@@ -62,7 +64,7 @@
       cursor: pointer;
       border-radius: 4px;
       margin-top: 12px;
-      /* ensure taps register */
+      /* ensure taps register immediately */
       -webkit-tap-highlight-color: rgba(0,0,0,0);
     }
     .error {
@@ -72,7 +74,7 @@
     }
   </style>
 
-  <!-- 1) env.js first -->
+  <!-- 1) Include your env.js first -->
   <script src="/env.js"></script>
 
   <!-- 2) Firebase compat SDKs -->
@@ -95,8 +97,8 @@
     <label>Password
       <input type="password" id="signInPassword" required>
     </label>
-    <!-- give the button an ID so we can also listen for click -->
-    <button type="submit" id="signInBtn" class="submit">Sign In</button>
+    <!-- change to type="button" -->
+    <button type="button" id="signInBtn" class="submit">Sign In</button>
   </form>
 
   <form id="formSignUp" novalidate>
@@ -110,7 +112,7 @@
     <label>Confirm
       <input type="password" id="signUpPassword2" required>
     </label>
-    <button type="submit" id="signUpBtn" class="submit">Sign Up</button>
+    <button type="button" id="signUpBtn" class="submit">Sign Up</button>
   </form>
 
   <script>
@@ -129,27 +131,23 @@
       });
       const auth = firebase.auth();
 
-      // Tabs
+      // Tab toggling
       const tabIn  = document.getElementById('tabSignIn');
       const tabUp  = document.getElementById('tabSignUp');
       const formIn = document.getElementById('formSignIn');
       const formUp = document.getElementById('formSignUp');
       tabIn.onclick = () => {
-        tabIn.classList.add('active');
-        tabUp.classList.remove('active');
-        formIn.classList.add('active');
-        formUp.classList.remove('active');
+        tabIn.classList.add('active'); tabUp.classList.remove('active');
+        formIn.classList.add('active'); formUp.classList.remove('active');
       };
       tabUp.onclick = () => {
-        tabUp.classList.add('active');
-        tabIn.classList.remove('active');
-        formUp.classList.add('active');
-        formIn.classList.remove('active');
+        tabUp.classList.add('active'); tabIn.classList.remove('active');
+        formUp.classList.add('active'); formIn.classList.remove('active');
       };
 
-      // Sign-in logic
+      // Handlers
       async function handleSignIn(evt) {
-        if(evt) evt.preventDefault();
+        evt && evt.preventDefault();
         const errEl = document.getElementById('errorSignIn');
         errEl.textContent = '';
         const email = document.getElementById('signInEmail').value;
@@ -164,16 +162,14 @@
           errEl.textContent = err.message;
         }
       }
-
-      // Sign-up logic
       async function handleSignUp(evt) {
-        if(evt) evt.preventDefault();
+        evt && evt.preventDefault();
         const errEl = document.getElementById('errorSignUp');
         errEl.textContent = '';
         const email = document.getElementById('signUpEmail').value;
         const pw    = document.getElementById('signUpPassword').value;
         const pw2   = document.getElementById('signUpPassword2').value;
-        if(pw!==pw2) {
+        if (pw !== pw2) {
           errEl.textContent = 'Passwords must match.';
           return;
         }
@@ -188,20 +184,21 @@
         }
       }
 
-      // Wire up both form submit *and* button click for mobile
-      document.getElementById('formSignIn')
-              .addEventListener('submit', handleSignIn);
-      document.getElementById('signInBtn')
-              .addEventListener('click',  handleSignIn);
+      // Listen for both click & touchend (mobile)
+      const signInBtn = document.getElementById('signInBtn');
+      signInBtn.addEventListener('click',    handleSignIn);
+      signInBtn.addEventListener('touchend', handleSignIn);
 
-      document.getElementById('formSignUp')
-              .addEventListener('submit', handleSignUp);
-      document.getElementById('signUpBtn')
-              .addEventListener('click',  handleSignUp);
+      const signUpBtn = document.getElementById('signUpBtn');
+      signUpBtn.addEventListener('click',    handleSignUp);
+      signUpBtn.addEventListener('touchend', handleSignUp);
 
-      // If already logged in, redirect home
+      // Redirect home if already signed in
       auth.onAuthStateChanged(u => {
-        if(u) location.href = '/index.html';
+        if (u) {
+          console.log('👤 Already logged in – redirecting');
+          location.href = '/index.html';
+        }
       });
     });
   </script>
