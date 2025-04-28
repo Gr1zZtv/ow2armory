@@ -26,17 +26,19 @@
 
   <script type="module">
     import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
-    import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+    import { onAuthStateChanged, signOut }
+      from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+    import { doc, getDoc, setDoc }
+      from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
 
     onAuthStateChanged(auth, async user => {
       if (!user) return location.href = '/login.html';
 
-      // --- Log out button ---
+      // logout
       document.getElementById('btnLogout').onclick = () =>
         signOut(auth).then(() => location.href = '/login.html');
 
-      // --- Load existing profile data ---
+      // load existing
       const ref = doc(db, 'profiles', user.uid);
       const snap = await getDoc(ref);
       if (snap.exists()) {
@@ -45,14 +47,14 @@
         document.getElementById('inpColor').value       = color       || '#ffffff';
       }
 
-      // --- Save updates ---
+      // save updates
       document.getElementById('settingsForm').onsubmit = async e => {
         e.preventDefault();
         await setDoc(ref, {
           displayName: document.getElementById('inpDisplayName').value,
           color:       document.getElementById('inpColor').value
         }, { merge: true });
-        alert('Saved!');
+        alert('Profile saved!');
       };
     });
   </script>
