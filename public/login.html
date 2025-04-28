@@ -14,13 +14,57 @@
       align-items: center;
       padding: 40px;
     }
-    h1 { margin-bottom: 24px; }
-    #firebaseui-auth-container {
+    h1 { margin-bottom: 16px; }
+    .tabs {
+      display: flex;
+      margin-bottom: 24px;
+    }
+    .tabs button {
+      flex: 1;
+      padding: 8px;
+      background: #1a2738;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+    }
+    .tabs button.active {
+      background: #f96302;
+    }
+    form {
+      background: rgba(255,255,255,0.05);
+      padding: 24px;
+      border-radius: 8px;
       width: 100%;
       max-width: 360px;
-      background: rgba(255,255,255,0.05);
-      padding: 16px;
-      border-radius: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+    form.active { display: flex; }
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+    }
+    input {
+      padding: 8px;
+      margin-top: 4px;
+      border: none;
+      border-radius: 4px;
+    }
+    button.submit {
+      background: #2d6a2d;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 12px;
+    }
+    .error {
+      color: #f88;
+      font-size: 14px;
+      min-height: 18px;
     }
   </style>
 
@@ -30,21 +74,50 @@
   <!-- 2) Firebase compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-
-  <!-- 3) FirebaseUI CSS & JS -->
-  <link
-    rel="stylesheet"
-    href="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.css"
-  />
-  <script src="https://www.gstatic.com/firebasejs/ui/6.0.0/firebase-ui-auth.js"></script>
 </head>
 <body>
 
-  <h1>Sign In / Sign Up</h1>
-  <div id="firebaseui-auth-container"></div>
+  <h1>Welcome to the Armory</h1>
+
+  <div class="tabs">
+    <button id="tabSignIn" class="active">Sign In</button>
+    <button id="tabSignUp">Sign Up</button>
+  </div>
+
+  <!-- Sign In Form -->
+  <form id="formSignIn" class="active">
+    <div class="error" id="errorSignIn"></div>
+    <label>
+      Email
+      <input type="email" id="signInEmail" required>
+    </label>
+    <label>
+      Password
+      <input type="password" id="signInPassword" required>
+    </label>
+    <button type="submit" class="submit">Sign In</button>
+  </form>
+
+  <!-- Sign Up Form -->
+  <form id="formSignUp">
+    <div class="error" id="errorSignUp"></div>
+    <label>
+      Email
+      <input type="email" id="signUpEmail" required>
+    </label>
+    <label>
+      Password
+      <input type="password" id="signUpPassword" required>
+    </label>
+    <label>
+      Confirm Password
+      <input type="password" id="signUpPassword2" required>
+    </label>
+    <button type="submit" class="submit">Sign Up</button>
+  </form>
 
   <script>
-    // ── 1) Initialize Firebase from your env.js ────────────────────────────
+    // ── Initialize Firebase ───────────────────────────────────────────────────
     const fbConfig = {
       apiKey:            window.__env__.FIREBASE_API_KEY,
       authDomain:        window.__env__.FIREBASE_AUTH_DOMAIN,
@@ -54,26 +127,64 @@
       appId:             window.__env__.FIREBASE_APP_ID
     };
     firebase.initializeApp(fbConfig);
+    const auth = firebase.auth();
 
-    // ── 2) Configure FirebaseUI to use ONLY email/password provider ────────
-    const uiConfig = {
-      signInFlow: 'popup',
-      signInOptions: [
-        // This single entry gives both Sign-In & Sign-Up tabs:
-        firebase.auth.EmailAuthProvider.PROVIDER_ID
-      ],
-      callbacks: {
-        signInSuccessWithAuthResult: () => {
-          // redirect back home on success
-          window.location.href = '/index.html';
-          return false; // don't let FirebaseUI do another redirect
-        }
-      }
+    // ── Tab Switching ─────────────────────────────────────────────────────────
+    const tabSignIn = document.getElementById('tabSignIn');
+    const tabSignUp = document.getElementById('tabSignUp');
+    const formSignIn = document.getElementById('formSignIn');
+    const formSignUp = document.getElementById('formSignUp');
+    tabSignIn.onclick = () => {
+      tabSignIn.classList.add('active');
+      tabSignUp.classList.remove('active');
+      formSignIn.classList.add('active');
+      formSignUp.classList.remove('active');
+    };
+    tabSignUp.onclick = () => {
+      tabSignUp.classList.add('active');
+      tabSignIn.classList.remove('active');
+      formSignUp.classList.add('active');
+      formSignIn.classList.remove('active');
     };
 
-    // ── 3) Launch FirebaseUI ────────────────────────────────────────────────
-    const ui = new firebaseui.auth.AuthUI(firebase.auth());
-    ui.start('#firebaseui-auth-container', uiConfig);
+    // ── Sign In Handler ───────────────────────────────────────────────────────
+    formSignIn.addEventListener('submit', async e => {
+      e.preventDefault();
+      document.getElementById('errorSignIn').textContent = '';
+      const email = document.getElementById('signInEmail').value;
+      const pw    = document.getElementById('signInPassword').value;
+      try {
+        await auth.signInWithEmailAndPassword(email, pw);
+        // redirect home on success
+        window.location.href = '/index.html';
+      } catch (err) {
+        document.getElementById('errorSignIn').textContent = err.message;
+      }
+    });
+
+    // ── Sign Up Handler ───────────────────────────────────────────────────────
+    formSignUp.addEventListener('submit', async e => {
+      e.preventDefault();
+      document.getElementById('errorSignUp').textContent = '';
+      const email = document.getElementById('signUpEmail').value;
+      const pw    = document.getElementById('signUpPassword').value;
+      const pw2   = document.getElementById('signUpPassword2').value;
+      if (pw !== pw2) {
+        return document.getElementById('errorSignUp').textContent = 'Passwords do not match.';
+      }
+      try {
+        await auth.createUserWithEmailAndPassword(email, pw);
+        // redirect home on success
+        window.location.href = '/index.html';
+      } catch (err) {
+        document.getElementById('errorSignUp').textContent = err.message;
+      }
+    });
+
+    // ── If already signed in, redirect to home immediately ────────────────────
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = '/index.html';
+    });
   </script>
 
 </body>
