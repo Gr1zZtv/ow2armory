@@ -3,16 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>The Armory — Home</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Main site styles -->
   <link rel="stylesheet" href="index.css">
 
-  <!-- Navbar widget (will prepend .site-header into <body>) -->
-  <script type="module" src="widgets/navbar.mjs" defer></script>
+  <!-- 1) Expose your Render env vars -->
+  <script src="/env.js"></script>
+  <!-- 2) Initialize Firebase using those vars -->
+  <script type="module" src="/firebase-config.js"></script>
 </head>
 <body>
+  <script type="module" src="/widgets/navbar.mjs"></script>
+<button onclick="location.href='login.html'">Log In</button>
 
+  <!-- ── NAV (User info + Logout) ─────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="user-info">
+      <img id="userPic" class="user-pic" alt="Avatar" hidden>
+      <span id="userName" class="user-name"></span>
+      <button id="btnLogout" class="btn-logout" hidden>Log Out</button>
+    </div>
+  </nav>  
   <!-- ── BANNER ─────────────────────────────────────────────────────────────── -->
   <section class="banner">
     <h1>Welcome to the Armory</h1>
@@ -26,11 +35,37 @@
   <section class="section">
     <h2>Trending Builds</h2>
     <div class="trending-builds">
-      <!-- Example Card -->
+      <!-- Card 1 -->
       <div class="build-card">
         <div class="card-header">
           <img src="images/placeholders/hero.png" alt="Hero">
           <h3>Hero A</h3>
+        </div>
+        <div class="card-body">
+          <!-- 4 squares -->
+          <div class="squares">
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+          </div>
+          <!-- 2 rows of 3 circles -->
+          <div class="circles">
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+          </div>
+          <div class="cost">Total: 12,000</div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="build-card">
+        <div class="card-header">
+          <img src="images/placeholders/hero.png" alt="Hero">
+          <h3>Hero B</h3>
         </div>
         <div class="card-body">
           <div class="squares">
@@ -47,10 +82,57 @@
             <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
             <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
           </div>
-          <div class="cost">Total: 12,000</div>
+          <div class="cost">Total: 10,500</div>
         </div>
       </div>
-      <!-- Repeat for Card 2, 3, 4 as in your prior markup -->
+      <!-- Card 3 -->
+      <div class="build-card">
+        <div class="card-header">
+          <img src="images/placeholders/hero.png" alt="Hero">
+          <h3>Hero C</h3>
+        </div>
+        <div class="card-body">
+          <div class="squares">
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+          </div>
+          <div class="circles">
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+          </div>
+          <div class="cost">Total: 11,200</div>
+        </div>
+      </div>
+      <!-- Card 4 -->
+      <div class="build-card">
+        <div class="card-header">
+          <img src="images/placeholders/hero.png" alt="Hero">
+          <h3>Hero D</h3>
+        </div>
+        <div class="card-body">
+          <div class="squares">
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+          </div>
+          <div class="circles">
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+          </div>
+          <div class="cost">Total: 9,800</div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -58,7 +140,7 @@
   <section class="section">
     <h2>Latest Builds</h2>
     <div class="latest-builds">
-      <!-- Example Card -->
+      <!-- Hero E -->
       <div class="build-card">
         <div class="card-header">
           <img src="images/placeholders/hero.png" alt="Hero">
@@ -82,9 +164,112 @@
           <div class="cost">Total: 10,300</div>
         </div>
       </div>
-      <!-- Repeat for Hero F, G, H as needed -->
+      <!-- Hero F -->
+      <div class="build-card">
+        <div class="card-header">
+          <img src="images/placeholders/hero.png" alt="Hero">
+          <h3>Hero F</h3>
+        </div>
+        <div class="card-body">
+          <div class="squares">
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+          </div>
+          <div class="circles">
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+          </div>
+          <div class="cost">Total: 11,600</div>
+        </div>
+      </div>
+      <!-- Hero G -->
+      <div class="build-card">
+        <div class="card-header">
+          <img src="images/placeholders/hero.png" alt="Hero">
+          <h3>Hero G</h3>
+        </div>
+        <div class="card-body">
+          <div class="squares">
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+          </div>
+          <div class="circles">
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+          </div>
+          <div class="cost">Total: 9,900</div>
+        </div>
+      </div>
+      <!-- Hero H -->
+      <div class="build-card">
+        <div class="card-header">
+          <img src="images/placeholders/hero.png" alt="Hero">
+          <h3>Hero H</h3>
+        </div>
+        <div class="card-body">
+          <div class="squares">
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+            <div class="square"><img class="icon" src="images/placeholders/sq.png" alt=""></div>
+          </div>
+          <div class="circles">
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+            <div class="circle"><img class="icon" src="images/placeholders/circ.png" alt=""></div>
+          </div>
+          <div class="cost">Total: 10,800</div>
+        </div>
+      </div>
     </div>
   </section>
+  <script type="module">
+    // 1) Pull in your initialized Firebase auth instance
+    import { auth } from './firebase-config.js';
+    // 2) And the listener
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+
+    const userNameElem = document.getElementById('userName');
+    const userPicElem  = document.getElementById('userPic');
+    const btnLogout    = document.getElementById('btnLogout');
+
+    // 3) React to auth state changes
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        // show name or email
+        userNameElem.textContent = user.displayName || user.email;
+        // show photoURL or a fallback
+        userPicElem.src       = user.photoURL || 'images/default-avatar.png';
+        userPicElem.hidden    = false;
+        btnLogout.hidden      = false;
+      } else {
+        // signed out — hide them
+        userNameElem.textContent = '';
+        userPicElem.hidden       = true;
+        btnLogout.hidden         = true;
+      }
+    });
+
+    // 4) Wire up the logout button
+    btnLogout.addEventListener('click', () => {
+      auth.signOut();
+    });
+  </script>
 
 </body>
 </html>
