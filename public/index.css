@@ -158,6 +158,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  /* prevent wrapping on desktop */
+  flex-wrap: nowrap;
   padding: 12px 24px;
 }
 .site-header .logo {
@@ -168,7 +170,9 @@ body {
 }
 .site-header .nav-links {
   display: flex;
-  gap: 16px;
+  gap: 24px;
+  /* always horizontal on desktop */
+  flex-direction: row;
 }
 .site-header .nav-links a {
   color: #ddd;
@@ -198,18 +202,17 @@ body {
 .site-header .user-panel {
   display: flex;
   align-items: center;
+  gap: 12px;
 }
 .site-header .user-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 8px;
   border: 2px solid #444;
 }
 .site-header .user-name {
   color: #fff;
-  margin-right: 16px;
   font-size: 0.95rem;
 }
 .site-header .btn-logout {
@@ -230,21 +233,18 @@ body {
 /* ─────────── RESPONSIVE NAVBAR ─────────── */
 @media (max-width: 768px) {
   .site-header .nav-container {
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* allow wrap only on mobile */
   }
   .site-header .nav-links {
     order: 3;
     width: 100%;
     justify-content: center;
-    margin-top: 8px;
-  }
-  .site-header .nav-links a {
-    margin: 8px;
+    margin: 12px 0;
   }
   .site-header .user-panel {
     order: 2;
     width: 100%;
     justify-content: center;
-    margin-top: 8px;
+    margin-bottom: 12px;
   }
 }
