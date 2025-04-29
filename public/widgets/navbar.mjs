@@ -1,22 +1,27 @@
 // public/widgets/navbar.mjs
-
 import { auth } from '../firebase-config.js';
 
 function buildNavbar() {
   const header = document.createElement('header');
   header.className = 'site-header';
   header.innerHTML = `
-    <div class="nav-container">
-      <a href="index.html" class="logo">Armory</a>
-      <nav class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="viewer.html">Builder</a>
-        <a href="admin.html">Admin</a>
+    <div class="site-header__inner">
+      <a href="index.html" class="site-header__logo">
+        <img src="/images/logo.png" alt="Logo"><span>The Armory</span>
+      </a>
+      <nav class="site-nav">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="viewer.html">Builder</a></li>
+          <li><a href="admin.html">Admin</a></li>
+        </ul>
       </nav>
-      <div class="user-panel">
-        <img class="user-avatar" src="" alt="User avatar" hidden>
-        <span class="user-name"></span>
-        <button class="btn-logout" hidden>Log Out</button>
+      <div class="site-user">
+        <a href="#" id="profileLink" class="site-user__link">
+          <img id="userAvatar" class="site-user__avatar" src="" alt="Avatar" hidden>
+          <span id="userName"   class="site-user__name"></span>
+        </a>
+        <button id="btnLogout" class="site-user__login" hidden>Log Out</button>
       </div>
     </div>
   `;
@@ -24,26 +29,34 @@ function buildNavbar() {
 }
 
 function wireAuthUI() {
-  const avatar   = document.querySelector('.user-avatar');
-  const nameSpan = document.querySelector('.user-name');
-  const logout   = document.querySelector('.btn-logout');
+  const avatarEl    = document.getElementById('userAvatar');
+  const nameEl      = document.getElementById('userName');
+  const linkEl      = document.getElementById('profileLink');
+  const logoutBtn   = document.getElementById('btnLogout');
 
   auth.onAuthStateChanged(user => {
     if (user) {
-      // show avatar & name & logout
-      avatar.src       = user.photoURL || '/images/default-avatar.png';
-      avatar.hidden    = false;
-      nameSpan.textContent = user.displayName || user.email;
-      logout.hidden    = false;
-      logout.onclick   = () => auth.signOut().then(() => {
-        // optionally redirect to login page
-        window.location.href = '/login.html';
-      });
+      // point link to their profile by UID
+      linkEl.href = `/profile.html?uid=${user.uid}`;
+
+      // show avatar / name / logout
+      avatarEl.src          = user.photoURL || '/images/default-avatar.png';
+      avatarEl.hidden       = false;
+      nameEl.textContent    = user.displayName || user.email;
+      logoutBtn.hidden      = false;
     } else {
-      avatar.hidden = true;
-      nameSpan.textContent = '';
-      logout.hidden = true;
+      // if not signed in, link to login
+      linkEl.href       = '/login.html';
+      avatarEl.hidden   = true;
+      nameEl.textContent = 'Sign In';
+      logoutBtn.hidden  = true;
     }
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    auth.signOut().then(() => {
+      window.location.href = '/login.html';
+    });
   });
 }
 
