@@ -4,22 +4,43 @@
   <meta charset="utf-8">
   <title>My Profile — Armory</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="profile.css">
 
-  <!-- 1) Your env.vars -->
+  <!-- 1) env.js first -->
   <script src="/env.js"></script>
 
-  <!-- 2) Firebase compat SDKs for App, Auth & Firestore -->
+  <!-- 2) Static initialData so we can look up icons, costs, tabs, etc. -->
+  <script src="/initialData.js"></script>
+
+  <!-- 3) Firebase “compat” SDKs for Auth & Firestore -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
-  <link rel="stylesheet" href="profile.css">
+  <!-- 4) Initialize Firebase & track currentUser -->
+  <script>
+    ;(function(){
+      const fb = window.__env__ || {};
+      firebase.initializeApp({
+        apiKey:            fb.FIREBASE_API_KEY,
+        authDomain:        fb.FIREBASE_AUTH_DOMAIN,
+        projectId:         fb.FIREBASE_PROJECT_ID,
+        storageBucket:     fb.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: fb.FIREBASE_MESSAGING_SENDER_ID,
+        appId:             fb.FIREBASE_APP_ID
+      });
+      firebase.auth().onAuthStateChanged(user => {
+        window.currentUser = user;
+      });
+    })();
+  </script>
 </head>
 <body>
-  <!-- site-wide navbar -->
+  <!-- site‐wide navbar -->
   <script type="module" src="widgets/navbar.mjs"></script>
 
   <main class="profile-page">
+
     <!-- HEADER -->
     <section class="profile-header">
       <img id="imgAvatar" class="avatar" src="/images/default-avatar.png" alt="Avatar">
@@ -54,92 +75,111 @@
         This section will soon let you chat, comment on builds, and share tips!
       </div>
     </section>
+
   </main>
 
   <script>
-    // ── Initialize Firebase App & Firestore/Auth ────────────────────────────
-    (function(){
-      const fb = window.__env__ || {};
-      firebase.initializeApp({
-        apiKey:            fb.FIREBASE_API_KEY,
-        authDomain:        fb.FIREBASE_AUTH_DOMAIN,
-        projectId:         fb.FIREBASE_PROJECT_ID,
-        storageBucket:     fb.FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: fb.FIREBASE_MESSAGING_SENDER_ID,
-        appId:             fb.FIREBASE_APP_ID
-      });
-    })();
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
     document.addEventListener('DOMContentLoaded', () => {
-      const auth = firebase.auth();
-      const db   = firebase.firestore();
-
       // Tab switching
       const btnBuilds     = document.getElementById('tabBuilds');
       const btnDiscussion = document.getElementById('tabDiscussion');
       const secBuilds     = document.getElementById('sectionBuilds');
       const secDisc       = document.getElementById('sectionDiscussion');
-      btnBuilds.onclick   = () => {
+      btnBuilds .onclick = () => {
         btnBuilds.classList.add('active');
         btnDiscussion.classList.remove('active');
         secBuilds.style.display = '';
-        secDisc.style.display   = 'none';
+        secDisc  .style.display = 'none';
       };
       btnDiscussion.onclick = () => {
         btnDiscussion.classList.add('active');
         btnBuilds.classList.remove('active');
-        secDisc.style.display   = '';
-        secBuilds.style.display = 'none';
+        secDisc .style.display = '';
+        secBuilds .style.display = 'none';
       };
 
-      // Wait for auth
-      auth.onAuthStateChanged(async user => {
+      // Wait for Firebase Auth
+      const unbind = auth.onAuthStateChanged(async user => {
         if (!user) return location.href = '/login.html';
+        unbind();
 
-        // Header
+        // Header: name & avatar
         document.getElementById('lblName').textContent =
           user.displayName || user.email;
         document.getElementById('imgAvatar').src =
           user.photoURL || '/images/default-avatar.png';
+
         document.getElementById('btnEditProfile')
                 .onclick = () => location.href = '/settings.html';
 
-        // Firestore: query builds where uid == user.uid
+        // Fetch builds for this user
         const buildsContainer = document.getElementById('buildsContainer');
-        buildsContainer.innerHTML = ''; // clear
+        buildsContainer.innerHTML = '';
 
         try {
-          const q = db.collection('builds')
-                      .where('uid', '==', user.uid)
-                      .orderBy('timestamp','desc');
-          const snap = await q.get();
-          if (snap.empty) {
+          const snapshot = await db.collection('builds')
+                                   .where('uid','==', user.uid)
+                                   .orderBy('timestamp','desc')
+                                   .get();
+          if (snapshot.empty) {
             buildsContainer.innerHTML =
               `<p style="color:#888;">You haven’t saved any builds yet.</p>`;
-          } else {
-            snap.forEach(doc => {
-              const b = doc.data();
-              const card = document.createElement('div');
-              card.className = 'build-card';
-              card.innerHTML = `
-                <div class="card-header">
-                  <h3>${b.character}</h3>
-                </div>
-                <div class="card-body">
-                  <p><strong>Powers:</strong> ${b.powers.join(', ')}</p>
-                  <p><strong>Items:</strong>  ${b.items.join(', ')}</p>
-                  <p><strong>Saved:</strong> ${new Date(b.timestamp).toLocaleString()}</p>
-                  <a href="/viewer.html?buildId=${doc.id}">
-                    Load this build
-                  </a>
-                </div>`;
-              buildsContainer.appendChild(card);
-            });
+            return;
           }
-        } catch(e) {
-          console.error('Error loading your builds:', e);
+
+          // Grab our static armory data out of localStorage
+          const stored   = JSON.parse(localStorage.getItem('armoryData')||'{}');
+          const heroes   = stored.heroes         || [];
+          const globals  = stored.globalAbilities||[];
+
+          snapshot.forEach(docSnap => {
+            const b = docSnap.data();
+            // find hero definition to get icon & abilities
+            const heroDef = heroes.find(h=>h.name===b.character) || {};
+            const pool    = [...globals, ...(heroDef.abilities||[])];
+
+            // map saved names back to ability objects
+            const powerObjs = pool.filter(a=> b.powers.includes(a.name)).slice(0,4);
+            const itemObjs  = pool.filter(a=> b.items.includes(a.name)).slice(0,6);
+
+            const totalCost = powerObjs.reduce((s,a)=>s+a.cost,0)
+                              + itemObjs .reduce((s,a)=>s+a.cost,0);
+
+            // build the card
+            const card = document.createElement('div');
+            card.className = 'build-card';
+            card.innerHTML = `
+              <div class="card-header">
+                <img src="${heroDef.avatar||'/images/default-avatar.png'}" 
+                     alt="${b.character}">
+                <h3>${b.character}</h3>
+              </div>
+              <div class="card-body">
+                <div class="squares">
+                  ${powerObjs.map(a=>`
+                    <div class="square">
+                      <img class="icon" src="${a.icon}" alt="${a.name}">
+                    </div>`).join('')}
+                </div>
+                <div class="circles">
+                  ${itemObjs.map(a=>`
+                    <div class="circle">
+                      <img class="icon" src="${a.icon}" alt="${a.name}">
+                    </div>`).join('')}
+                </div>
+                <div class="cost">Total: ${totalCost.toLocaleString()}</div>
+              </div>
+            `;
+            buildsContainer.appendChild(card);
+          });
+
+        } catch(err) {
+          console.error('Error loading your builds:', err);
           buildsContainer.innerHTML =
-            `<p style="color:#f88;">Failed to load builds.</p>`;
+            `<p style="color:#f88;">Failed to load your builds.</p>`;
         }
       });
     });
