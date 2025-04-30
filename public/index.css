@@ -149,7 +149,7 @@ body {
   top: 0;
   width: 100%;
   background: #1a1a2e;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   z-index: 1000;
 }
 .site-header .nav-container {
@@ -158,8 +158,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* prevent wrapping on desktop */
-  flex-wrap: nowrap;
   padding: 12px 24px;
 }
 .site-header .logo {
