@@ -4,36 +4,22 @@
   <meta charset="utf-8">
   <title>My Profile — Armory</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="profile.css">
-  <!-- 1) env.js first -->
+
+  <!-- 1) Your env.vars -->
   <script src="/env.js"></script>
-  <!-- 2) Firebase “compat” SDK for Auth -->
+
+  <!-- 2) Firebase compat SDKs for App, Auth & Firestore -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <!-- 3) Initialize Firebase & track currentUser -->
-  <script>
-    ;(function(){
-      const fb = window.__env__ || {};
-      firebase.initializeApp({
-        apiKey:            fb.FIREBASE_API_KEY,
-        authDomain:        fb.FIREBASE_AUTH_DOMAIN,
-        projectId:         fb.FIREBASE_PROJECT_ID,
-        storageBucket:     fb.FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: fb.FIREBASE_MESSAGING_SENDER_ID,
-        appId:             fb.FIREBASE_APP_ID
-      });
-      firebase.auth().onAuthStateChanged(user => {
-        window.currentUser = user;
-      });
-    })();
-  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <link rel="stylesheet" href="profile.css">
 </head>
 <body>
   <!-- site-wide navbar -->
   <script type="module" src="widgets/navbar.mjs"></script>
 
   <main class="profile-page">
-
     <!-- HEADER -->
     <section class="profile-header">
       <img id="imgAvatar" class="avatar" src="/images/default-avatar.png" alt="Avatar">
@@ -68,83 +54,92 @@
         This section will soon let you chat, comment on builds, and share tips!
       </div>
     </section>
-
   </main>
 
   <script>
+    // ── Initialize Firebase App & Firestore/Auth ────────────────────────────
+    (function(){
+      const fb = window.__env__ || {};
+      firebase.initializeApp({
+        apiKey:            fb.FIREBASE_API_KEY,
+        authDomain:        fb.FIREBASE_AUTH_DOMAIN,
+        projectId:         fb.FIREBASE_PROJECT_ID,
+        storageBucket:     fb.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: fb.FIREBASE_MESSAGING_SENDER_ID,
+        appId:             fb.FIREBASE_APP_ID
+      });
+    })();
+
     document.addEventListener('DOMContentLoaded', () => {
+      const auth = firebase.auth();
+      const db   = firebase.firestore();
+
       // Tab switching
       const btnBuilds     = document.getElementById('tabBuilds');
       const btnDiscussion = document.getElementById('tabDiscussion');
       const secBuilds     = document.getElementById('sectionBuilds');
       const secDisc       = document.getElementById('sectionDiscussion');
-      btnBuilds.addEventListener('click', () => {
+      btnBuilds.onclick   = () => {
         btnBuilds.classList.add('active');
         btnDiscussion.classList.remove('active');
         secBuilds.style.display = '';
         secDisc.style.display   = 'none';
-      });
-      btnDiscussion.addEventListener('click', () => {
+      };
+      btnDiscussion.onclick = () => {
         btnDiscussion.classList.add('active');
         btnBuilds.classList.remove('active');
         secDisc.style.display   = '';
         secBuilds.style.display = 'none';
-      });
+      };
 
-      // Wait for Firebase Auth
-      const unbind = firebase.auth().onAuthStateChanged(async user => {
-        if (!user) {
-          // not signed in → redirect to login
-          return location.href = '/login.html';
-        }
-        unbind(); // only run once
+      // Wait for auth
+      auth.onAuthStateChanged(async user => {
+        if (!user) return location.href = '/login.html';
 
-        // Header: name & avatar
+        // Header
         document.getElementById('lblName').textContent =
           user.displayName || user.email;
         document.getElementById('imgAvatar').src =
           user.photoURL || '/images/default-avatar.png';
-
-        // (Optional) load a favorite color from your own profile store...
-        // document.getElementById('clrDisplay').textContent = ...;
-
         document.getElementById('btnEditProfile')
                 .onclick = () => location.href = '/settings.html';
 
-        // Fetch **all** builds, filter by current user
-        let allBuilds;
-        try {
-          allBuilds = await fetch('/api/builds').then(r => r.json());
-        } catch (e) {
-          console.error('Failed to load builds', e);
-          allBuilds = [];
-        }
-        const myBuilds = allBuilds.filter(b => b.creatorId === user.uid);
+        // Firestore: query builds where uid == user.uid
+        const buildsContainer = document.getElementById('buildsContainer');
+        buildsContainer.innerHTML = ''; // clear
 
-        const container = document.getElementById('buildsContainer');
-        container.innerHTML = '';
-        if (myBuilds.length === 0) {
-          container.innerHTML =
-            `<p style="color:#888;">You haven’t saved any builds yet.</p>`;
-        } else {
-          myBuilds.forEach(b => {
-            const card = document.createElement('div');
-            card.className = 'build-card';
-            card.innerHTML = `
-              <div class="card-header">
-                <!-- no avatar for hero here; just show character name -->
-                <h3>${b.character}</h3>
-              </div>
-              <div class="card-body">
-                <p><strong>Powers:</strong> ${b.powers.join(', ')}</p>
-                <p><strong>Items:</strong> ${b.items.join(', ')}</p>
-                <p><strong>Saved:</strong> ${new Date(b.timestamp).toLocaleString()}</p>
-                <a href="/${encodeURIComponent(b.creator)}/${encodeURIComponent(b.character)}/${b.code}">
-                  Load this build
-                </a>
-              </div>`;
-            container.appendChild(card);
-          });
+        try {
+          const q = db.collection('builds')
+                      .where('uid', '==', user.uid)
+                      .orderBy('timestamp','desc');
+          const snap = await q.get();
+          if (snap.empty) {
+            buildsContainer.innerHTML =
+              `<p style="color:#888;">You haven’t saved any builds yet.</p>`;
+          } else {
+            snap.forEach(doc => {
+              const b = doc.data();
+              const card = document.createElement('div');
+              card.className = 'build-card';
+              card.innerHTML = `
+                <div class="card-header">
+                  <h3>${b.character}</h3>
+                </div>
+                <div class="card-body">
+                  <p><strong>Powers:</strong> ${b.powers.join(', ')}</p>
+                  <p><strong>Items:</strong>  ${b.items.join(', ')}</p>
+                  <p><strong>Saved:</strong> ${new Date(b.timestamp).toLocaleString()}</p>
+                  <a href="/viewer.html?buildId=${doc.id}">
+                    Load this build
+                  </a>
+                </div>`;
+              buildsContainer.appendChild(card);
+            });
+          }
+        } catch(e) {
+          console.error('Error loading your builds:', e);
+          buildsContainer.innerHTML =
+            `<p style="color:#f88;">Failed to load builds.</p>`;
         }
       });
     });
