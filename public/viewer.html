@@ -50,7 +50,34 @@
       Shareable link: <a href="#" target="_blank" id="buildLink"></a>
     </div>
   </div>
+<!-- Save & Share -->
+<div id="save-share">
+  <button id="btnSaveBuild">Save & Share Build</button>
 
+  <!-- the modal dialog -->
+  <dialog id="saveDialog" class="save-dialog">
+    <form method="dialog">
+      <label>
+        Build Name (max 18 chars):
+        <input
+          id="buildNameInput"
+          type="text"
+          maxlength="18"
+          required
+          placeholder="My awesome build"
+        >
+      </label>
+      <menu>
+        <button value="cancel">Cancel</button>
+        <button id="confirmSave" value="default">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <div id="shareLink" style="display:none; margin-top:8px;">
+    Shareable link: <a href="#" target="_blank" id="buildLink"></a>
+  </div>
+</div>
   <!-- Main Armory -->
   <div class="armory">
     <!-- HEADER -->
