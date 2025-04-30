@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="utf-8">
 <head>
   <meta charset="utf-8">
   <title>My Profile — Armory</title>
@@ -79,8 +79,8 @@
   </main>
 
   <script>
-    const db = firebase.firestore();
     const auth = firebase.auth();
+    const db   = firebase.firestore();
 
     document.addEventListener('DOMContentLoaded', () => {
       // Tab switching
@@ -88,17 +88,17 @@
       const btnDiscussion = document.getElementById('tabDiscussion');
       const secBuilds     = document.getElementById('sectionBuilds');
       const secDisc       = document.getElementById('sectionDiscussion');
-      btnBuilds .onclick = () => {
+      btnBuilds.onclick = () => {
         btnBuilds.classList.add('active');
         btnDiscussion.classList.remove('active');
         secBuilds.style.display = '';
-        secDisc  .style.display = 'none';
+        secDisc.style.display   = 'none';
       };
       btnDiscussion.onclick = () => {
         btnDiscussion.classList.add('active');
         btnBuilds.classList.remove('active');
-        secDisc .style.display = '';
-        secBuilds .style.display = 'none';
+        secDisc.style.display   = '';
+        secBuilds.style.display = 'none';
       };
 
       // Wait for Firebase Auth
@@ -120,10 +120,12 @@
         buildsContainer.innerHTML = '';
 
         try {
-          const snapshot = await db.collection('builds')
-                                   .where('uid','==', user.uid)
-                                   .orderBy('timestamp','desc')
-                                   .get();
+          const snapshot = await db
+            .collection('builds')
+            .where('uid','==', user.uid)
+            .orderBy('timestamp','desc')
+            .get();
+
           if (snapshot.empty) {
             buildsContainer.innerHTML =
               `<p style="color:#888;">You haven’t saved any builds yet.</p>`;
@@ -132,44 +134,57 @@
 
           // Grab our static armory data out of localStorage
           const stored   = JSON.parse(localStorage.getItem('armoryData')||'{}');
-          const heroes   = stored.heroes         || [];
-          const globals  = stored.globalAbilities||[];
+          const heroes   = stored.heroes          || [];
+          const globals  = stored.globalAbilities || [];
 
           snapshot.forEach(docSnap => {
-            const b = docSnap.data();
-            // find hero definition to get icon & abilities
+            const b       = docSnap.data();
             const heroDef = heroes.find(h=>h.name===b.character) || {};
             const pool    = [...globals, ...(heroDef.abilities||[])];
 
-            // map saved names back to ability objects
-            const powerObjs = pool.filter(a=> b.powers.includes(a.name)).slice(0,4);
-            const itemObjs  = pool.filter(a=> b.items.includes(a.name)).slice(0,6);
+            // pick out saved abilities/items
+            const powerObjs = pool.filter(a=> b.powers.includes(a.name));
+            const itemObjs  = pool.filter(a=> b.items.includes(a.name));
 
-            const totalCost = powerObjs.reduce((s,a)=>s+a.cost,0)
-                              + itemObjs .reduce((s,a)=>s+a.cost,0);
+            // compute total cost
+            const totalCost = 
+              powerObjs.reduce((s,a)=>s+a.cost,0) +
+              itemObjs .reduce((s,a)=>s+a.cost,0);
+
+            // render 4 power slots, filling with placeholders
+            const squares = Array(4).fill(0).map((_,i) => {
+              const a = powerObjs[i];
+              return `
+                <div class="square">
+                  <img class="icon" src="${
+                    a ? a.icon : 'images/placeholders/sq.png'
+                  }" alt="">
+                </div>`;
+            }).join('');
+
+            // render 6 item slots, filling with placeholders
+            const circles = Array(6).fill(0).map((_,i) => {
+              const a = itemObjs[i];
+              return `
+                <div class="circle">
+                  <img class="icon" src="${
+                    a ? a.icon : 'images/placeholders/circ.png'
+                  }" alt="">
+                </div>`;
+            }).join('');
 
             // build the card
             const card = document.createElement('div');
             card.className = 'build-card';
             card.innerHTML = `
               <div class="card-header">
-                <img src="${heroDef.avatar||'/images/default-avatar.png'}" 
+                <img src="${heroDef.avatar||'/images/default-avatar.png'}"
                      alt="${b.character}">
                 <h3>${b.character}</h3>
               </div>
               <div class="card-body">
-                <div class="squares">
-                  ${powerObjs.map(a=>`
-                    <div class="square">
-                      <img class="icon" src="${a.icon}" alt="${a.name}">
-                    </div>`).join('')}
-                </div>
-                <div class="circles">
-                  ${itemObjs.map(a=>`
-                    <div class="circle">
-                      <img class="icon" src="${a.icon}" alt="${a.name}">
-                    </div>`).join('')}
-                </div>
+                <div class="squares">${squares}</div>
+                <div class="circles">${circles}</div>
                 <div class="cost">Total: ${totalCost.toLocaleString()}</div>
               </div>
             `;
