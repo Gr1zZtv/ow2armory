@@ -5,35 +5,50 @@
   <title>My Profile — Armory</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="profile.css">
-  <!-- env.js must come first so firebase-config.js can read it -->
+  <!-- env.js must come first -->
   <script src="/env.js"></script>
 </head>
 <body>
-  <!-- Your site‐wide navbar widget -->
+  <!-- site‐wide navbar -->
   <script type="module" src="widgets/navbar.mjs"></script>
 
   <main class="profile-page">
-    <!-- HEADER: Avatar + Name -->
+
+    <!-- HEADER -->
     <section class="profile-header">
       <img id="imgAvatar" class="avatar" src="/images/default-avatar.png" alt="Avatar">
       <h1 id="lblName">Loading…</h1>
     </section>
 
-    <!-- ABOUT PANEL -->
+    <!-- ABOUT -->
     <section class="profile-about">
       <h2>About Me</h2>
       <p>Favorite Color: <span id="clrDisplay">—</span></p>
       <button id="btnEditProfile">Edit Profile</button>
     </section>
 
-    <!-- BUILDS PANEL -->
-    <section class="profile-builds">
+    <!-- TABS -->
+    <div class="profile-tabs">
+      <button id="tabBuilds" class="active">My Builds</button>
+      <button id="tabDiscussion">Discussion</button>
+    </div>
+
+    <!-- MY BUILDS -->
+    <section id="sectionBuilds" class="profile-builds">
       <h2>My Builds</h2>
       <div id="buildsContainer" class="builds-container">
-        <!-- Placeholder while loading or if empty -->
-        <p style="color:#888;">You haven’t saved any builds yet.</p>
+        <p style="color:#888;">Loading your builds…</p>
       </div>
     </section>
+
+    <!-- DISCUSSION PLACEHOLDER -->
+    <section id="sectionDiscussion" class="profile-discussion" style="display:none;">
+      <h2>Discussion</h2>
+      <div class="placeholder">
+        This section will soon let you chat, comment on builds, and share tips!
+      </div>
+    </section>
+
   </main>
 
   <script type="module">
@@ -43,71 +58,86 @@
       collection, query, where, getDocs
     } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
 
-    auth.onAuthStateChanged(async user => {
-      if (!user) {
-        // not signed in → send to login
-        return location.href = '/login.html';
-      }
+    // Tab switching
+    const btnBuilds     = document.getElementById('tabBuilds');
+    const btnDiscussion = document.getElementById('tabDiscussion');
+    const secBuilds     = document.getElementById('sectionBuilds');
+    const secDiscussion = document.getElementById('sectionDiscussion');
 
-      // — Load profile metadata —
+    btnBuilds.addEventListener('click', () => {
+      btnBuilds.classList.add('active');
+      btnDiscussion.classList.remove('active');
+      secBuilds.style.display = '';
+      secDiscussion.style.display = 'none';
+    });
+    btnDiscussion.addEventListener('click', () => {
+      btnDiscussion.classList.add('active');
+      btnBuilds.classList.remove('active');
+      secDiscussion.style.display = '';
+      secBuilds.style.display = 'none';
+    });
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) return location.href = '/login.html';
+
+      // Load profile metadata
       const profileRef = doc(db, 'profiles', user.uid);
       const snap = await getDoc(profileRef);
       const data = snap.exists() ? snap.data() : {};
 
-      // Display name & avatar
+      // Header
       document.getElementById('lblName').textContent =
         data.displayName || user.email;
-      const avatarEl = document.getElementById('imgAvatar');
-      avatarEl.src = data.avatarURL || user.photoURL || '/images/default-avatar.png';
+      document.getElementById('imgAvatar').src =
+        data.avatarURL || user.photoURL || '/images/default-avatar.png';
 
       // Favorite color
       const clr = data.color || '#888';
       document.getElementById('clrDisplay').textContent = clr;
-      // store as CSS var so you could theme dynamically if you like:
       document.body.style.setProperty('--accent', clr);
 
-      // Edit button → can point to a settings page you’ll build later
-      document.getElementById('btnEditProfile').onclick = () =>
-        location.href = '/settings.html';
+      document.getElementById('btnEditProfile')
+        .onclick = () => location.href = '/settings.html';
 
-      // — Load this user’s saved builds —
+      // Load builds
       const buildsContainer = document.getElementById('buildsContainer');
-      buildsContainer.innerHTML = ''; // clear placeholder
+      buildsContainer.innerHTML = ''; // clear
       const q = query(
         collection(db, 'builds'),
         where('uid','==', user.uid)
       );
       const snaps = await getDocs(q);
       if (snaps.empty) {
-        buildsContainer.innerHTML = `<p style="color:#888;">You haven’t saved any builds yet.</p>`;
-        return;
+        buildsContainer.innerHTML =
+          `<p style="color:#888;">You haven’t saved any builds yet.</p>`;
+      } else {
+        snaps.forEach(docSnap => {
+          const b = docSnap.data();
+          const card = document.createElement('div');
+          card.className = 'build-card';
+          card.innerHTML = `
+            <div class="card-header">
+              <img src="${b.heroAvatar}" alt="${b.heroName}">
+              <h3>${b.heroName}</h3>
+            </div>
+            <div class="card-body">
+              <div class="squares">
+                ${b.powers.slice(0,4).map(p => `
+                  <div class="square">
+                    <img class="icon" src="${p.icon}" alt="">
+                  </div>`).join('')}
+              </div>
+              <div class="circles">
+                ${b.items.slice(0,6).map(i => `
+                  <div class="circle">
+                    <img class="icon" src="${i.icon}" alt="">
+                  </div>`).join('')}
+              </div>
+              <div class="cost">Total: ${b.totalCost.toLocaleString()}</div>
+            </div>`;
+          buildsContainer.appendChild(card);
+        });
       }
-      snaps.forEach(docSnap => {
-        const b = docSnap.data();
-        const card = document.createElement('div');
-        card.className = 'build-card';
-        card.innerHTML = `
-          <div class="card-header">
-            <img src="${b.heroAvatar}" alt="${b.heroName}">
-            <h3>${b.heroName}</h3>
-          </div>
-          <div class="card-body">
-            <div class="squares">
-              ${b.powers.slice(0,4).map(p => `
-                <div class="square">
-                  <img class="icon" src="${p.icon}" alt="">
-                </div>`).join('')}
-            </div>
-            <div class="circles">
-              ${b.items.slice(0,6).map(i => `
-                <div class="circle">
-                  <img class="icon" src="${i.icon}" alt="">
-                </div>`).join('')}
-            </div>
-            <div class="cost">Total: ${b.totalCost.toLocaleString()}</div>
-          </div>`;
-        buildsContainer.appendChild(card);
-      });
     });
   </script>
 </body>
