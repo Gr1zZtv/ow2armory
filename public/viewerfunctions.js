@@ -1,11 +1,11 @@
 // public/viewerfunctions.js
 
-// grab the compat instances you initialized in viewer.html
-const auth = window.auth;
-const db   = window.db;
-
 document.addEventListener("DOMContentLoaded", () => {
-  // ── CONSTANTS & STORAGE Keys ──────────────────────────────────────────────
+  // ── FIREBASE INSTANCES ────────────────────────────────────────────────────
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  // ── CONSTANTS & STORAGE KEYS ─────────────────────────────────────────────
   const STORAGE_KEY = 'armoryData';
   const STAT_DEFS = [
     { key: 'life',             label: 'Life',               icon: 'images/stats/stat-life.png' },
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { key: 'criticalDamage',   label: 'Critical Damage',     icon: 'images/stats/stat-critical-dmg.png' },
   ];
 
-  // ── LOAD & NORMALIZE LOCAL DATA ──────────────────────────────────────────
+  // ── LOAD + NORMALIZE LOCAL DATA ──────────────────────────────────────────
   let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
   data.heroes          = Array.isArray(data.heroes)          ? data.heroes          : [];
   data.globalAbilities = Array.isArray(data.globalAbilities) ? data.globalAbilities : [];
@@ -39,7 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let selectedHeroIdx = parseInt(localStorage.getItem('selectedHeroIdx')) || 0;
   let selectedTabIdx  = parseInt(localStorage.getItem('selectedTabIdx'))  || 0;
-
   const tooltip = document.getElementById('tooltip');
 
   // ── TOOLTIP HANDLERS ──────────────────────────────────────────────────────
@@ -127,11 +126,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── ABILITY GRID ──────────────────────────────────────────────────────────
   function renderAbilities() {
     const hero = data.heroes[selectedHeroIdx];
-    const pool = [...data.globalAbilities, ...(hero.abilities||[])];
+    const combined = [...data.globalAbilities, ...(hero.abilities||[])];
     ['common','rare','epic'].forEach(rarity => {
       const grid = document.getElementById(rarity + 'Grid');
       grid.innerHTML = '';
-      pool
+      combined
         .filter(a => a.tabIdx===selectedTabIdx && a.category===rarity)
         .forEach(a => {
           const wrap = document.createElement('div');
@@ -205,13 +204,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── PURCHASE LOGIC ────────────────────────────────────────────────────────
   function purchaseAbility(a) {
-    const hero    = data.heroes[selectedHeroIdx];
-    const isPower = hero.tabs[selectedTabIdx] === 'Power';
+    const hero   = data.heroes[selectedHeroIdx];
+    const isPower= hero.tabs[selectedTabIdx]==='Power';
     if (isPower) {
-      if (hero.buildPowers.length >= 4) return alert('Power slots full');
+      if (hero.buildPowers.length>=4) return alert('Power slots full');
       hero.buildPowers.push(a);
     } else {
-      if (hero.buildItems.length >= 6) return alert('Item slots full');
+      if (hero.buildItems.length>=6)  return alert('Item slots full');
       hero.buildItems.push(a);
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -219,33 +218,58 @@ document.addEventListener("DOMContentLoaded", () => {
     renderStats(calculateStats(hero));
   }
 
-  // ── SAVE & SHARE ──────────────────────────────────────────────────────────
+  // ── SAVE & SHARE WITH NAME MODAL ─────────────────────────────────────────
   function bindSaveShare() {
-    document.getElementById('btnSaveBuild')
-      .addEventListener('click', async () => {
-        const hero = data.heroes[selectedHeroIdx];
-        const user = auth.currentUser;
-        const payload = {
-          creator:   user ? (user.displayName || user.email) : 'anonymous',
-          uid:       user ? user.uid : null,
-          character: hero.name,
-          powers:    hero.buildPowers.map(a=>a.name),
-          items:     hero.buildItems.map(a=>a.name),
-          timestamp: Date.now()
-        };
-        try {
-          const docRef = await db.collection('builds').add(payload);
-          const id     = docRef.id;
-          const link   = `${window.location.origin}/viewer.html?buildId=${id}`;
-          const a      = document.getElementById('buildLink');
-          a.href        = link;
-          a.textContent = link;
-          document.getElementById('shareLink').style.display = 'block';
-        } catch(err) {
-          console.error('Error saving build:', err);
-          alert('Failed to save build. Please try again.');
+    const btn     = document.getElementById('btnSaveBuild');
+    const dialog  = document.getElementById('saveDialog');
+    const input   = document.getElementById('buildNameInput');
+    const linkEl  = document.getElementById('buildLink');
+    const shareEl = document.getElementById('shareLink');
+
+    btn.addEventListener('click', () => {
+      if (auth.currentUser) {
+        input.value = '';
+        dialog.showModal();
+      } else {
+        saveBuild(null);
+      }
+    });
+
+    dialog.addEventListener('close', () => {
+      if (dialog.returnValue === 'default') {
+        const name = input.value.trim();
+        if (!name) {
+          alert('Please enter a build name.');
+          return;
         }
-      });
+        saveBuild(name);
+      }
+    });
+
+    async function saveBuild(buildName) {
+      const hero = data.heroes[selectedHeroIdx];
+      const user = auth.currentUser;
+      const payload = {
+        creator:   user ? (user.displayName||user.email) : 'anonymous',
+        uid:       user ? user.uid : null,
+        character: hero.name,
+        name:      buildName,
+        powers:    hero.buildPowers.map(a=>a.name),
+        items:     hero.buildItems.map(a=>a.name),
+        timestamp: Date.now()
+      };
+      try {
+        const docRef = await db.collection('builds').add(payload);
+        const id     = docRef.id;
+        const url    = `${window.location.origin}/viewer.html?buildId=${id}`;
+        linkEl.href        = url;
+        linkEl.textContent = url;
+        shareEl.style.display = 'block';
+      } catch(err) {
+        console.error('Error saving build:', err);
+        alert('Failed to save build. Please try again.');
+      }
+    }
   }
 
   // ── LOAD BUILD FROM ?buildId=… ───────────────────────────────────────────
@@ -273,19 +297,18 @@ document.addEventListener("DOMContentLoaded", () => {
   async function renderCommunity() {
     const grid  = document.getElementById('communityGrid');
     const snaps = await db.collection('builds').get();
-    const all   = [];
-    snaps.forEach(d => all.push({ id: d.id, ...d.data() }));
+    const all   = snaps.docs.map(d=>({ id:d.id, ...d.data() }));
     grid.innerHTML = all.map(b=>`
       <div class="community-card">
         <strong>${b.character}</strong> by ${b.creator}<br>
         Powers: ${b.powers.join(', ')}<br>
         Items:  ${b.items.join(', ')}<br>
-        <a href="/viewer.html?buildId=${b.id}">Load Build</a>
+        <a href="viewer.html?buildId=${b.id}">Load Build</a>
       </div>
     `).join('');
   }
 
-  // ── INITIALIZATION ────────────────────────────────────────────────────────
+  // ── INIT VIEWER & HOOKS ──────────────────────────────────────────────────
   function initViewer() {
     const sel = document.getElementById('heroSelect');
     sel.innerHTML = data.heroes
@@ -295,7 +318,7 @@ document.addEventListener("DOMContentLoaded", () => {
     sel.onchange = () => {
       selectedHeroIdx = +sel.value;
       localStorage.setItem('selectedHeroIdx', selectedHeroIdx);
-      selectedTabIdx  = 0;
+      selectedTabIdx = 0;
       localStorage.setItem('selectedTabIdx', 0);
       renderTabs();
       renderAbilities();
