@@ -245,8 +245,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('btnSaveBuild')
       .addEventListener('click', async () => {
         const hero = data.heroes[selectedHeroIdx];
+        // use the signed-in user if any
+        const user = window.currentUser;
+        const creator = user
+          ? (user.displayName || user.email.split('@')[0])
+          : 'anonymous';
+
         const payload = {
-          creator:   window.__env__.USER_NAME || 'anonymous',
+          creator,
           character: hero.name,
           powers:    hero.buildPowers.map(a=>a.name),
           items:     hero.buildItems.map(a=>a.name),
@@ -259,8 +265,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const { code, url } = await resp.json();
         const a = document.getElementById('buildLink');
-        a.href           = url;
-        a.textContent    = window.location.origin + url;
+        a.href        = url;
+        a.textContent = window.location.origin + url;
         document.getElementById('shareLink').style.display = 'block';
       });
   }
