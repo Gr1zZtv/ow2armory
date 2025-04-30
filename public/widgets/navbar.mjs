@@ -5,9 +5,10 @@ function buildNavbar() {
   const header = document.createElement('header');
   header.className = 'site-header';
   header.innerHTML = `
-    <div class="site-header__inner">
-      <a href="index.html" class="site-header__logo">
-        <img src="/images/logo.png" alt="Logo"><span>The Armory</span>
+    <div class="nav-container">
+      <a href="index.html" class="logo">
+        <img src="/images/logo.png" alt="Logo">
+        <span>The Armory</span>
       </a>
       <nav class="site-nav">
         <ul>
@@ -17,46 +18,36 @@ function buildNavbar() {
         </ul>
       </nav>
       <div class="site-user">
-        <a href="#" id="profileLink" class="site-user__link">
-          <img id="userAvatar" class="site-user__avatar" src="" alt="Avatar" hidden>
-          <span id="userName"   class="site-user__name"></span>
-        </a>
-        <button id="btnLogout" class="site-user__login" hidden>Log Out</button>
+        <img class="site-user__avatar" src="" alt="Avatar" hidden>
+        <span class="site-user__name"></span>
+        <a href="login.html" class="site-user__login" hidden>Log In</a>
+        <button class="site-user__login site-user__logout" hidden>Log Out</button>
       </div>
-    </div>
-  `;
+    </div>`;
   document.body.prepend(header);
 }
 
 function wireAuthUI() {
-  const avatarEl    = document.getElementById('userAvatar');
-  const nameEl      = document.getElementById('userName');
-  const linkEl      = document.getElementById('profileLink');
-  const logoutBtn   = document.getElementById('btnLogout');
+  const avatar = document.querySelector('.site-user__avatar');
+  const name   = document.querySelector('.site-user__name');
+  const login  = document.querySelector('.site-user__login');
+  const logout = document.querySelector('.site-user__logout');
 
   auth.onAuthStateChanged(user => {
     if (user) {
-      // point link to their profile by UID
-      linkEl.href = `/profile.html?uid=${user.uid}`;
-
-      // show avatar / name / logout
-      avatarEl.src          = user.photoURL || '/images/default-avatar.png';
-      avatarEl.hidden       = false;
-      nameEl.textContent    = user.displayName || user.email;
-      logoutBtn.hidden      = false;
+      avatar.src    = user.photoURL || '/images/default-avatar.png';
+      avatar.hidden = false;
+      name.textContent = user.displayName || user.email;
+      logout.hidden = false;
+      login.hidden  = true;
+      logout.onclick = () => auth.signOut().then(() => location.href = '/login.html');
     } else {
-      // if not signed in, link to login
-      linkEl.href       = '/login.html';
-      avatarEl.hidden   = true;
-      nameEl.textContent = 'Sign In';
-      logoutBtn.hidden  = true;
+      avatar.hidden = true;
+      name.textContent = '';
+      logout.hidden = true;
+      login.hidden  = false;
+      login.href    = '/login.html';
     }
-  });
-
-  logoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => {
-      window.location.href = '/login.html';
-    });
   });
 }
 
