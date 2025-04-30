@@ -1,8 +1,19 @@
-// viewerfunctions.js
+// public/viewerfunctions.js
+
+import { auth, db } from './firebase-config.js';
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where
+} from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+
 document.addEventListener("DOMContentLoaded", () => {
   // ── CONSTANTS & STORAGE KEYS ─────────────────────────────────────────────
   const STORAGE_KEY = 'armoryData';
-  const URLS_KEY    = 'savedBuildUrls';   // ← new: for storing share URLs
   const STAT_DEFS = [
     { key: 'life',             label: 'Life',               icon: 'images/stats/stat-life.png' },
     { key: 'weaponPower',      label: 'Weapon Power',       icon: 'images/stats/weaponpowericon.png' },
@@ -49,9 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="tooltip-label">${def.label}</span>
         </div>`;
     }).join('');
-    const ctx = a.tooltip
-      ? `<div class="tooltip-context">${a.tooltip}</div>`
-      : '';
+    const ctx = a.tooltip ? `<div class="tooltip-context">${a.tooltip}</div>` : '';
     tooltip.innerHTML = `
       <div class="tooltip-header">${a.name||''}</div>
       <div class="tooltip-body">${statLines}${ctx}</div>
@@ -94,7 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
       statEl.innerHTML = `
         <img class="icon" src="${icon}" alt="${label}">
         <span class="stat-label">${label}</span>
-        <div class="bar" data-percent="${pct}"><div class="fill" style="width:${pct}%;"></div></div>`;
+        <div class="bar" data-percent="${pct}">
+          <div class="fill" style="width:${pct}%;"></div>
+        </div>`;
       cont.appendChild(statEl);
     });
   }
@@ -126,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const grid = document.getElementById(rarity + 'Grid');
       grid.innerHTML = '';
       combined
-        .filter(a => a.tabIdx === selectedTabIdx && a.category === rarity)
+        .filter(a => a.tabIdx===selectedTabIdx && a.category===rarity)
         .forEach(a => {
           const wrap = document.createElement('div');
           wrap.className = 'ability';
@@ -134,8 +145,8 @@ document.addEventListener("DOMContentLoaded", () => {
           card.className = 'card';
           card.__ability = a;
           card.innerHTML = `<img src="${a.icon}" alt="">`;
-          card.addEventListener('click',    () => purchaseAbility(a));
-          card.addEventListener('mouseover',() => showTooltip(a));
+          card.addEventListener('click',    ()=> purchaseAbility(a));
+          card.addEventListener('mouseover',()=> showTooltip(a));
           card.addEventListener('mousemove', onMouseMove);
           card.addEventListener('mouseout',  hideTooltip);
           wrap.appendChild(card);
@@ -151,24 +162,22 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── BUILD PANEL ───────────────────────────────────────────────────────────
   function renderBuildSlots() {
     const hero = data.heroes[selectedHeroIdx];
-    // total cost
     const total = hero.buildPowers.reduce((s,a)=>s+a.cost,0)
                 + hero.buildItems .reduce((s,a)=>s+a.cost,0);
     document.querySelector('.build-cost .cost-value')
       .textContent = total.toLocaleString();
 
-    // power slots
     document.querySelectorAll('.left-panel .slots.powers .circle')
       .forEach((el,i) => {
         const a = hero.buildPowers[i];
         el.innerHTML = a
           ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
           : '';
-        el.style.cursor = a ? 'pointer' : 'default';
-        el.onmouseover = () => a && showTooltip(a);
+        el.style.cursor = a?'pointer':'default';
+        el.onmouseover = ()=> a && showTooltip(a);
         el.onmousemove = onMouseMove;
         el.onmouseout  = hideTooltip;
-        el.onclick     = () => {
+        el.onclick     = ()=> {
           if (!a) return;
           hero.buildPowers.splice(i,1);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -177,18 +186,17 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       });
 
-    // item slots
     document.querySelectorAll('.left-panel .slots.items .circle')
       .forEach((el,i) => {
         const a = hero.buildItems[i];
         el.innerHTML = a
           ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
           : '';
-        el.style.cursor = a ? 'pointer' : 'default';
-        el.onmouseover = () => a && showTooltip(a);
+        el.style.cursor = a?'pointer':'default';
+        el.onmouseover = ()=> a && showTooltip(a);
         el.onmousemove = onMouseMove;
         el.onmouseout  = hideTooltip;
-        el.onclick     = () => {
+        el.onclick     = ()=> {
           if (!a) return;
           hero.buildItems.splice(i,1);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -242,64 +250,68 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCommunity();
   }
 
-  // ── SAVE & SHARE ──────────────────────────────────────────────────────────
+  // ── SAVE & SHARE into Firestore ─────────────────────────────────────────
   function bindSaveShare() {
     document.getElementById('btnSaveBuild')
       .addEventListener('click', async () => {
         const hero = data.heroes[selectedHeroIdx];
-        const build = {
-          heroName:  hero.name,
+        const user = auth.currentUser;
+        const payload = {
+          creator:   user ? (user.displayName || user.email) : 'anonymous',
+          uid:       user ? user.uid : null,
+          character: hero.name,
           powers:    hero.buildPowers.map(a=>a.name),
           items:     hero.buildItems.map(a=>a.name),
           timestamp: Date.now()
         };
-        const resp = await fetch('/api/builds', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify(build)
-        });
-        const { id } = await resp.json();
-        const shareUrl = `${window.location.origin}/viewer.html?buildId=${id}`;
-
-        // set link in UI
-        const a = document.getElementById('buildLink');
-        a.href        = shareUrl;
-        a.textContent = shareUrl;
-        document.getElementById('shareLink').style.display = 'block';
-
-        // ── NEW: persist URL locally ───────────────────────
-        const saved = JSON.parse(localStorage.getItem(URLS_KEY) || '[]');
-        saved.push(shareUrl);
-        localStorage.setItem(URLS_KEY, JSON.stringify(saved));
+        try {
+          const buildsRef = collection(db, 'builds');
+          const docRef    = await addDoc(buildsRef, payload);
+          const id        = docRef.id;
+          const shareUrl  = `${window.location.origin}/viewer.html?buildId=${id}`;
+          const a         = document.getElementById('buildLink');
+          a.href          = shareUrl;
+          a.textContent   = shareUrl;
+          document.getElementById('shareLink').style.display = 'block';
+        } catch(err) {
+          console.error('Error saving build:', err);
+          alert('Failed to save build. Please try again.');
+        }
       });
   }
 
-  // ── LOAD BUILD FROM ?buildId=… ───────────────────────────────────────────
+  // ── LOAD a single build if ?buildId=… ───────────────────────────────────
   async function loadBuildFromURL() {
     const params = new URLSearchParams(window.location.search);
     if (!params.has('buildId')) return;
-    const { buildId } = Object.fromEntries(params);
-    const resp = await fetch(`/api/builds/${buildId}`);
-    if (!resp.ok) return;
-    const saved = await resp.json();
-    selectedHeroIdx = data.heroes.findIndex(h=>h.name===saved.heroName);
+    const id      = params.get('buildId');
+    const docRef  = doc(db, 'builds', id);
+    const snap    = await getDoc(docRef);
+    if (!snap.exists()) return;
+    const b       = snap.data();
+    selectedHeroIdx = data.heroes.findIndex(h=>h.name===b.character);
     document.getElementById('heroSelect').value = selectedHeroIdx;
     const pool = [...data.globalAbilities, ...data.heroes[selectedHeroIdx].abilities];
     data.heroes[selectedHeroIdx].buildPowers =
-      pool.filter(a=> saved.powers.includes(a.name));
+      pool.filter(a=> b.powers.includes(a.name));
     data.heroes[selectedHeroIdx].buildItems  =
-      pool.filter(a=> saved.items.includes(a.name));
-    renderTabs(); renderAbilities();
-    renderBuildSlots(); renderStats(calculateStats(data.heroes[selectedHeroIdx]));
+      pool.filter(a=> b.items.includes(a.name));
+    renderTabs();
+    renderAbilities();
+    renderBuildSlots();
+    renderStats(calculateStats(data.heroes[selectedHeroIdx]));
   }
 
-  // ── COMMUNITY GALLERY ─────────────────────────────────────────────────────
+  // ── COMMUNITY GALLERY from Firestore ────────────────────────────────────
   async function renderCommunity() {
     const grid   = document.getElementById('communityGrid');
-    const builds = await fetch('/api/builds').then(r=>r.json());
-    grid.innerHTML = builds.map(b=>`
+    const buildsRef = collection(db, 'builds');
+    const snaps  = await getDocs(buildsRef);
+    const all    = [];
+    snaps.forEach(d => all.push({ id: d.id, ...d.data() }));
+    grid.innerHTML = all.map(b=>`
       <div class="community-card">
-        <strong>${b.heroName}</strong><br>
+        <strong>${b.character}</strong> by ${b.creator}<br>
         Powers: ${b.powers.join(', ')}<br>
         Items:  ${b.items.join(', ')}<br>
         <a href="viewer.html?buildId=${b.id}">Load Build</a>
