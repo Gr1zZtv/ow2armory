@@ -68,11 +68,12 @@
     }
   </style>
 
-  <!-- 1) Your env.js must be first -->
+  <!-- 1) env.js must come first -->
   <script src="/env.js"></script>
   <!-- 2) Firebase compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <h1>Armory Login / Signup</h1>
@@ -122,6 +123,7 @@
         appId:             fb.FIREBASE_APP_ID
       });
       const auth = firebase.auth();
+      const db   = firebase.firestore();
 
       // ── Tab logic ──────────────────────────────────────────────
       const tabIn   = document.getElementById('tabSignIn');
@@ -133,7 +135,7 @@
       const btnIn   = document.getElementById('btnSignIn');
       const btnUp   = document.getElementById('btnSignUp');
 
-      tabIn .onclick = () => {
+      tabIn.onclick = () => {
         tabIn .classList.add('active');
         tabUp .classList.remove('active');
         formIn.classList.add('active');
@@ -146,7 +148,7 @@
         formIn.classList.remove('active');
       };
 
-      // ── Sign-in / Sign-up helpers ──────────────────────────────
+      // ── Sign‐In / Sign‐Up logic ─────────────────────────────────
       async function signIn() {
         errIn.textContent = '';
         try {
@@ -159,30 +161,42 @@
           errIn.textContent = err.message;
         }
       }
+
       async function signUp() {
         errUp.textContent = '';
-        const pw  = document.getElementById('signUpPassword').value;
-        const pw2 = document.getElementById('signUpPassword2').value;
+        const email = document.getElementById('signUpEmail').value;
+        const pw    = document.getElementById('signUpPassword').value;
+        const pw2   = document.getElementById('signUpPassword2').value;
         if (pw !== pw2) {
           errUp.textContent = 'Passwords must match.';
           return;
         }
         try {
-          await auth.createUserWithEmailAndPassword(
-            document.getElementById('signUpEmail').value,
-            pw
-          );
+          // create user
+          await auth.createUserWithEmailAndPassword(email, pw);
+          const user = auth.currentUser;
+
+          // set default avatar on Auth profile
+          await user.updateProfile({
+            photoURL: '/images/default-avatar.png'
+          });
+
+          // create Firestore profile document
+          await db.collection('profiles').doc(user.uid).set({
+            displayName: user.email,
+            avatarURL:   user.photoURL,
+            color:       '#888'
+          });
+
           window.location.href = '/index.html';
         } catch(err) {
           errUp.textContent = err.message;
         }
       }
 
-      // ── Wire up clicks ────────────────────────────────────────
+      // ── Wire up clicks & “Enter” ────────────────────────────────
       btnIn.addEventListener('click', e => { e.preventDefault(); signIn(); });
       btnUp.addEventListener('click', e => { e.preventDefault(); signUp(); });
-
-      // ── Allow “Enter” key anywhere in the form to trigger action ──
       formIn.addEventListener('keydown', e => {
         if (e.key === 'Enter') { e.preventDefault(); signIn(); }
       });
@@ -190,7 +204,7 @@
         if (e.key === 'Enter') { e.preventDefault(); signUp(); }
       });
 
-      // ── Redirect if already signed in ──────────────────────────
+      // ── Redirect if already signed in ────────────────────────────
       auth.onAuthStateChanged(user => {
         if (user) window.location.href = '/index.html';
       });
