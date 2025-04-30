@@ -1,5 +1,4 @@
 // public/viewerfunctions.js
-
 import { auth, db } from './firebase-config.js';
 import {
   collection,
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let selectedHeroIdx = parseInt(localStorage.getItem('selectedHeroIdx')) || 0;
   let selectedTabIdx  = parseInt(localStorage.getItem('selectedTabIdx'))  || 0;
-  const tooltip = document.getElementById('tooltip');
+  const tooltip       = document.getElementById('tooltip');
 
   // ── TOOLTIP HANDLERS ──────────────────────────────────────────────────────
   function showTooltip(a) {
@@ -55,11 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
           <img src="${def.icon}" alt="${def.label}">
           <strong>${s.value > 0 ? '+' + s.value : s.value}%</strong>
           <span class="tooltip-label">${def.label}</span>
-        </div>`;
+        </div>
+      `;
     }).join('');
+
     const ctx = a.tooltip
       ? `<div class="tooltip-context">${a.tooltip}</div>`
       : '';
+
     tooltip.innerHTML = `
       <div class="tooltip-header">${a.name || ''}</div>
       <div class="tooltip-body">${statLines}${ctx}</div>
@@ -67,12 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
         <img src="assets/diamond-icon.png" alt="Cost">
         <span>${a.cost.toLocaleString()}</span>
         <span class="tooltip-buy">Buy</span>
-      </div>`;
+      </div>
+    `;
     tooltip.style.display = 'block';
   }
-  function hideTooltip() {
-    tooltip.style.display = 'none';
-  }
+  function hideTooltip() { tooltip.style.display = 'none'; }
   function onMouseMove(e) {
     if (tooltip.style.display === 'block') {
       tooltip.style.left = (e.pageX + 12) + 'px';
@@ -85,12 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const out = {};
     STAT_DEFS.forEach(s => out[s.key] = 0);
     (hero.stats || []).forEach(s => out[s.key] += s.value);
-    hero.buildPowers.forEach(a =>
-      (a.stats || []).forEach(s => out[s.key] += s.value)
-    );
-    hero.buildItems.forEach(a =>
-      (a.stats || []).forEach(s => out[s.key] += s.value)
-    );
+    hero.buildPowers.forEach(a => (a.stats||[]).forEach(s => out[s.key] += s.value));
+    hero.buildItems.forEach(a => (a.stats||[]).forEach(s => out[s.key] += s.value));
     return out;
   }
   function renderStats(stats) {
@@ -99,15 +96,15 @@ document.addEventListener('DOMContentLoaded', () => {
     STAT_DEFS.forEach(({ key, label, icon }) => {
       if (key === 'life') return;
       const pct = Math.min(Math.round(stats[key]), 100);
-      const statEl = document.createElement('div');
-      statEl.className = 'stat';
-      statEl.innerHTML = `
-        <img class="icon" src="${icon}" alt="${label}">
-        <span class="stat-label">${label}</span>
-        <div class="bar" data-percent="${pct}">
-          <div class="fill" style="width:${pct}%;"></div>
-        </div>`;
-      cont.appendChild(statEl);
+      cont.innerHTML += `
+        <div class="stat">
+          <img class="icon" src="${icon}" alt="${label}">
+          <span class="stat-label">${label}</span>
+          <div class="bar" data-percent="${pct}">
+            <div class="fill" style="width:${pct}%;"></div>
+          </div>
+        </div>
+      `;
     });
   }
 
@@ -117,92 +114,79 @@ document.addEventListener('DOMContentLoaded', () => {
     container.innerHTML = '';
     const hero = data.heroes[selectedHeroIdx] || { tabs: [] };
     hero.tabs.forEach((tab, i) => {
-      const btn = document.createElement('button');
-      btn.textContent = tab;
-      if (i === selectedTabIdx) btn.classList.add('active');
-      btn.onclick = () => {
-        selectedTabIdx = i;
-        localStorage.setItem('selectedTabIdx', i);
+      container.innerHTML += `
+        <button class="${i===selectedTabIdx?'active':''}" data-idx="${i}">
+          ${tab}
+        </button>
+      `;
+    });
+    container.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedTabIdx = +btn.dataset.idx;
+        localStorage.setItem('selectedTabIdx', selectedTabIdx);
         renderTabs();
         renderAbilities();
-      };
-      container.appendChild(btn);
+      });
     });
   }
 
   // ── ABILITY GRID ──────────────────────────────────────────────────────────
   function renderAbilities() {
     const hero = data.heroes[selectedHeroIdx];
-    const pool = [...data.globalAbilities, ...(hero.abilities || [])];
-    ['common', 'rare', 'epic'].forEach(rarity => {
+    const pool = [...data.globalAbilities, ...(hero.abilities||[])];
+    ['common','rare','epic'].forEach(rarity => {
       const grid = document.getElementById(rarity + 'Grid');
       grid.innerHTML = '';
-      pool
-        .filter(a => a.tabIdx === selectedTabIdx && a.category === rarity)
-        .forEach(a => {
-          const wrap = document.createElement('div');
-          wrap.className = 'ability';
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.__ability = a;
-          card.innerHTML = `<img src="${a.icon}" alt="">`;
-          card.addEventListener('click',    () => purchaseAbility(a));
-          card.addEventListener('mouseover',() => showTooltip(a));
-          card.addEventListener('mousemove', onMouseMove);
-          card.addEventListener('mouseout',  hideTooltip);
-          wrap.appendChild(card);
-          const costEl = document.createElement('div');
-          costEl.className = 'ability-cost';
-          costEl.textContent = a.cost.toLocaleString();
-          wrap.appendChild(costEl);
-          grid.appendChild(wrap);
-        });
+      pool.filter(a => a.tabIdx===selectedTabIdx && a.category===rarity)
+          .forEach(a => {
+        grid.innerHTML += `
+          <div class="ability">
+            <div class="card" data-name="${a.name}">
+              <img src="${a.icon}" alt="${a.name}">
+            </div>
+            <div class="ability-cost">${a.cost.toLocaleString()}</div>
+          </div>
+        `;
+      });
+      // attach events
+      grid.querySelectorAll('.card').forEach(card => {
+        const ability = pool.find(a => a.name === card.dataset.name);
+        card.addEventListener('click', () => purchaseAbility(ability));
+        card.addEventListener('mouseover', () => showTooltip(ability));
+        card.addEventListener('mousemove', onMouseMove);
+        card.addEventListener('mouseout', hideTooltip);
+      });
     });
   }
 
   // ── BUILD PANEL ───────────────────────────────────────────────────────────
   function renderBuildSlots() {
     const hero = data.heroes[selectedHeroIdx];
-    const total = hero.buildPowers.reduce((sum,a)=>sum+a.cost,0)
-                + hero.buildItems.reduce((sum,a)=>sum+a.cost,0);
+    const total = hero.buildPowers.reduce((s,a)=>s+a.cost,0)
+                + hero.buildItems.reduce((s,a)=>s+a.cost,0);
     document.querySelector('.build-cost .cost-value').textContent = total.toLocaleString();
 
-    // power slots
-    document.querySelectorAll('.left-panel .slots.powers .circle').forEach((el,i) => {
-      const a = hero.buildPowers[i];
-      el.innerHTML = a
-        ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
-        : '';
-      el.style.cursor = a ? 'pointer' : 'default';
-      el.onmouseover = () => a && showTooltip(a);
-      el.onmousemove = onMouseMove;
-      el.onmouseout  = hideTooltip;
-      el.onclick     = () => {
-        if (!a) return;
-        hero.buildPowers.splice(i,1);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        renderBuildSlots();
-        renderStats(calculateStats(hero));
-      };
-    });
-
-    // item slots
-    document.querySelectorAll('.left-panel .slots.items .circle').forEach((el,i) => {
-      const a = hero.buildItems[i];
-      el.innerHTML = a
-        ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
-        : '';
-      el.style.cursor = a ? 'pointer' : 'default';
-      el.onmouseover = () => a && showTooltip(a);
-      el.onmousemove = onMouseMove;
-      el.onmouseout  = hideTooltip;
-      el.onclick     = () => {
-        if (!a) return;
-        hero.buildItems.splice(i,1);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        renderBuildSlots();
-        renderStats(calculateStats(hero));
-      };
+    ['powers','items'].forEach(type => {
+      document.querySelectorAll(`.left-panel .slots.${type} .circle`)
+        .forEach((el,i) => {
+          const arr = type==='powers' ? hero.buildPowers : hero.buildItems;
+          const a = arr[i];
+          el.innerHTML = a
+            ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
+            : '';
+          el.style.cursor = a ? 'pointer' : 'default';
+          if (a) {
+            el.onmouseover = () => showTooltip(a);
+            el.onmousemove = onMouseMove;
+            el.onmouseout  = hideTooltip;
+            el.onclick     = () => {
+              arr.splice(i,1);
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+              renderBuildSlots();
+              renderStats(calculateStats(hero));
+            };
+          }
+        });
     });
   }
 
@@ -210,61 +194,56 @@ document.addEventListener('DOMContentLoaded', () => {
   function purchaseAbility(a) {
     const hero    = data.heroes[selectedHeroIdx];
     const isPower = hero.tabs[selectedTabIdx] === 'Power';
-    if (isPower) {
-      if (hero.buildPowers.length >= 4) return alert('Power slots full');
-      hero.buildPowers.push(a);
-    } else {
-      if (hero.buildItems.length >= 6) return alert('Item slots full');
-      hero.buildItems.push(a);
+    const arr     = isPower ? hero.buildPowers : hero.buildItems;
+    const limit   = isPower ? 4 : 6;
+    if (arr.length >= limit) {
+      return alert(`${isPower?'Power':'Item'} slots full`);
     }
+    arr.push(a);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     renderBuildSlots();
     renderStats(calculateStats(hero));
   }
 
   // ── SAVE & SHARE into Firestore ─────────────────────────────────────────
-  function bindSaveShare() {
-    document.getElementById('btnSaveBuild').addEventListener('click', async () => {
+  async function bindSaveShare() {
+    document.getElementById('btnSaveBuild').onclick = async () => {
       const hero = data.heroes[selectedHeroIdx];
       const user = auth.currentUser;
       const payload = {
-        creator:   user ? (user.displayName || user.email) : 'anonymous',
+        creator:   user ? (user.displayName||user.email) : 'anonymous',
         uid:       user ? user.uid : null,
         character: hero.name,
-        powers:    hero.buildPowers.map(a => a.name),
-        items:     hero.buildItems.map(a => a.name),
+        powers:    hero.buildPowers.map(a=>a.name),
+        items:     hero.buildItems.map(a=>a.name),
         timestamp: Date.now()
       };
       try {
-        const docRef = await addDoc(collection(db, 'builds'), payload);
-        const id     = docRef.id;
-        const link   = `${location.origin}/viewer.html?buildId=${id}`;
-        const a      = document.getElementById('buildLink');
-        a.href        = link;
-        a.textContent = link;
+        const ref = await addDoc(collection(db,'builds'), payload);
+        const url = `${location.origin}/viewer.html?buildId=${ref.id}`;
+        const a   = document.getElementById('buildLink');
+        a.href    = url;
+        a.textContent = url;
         document.getElementById('shareLink').style.display = 'block';
-      } catch (err) {
-        console.error('Error saving build:', err);
+      } catch(err) {
+        console.error(err);
         alert('Failed to save build.');
       }
-    });
+    };
   }
 
   // ── LOAD a single build from ?buildId=… ───────────────────────────────────
   async function loadBuildFromURL() {
     const params = new URLSearchParams(location.search);
     if (!params.has('buildId')) return;
-    const id     = params.get('buildId');
-    const snap   = await getDoc(doc(db, 'builds', id));
+    const snap = await getDoc(doc(db,'builds', params.get('buildId')));
     if (!snap.exists()) return;
-    const b      = snap.data();
-    selectedHeroIdx = data.heroes.findIndex(h => h.name === b.character);
+    const b = snap.data();
+    selectedHeroIdx = data.heroes.findIndex(h=>h.name===b.character);
     document.getElementById('heroSelect').value = selectedHeroIdx;
     const pool = [...data.globalAbilities, ...data.heroes[selectedHeroIdx].abilities];
-    data.heroes[selectedHeroIdx].buildPowers =
-      pool.filter(a => b.powers.includes(a.name));
-    data.heroes[selectedHeroIdx].buildItems =
-      pool.filter(a => b.items.includes(a.name));
+    data.heroes[selectedHeroIdx].buildPowers = pool.filter(a=>b.powers.includes(a.name));
+    data.heroes[selectedHeroIdx].buildItems  = pool.filter(a=>b.items.includes(a.name));
     renderTabs();
     renderAbilities();
     renderBuildSlots();
@@ -273,28 +252,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── COMMUNITY GALLERY from Firestore ────────────────────────────────────
   async function renderCommunity() {
-    const grid = document.getElementById('communityGrid');
-    const snaps = await getDocs(collection(db, 'builds'));
-    const all   = snaps.docs.map(d => ({ id: d.id, ...d.data() }));
-    grid.innerHTML = all.map(b => `
-      <div class="community-card">
-        <strong>${b.character}</strong> by ${b.creator}<br>
-        Powers: ${b.powers.join(', ')}<br>
-        Items: ${b.items.join(', ')}<br>
-        <a href="viewer.html?buildId=${b.id}">Load Build</a>
-      </div>
-    `).join('');
+    const snaps = await getDocs(collection(db,'builds'));
+    document.getElementById('communityGrid').innerHTML = snaps.docs.map(d => {
+      const b = d.data();
+      return `
+        <div class="community-card">
+          <strong>${b.character}</strong> by ${b.creator}<br>
+          Powers: ${b.powers.join(', ')}<br>
+          Items:  ${b.items.join(', ')}<br>
+          <a href="viewer.html?buildId=${d.id}">Load Build</a>
+        </div>
+      `;
+    }).join('');
   }
 
   // ── INITIALIZE EVERYTHING ────────────────────────────────────────────────
   function initViewer() {
-    const sel = document.getElementById('heroSelect');
-    sel.innerHTML = data.heroes.map((h,i) =>
-      `<option value="${i}">${h.name}</option>`
-    ).join('');
-    sel.value = selectedHeroIdx;
-    sel.onchange = () => {
-      selectedHeroIdx = +sel.value;
+    document.getElementById('heroSelect').innerHTML =
+      data.heroes.map((h,i) => `<option value="${i}">${h.name}</option>`).join('');
+    document.getElementById('heroSelect').value = selectedHeroIdx;
+    document.getElementById('heroSelect').onchange = e => {
+      selectedHeroIdx = +e.target.value;
       localStorage.setItem('selectedHeroIdx', selectedHeroIdx);
       selectedTabIdx = 0;
       localStorage.setItem('selectedTabIdx', 0);
