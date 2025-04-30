@@ -54,10 +54,16 @@ onAuthStateChanged(auth, async user => {
   try {
     const resp = await fetch('/api/builds');
     const allBuilds = await resp.json();
-    // match by creator === displayName (or email if you prefer)
-    const mine = allBuilds.filter(b => b.creator === (user.displayName || user.email));
-    const container = document.getElementById('userBuilds');
 
+    // match by creator === displayName (or email if you prefer)
+    const mine = allBuilds.filter(
+      b => b.creator === (user.displayName || user.email)
+    );
+
+    const container = document.getElementById('userBuilds');
+    container.innerHTML = ''; // clear any loading text
+
+    // helper to make one card
     function makeBuildCard(b) {
       const card = document.createElement('div');
       card.className = 'build-card';
@@ -86,9 +92,18 @@ onAuthStateChanged(auth, async user => {
       return card;
     }
 
-    mine.forEach(b => container.appendChild(makeBuildCard(b)));
+    if (mine.length === 0) {
+      container.innerHTML =
+        `<p style="color:#888;">You haven’t saved any builds yet.</p>`;
+    } else {
+      mine.forEach(b => container.appendChild(makeBuildCard(b)));
+    }
+
   } catch (e) {
     console.error('Error loading user builds:', e);
+    const container = document.getElementById('userBuilds');
+    container.innerHTML =
+      `<p style="color:#f88;">Failed to load your builds.</p>`;
   }
   // ──────────────────────────────────────────────────────────────────────────
 
