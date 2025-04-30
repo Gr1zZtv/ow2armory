@@ -201,13 +201,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── PURCHASE LOGIC ────────────────────────────────────────────────────────
   function purchaseAbility(a) {
-    const hero   = data.heroes[selectedHeroIdx];
-    const isPower= hero.tabs[selectedTabIdx]==='Power';
+    const hero    = data.heroes[selectedHeroIdx];
+    const isPower = hero.tabs[selectedTabIdx] === 'Power';
     if (isPower) {
-      if (hero.buildPowers.length>=4) return alert('Power slots full');
+      if (hero.buildPowers.length >= 4) return alert('Power slots full');
       hero.buildPowers.push(a);
     } else {
-      if (hero.buildItems.length>=6) return alert('Item slots full');
+      if (hero.buildItems.length >= 6) return alert('Item slots full');
       hero.buildItems.push(a);
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -262,8 +262,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const { id } = await resp.json();
         const link  = `${window.location.origin}/viewer.html?buildId=${id}`;
         const a     = document.getElementById('buildLink');
-        a.href      = link;
-        a.textContent = link;
+        a.href           = link;
+        a.textContent    = link;
         document.getElementById('shareLink').style.display = 'block';
       });
   }
