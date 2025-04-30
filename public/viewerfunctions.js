@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let selectedHeroIdx = parseInt(localStorage.getItem('selectedHeroIdx')) || 0;
   let selectedTabIdx  = parseInt(localStorage.getItem('selectedTabIdx'))  || 0;
+
   const tooltip = document.getElementById('tooltip');
 
   // ── TOOLTIP HANDLERS ──────────────────────────────────────────────────────
@@ -66,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ── STAT CALCULATION & RENDER ─────────────────────────────────────────────
+  // ── STAT CALC & RENDER ─────────────────────────────────────────────────────
   function calculateStats(hero) {
     const out = {};
     STAT_DEFS.forEach(s => out[s.key] = 0);
@@ -97,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ── TAB RENDERING ─────────────────────────────────────────────────────────
+  // ── TABS ──────────────────────────────────────────────────────────────────
   function renderTabs() {
     const container = document.getElementById('tabsContainer');
     container.innerHTML = '';
@@ -116,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ── ABILITY GRID ──────────────────────────────────────────────────────────
+  // ── ABILITIES ─────────────────────────────────────────────────────────────
   function renderAbilities() {
     const hero = data.heroes[selectedHeroIdx];
     const combined = [...data.globalAbilities, ...(hero.abilities||[])];
@@ -149,13 +150,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── BUILD PANEL ───────────────────────────────────────────────────────────
   function renderBuildSlots() {
     const hero = data.heroes[selectedHeroIdx];
-    // total cost
     const total = hero.buildPowers.reduce((s,a)=>s+a.cost,0)
-                + hero.buildItems .reduce((s,a)=>s+a.cost,0);
+                + hero.buildItems.reduce((s,a)=>s+a.cost,0);
     document.querySelector('.build-cost .cost-value')
       .textContent = total.toLocaleString();
 
-    // power slots
+    // power (4)
     document.querySelectorAll('.left-panel .slots.powers .circle')
       .forEach((el,i) => {
         const a = hero.buildPowers[i];
@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
       });
 
-    // item slots
+    // items (6)
     document.querySelectorAll('.left-panel .slots.items .circle')
       .forEach((el,i) => {
         const a = hero.buildItems[i];
@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  // ── PURCHASE LOGIC ────────────────────────────────────────────────────────
+  // ── PURCHASE ───────────────────────────────────────────────────────────────
   function purchaseAbility(a) {
     const hero    = data.heroes[selectedHeroIdx];
     const isPower = hero.tabs[selectedTabIdx] === 'Power';
@@ -212,8 +212,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderStats(calculateStats(hero));
   }
 
-  // ── INIT VIEWER & HOOKS ──────────────────────────────────────────────────
-  function initViewer() {
+  // ── INIT & HOOKS ──────────────────────────────────────────────────────────
+  async function initViewer() {
     const sel = document.getElementById('heroSelect');
     sel.innerHTML = data.heroes
       .map((h,i)=>`<option value="${i}">${h.name}</option>`)
@@ -245,17 +245,13 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('btnSaveBuild')
       .addEventListener('click', async () => {
         const hero = data.heroes[selectedHeroIdx];
-        // use the signed-in user if any
-        const user = window.currentUser;
-        const creator = user
-          ? (user.displayName || user.email.split('@')[0])
-          : 'anonymous';
-
+        const user = window.currentUser;  // set by your init script in viewer.html
         const payload = {
-          creator,
+          creator:   user ? (user.displayName || user.email) : 'anonymous',
+          creatorId: user ? user.uid                : null,
           character: hero.name,
-          powers:    hero.buildPowers.map(a=>a.name),
-          items:     hero.buildItems.map(a=>a.name),
+          powers:    hero.buildPowers.map(a => a.name),
+          items:     hero.buildItems.map(a => a.name),
           timestamp: Date.now()
         };
         const resp = await fetch('/api/builds', {
@@ -264,14 +260,14 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify(payload)
         });
         const { code, url } = await resp.json();
-        const a = document.getElementById('buildLink');
-        a.href        = url;
-        a.textContent = window.location.origin + url;
+        const linkEl = document.getElementById('buildLink');
+        linkEl.href        = url;
+        linkEl.textContent = window.location.origin + url;
         document.getElementById('shareLink').style.display = 'block';
       });
   }
 
-  // ── LOAD BUILD FROM /creator/character/code ──────────────────────────────
+  // ── LOAD BUILD FROM URL ───────────────────────────────────────────────────
   async function loadBuildFromURL() {
     const parts = window.location.pathname.split('/').filter(Boolean);
     if (parts.length === 3) {
@@ -279,15 +275,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const resp = await fetch(`/api/builds/${code}`);
       if (!resp.ok) return;
       const saved = await resp.json();
-      // re-select hero
       selectedHeroIdx = data.heroes.findIndex(h=>h.name===saved.character);
       document.getElementById('heroSelect').value = selectedHeroIdx;
-      // rebuild slots
       const pool = [...data.globalAbilities, ...data.heroes[selectedHeroIdx].abilities];
-      data.heroes[selectedHeroIdx].buildPowers =
-        pool.filter(a=> saved.powers.includes(a.name));
-      data.heroes[selectedHeroIdx].buildItems  =
-        pool.filter(a=> saved.items.includes(a.name));
+      data.heroes[selectedHeroIdx].buildPowers = pool.filter(a => saved.powers.includes(a.name));
+      data.heroes[selectedHeroIdx].buildItems  = pool.filter(a => saved.items.includes(a.name));
       renderTabs();
       renderAbilities();
       renderBuildSlots();
