@@ -5,17 +5,18 @@
   <title>The Armory — Viewer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <!-- your styles -->
-  <link rel="stylesheet" href="viewerstyles.css">
+  <!-- 1) Your styles -->
+  <link rel="stylesheet" href="/viewerstyles.css">
 
-  <!-- 1) Firebase config injected by your server -->
+  <!-- 2) env.js must come first, so window.__env__ exists -->
   <script src="/env.js"></script>
 
-  <!-- 2) Firebase compat SDKs -->
+  <!-- 3) Firebase “compat” SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
-  <!-- 3) Initialize Firebase & expose currentUser globally -->
+  <!-- 4) Initialize Firebase -->
   <script>
     (function() {
       const fb = window.__env__ || {};
@@ -27,9 +28,9 @@
         messagingSenderId: fb.FIREBASE_MESSAGING_SENDER_ID,
         appId:             fb.FIREBASE_APP_ID
       });
-      firebase.auth().onAuthStateChanged(user => {
-        window.currentUser = user || null;
-      });
+      // expose these globally for viewerfunctions.js
+      window.auth = firebase.auth();
+      window.db   = firebase.firestore();
     })();
   </script>
 </head>
@@ -39,7 +40,7 @@
   <div class="hero-selector">
     Hero:
     <select id="heroSelect"></select>
-    <a href="admin.html" class="admin-link">Admin</a>
+    <a href="/admin.html" class="admin-link">Admin</a>
   </div>
 
   <!-- Save & Share -->
@@ -52,7 +53,6 @@
 
   <!-- Main Armory -->
   <div class="armory">
-
     <!-- HEADER -->
     <div class="header">
       <img src="" class="avatar" alt="Avatar">
@@ -73,18 +73,13 @@
         <span class="cost-value">0</span>
       </div>
       <div class="slots powers">
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div>
       </div>
       <div class="slots items">
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div>
+        <div class="circle"></div><div class="circle"></div>
       </div>
     </div>
 
@@ -101,7 +96,6 @@
       <h3>Epic</h3>
       <div class="grid" id="epicGrid"></div>
     </div>
-
   </div>
 
   <!-- Tooltip -->
@@ -113,10 +107,9 @@
     <div id="communityGrid" class="community-grid"></div>
   </section>
 
-  <!-- 4) Load your static JSON/JS data -->
-  <script src="initialData.js"></script>
-
-  <!-- 5) Load the viewer logic as an ES module -->
-  <script type="module" src="viewerfunctions.js"></script>
+  <!-- 5) Your static data/helpers -->
+  <script src="/initialData.js"></script>
+  <!-- 6) Your build logic (uses window.auth & window.db) -->
+  <script src="/viewerfunctions.js"></script>
 </body>
 </html>
