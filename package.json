@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
+    "preinstall": "npm audit fix --production || true",
     "start": "node server.js",
     "postinstall": "npm audit fix --force"
   },
