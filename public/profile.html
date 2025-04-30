@@ -36,7 +36,7 @@
   </script>
 </head>
 <body>
-  <!-- site-wide navbar -->
+  <!-- site‐wide navbar -->
   <script type="module" src="widgets/navbar.mjs"></script>
 
   <main class="profile-page">
@@ -138,6 +138,7 @@
           const globals  = stored.globalAbilities || [];
 
           snapshot.forEach(docSnap => {
+            const id      = docSnap.id;
             const b       = docSnap.data();
             const heroDef = heroes.find(h=>h.name===b.character) || {};
             const pool    = [...globals, ...(heroDef.abilities||[])];
@@ -186,6 +187,9 @@
                 <div class="squares">${squares}</div>
                 <div class="circles">${circles}</div>
                 <div class="cost">Total: ${totalCost.toLocaleString()}</div>
+                <div class="card-footer">
+                  <a class="btn-view" href="/viewer.html?buildId=${id}">View</a>
+                </div>
               </div>`;
             buildsContainer.appendChild(card);
           });
