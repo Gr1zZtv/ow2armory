@@ -52,9 +52,9 @@ body {
   transition: background 0.2s, border-color 0.2s;
 }
 .profile-tabs button.active {
+  background: #11141f;
   color: #fff;
   border-color: #f96302;
-  background: #11141f;
 }
 .profile-tabs button:hover {
   background: #16182b;
@@ -69,6 +69,9 @@ body {
 }
 .profile-about h2 {
   color: #f96302;
+  margin-bottom: 12px;
+}
+.profile-about p {
   margin-bottom: 12px;
 }
 #btnEditProfile {
@@ -89,6 +92,7 @@ body {
   background: #1a1a2e;
   padding: 16px;
   border-radius: 8px;
+  margin-bottom: 24px;
 }
 .profile-builds h2 {
   color: #f96302;
@@ -99,7 +103,90 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
 }
-/* (reuse your existing .build-card styles) */
+
+/* ─────────── BUILD CARD ─────────── */
+.build-card {
+  background: rgba(15, 25, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.build-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+}
+.build-card .card-header img {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+.build-card .card-header h3 {
+  font-size: 1.1rem;
+  color: #fff;
+}
+.build-card .card-body {
+  padding: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 4 Squared Abilities */
+.squares {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.square {
+  flex: 1;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.square .icon {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* 2 Rows of 3 Circles */
+.circles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+  justify-items: center;
+}
+.circle {
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.circle .icon {
+  max-width: 70%;
+  max-height: 70%;
+}
+
+/* Cost Footer */
+.cost {
+  margin-top: auto;
+  text-align: right;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #ddd;
+}
 
 /* ─────────── DISCUSSION PLACEHOLDER ─────────── */
 .profile-discussion {
