@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="utf-8">
+<head>
+  <meta charset="utf-8">
+  <title>My Favorites — Armory</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- reuse your profile.css since the cards/styles are identical -->
+  <link rel="stylesheet" href="profile.css">
+
+  <!-- 1) expose Firebase config -->
+  <script src="/env.js"></script>
+  <!-- 2) load your static armory data into localStorage -->
+  <script src="/initialData.js"></script>
+  <!-- 3) init Firebase (modular) -->
+  <script type="module" src="/firebase-config.js"></script>
+</head>
+<body>
+  <!-- site‐wide navbar -->
+  <script type="module" src="/widgets/navbar.mjs"></script>
+
+  <main class="profile-page">
+    <h1>My Favorites</h1>
+    <section class="profile-builds">
+      <div id="favoritesContainer" class="builds-container">
+        <p style="color:#888;">Loading your favorites…</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- 4) your favorites logic -->
+  <script type="module" src="/favorites.js"></script>
+</body>
+</html>
