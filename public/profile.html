@@ -5,11 +5,31 @@
   <title>My Profile — Armory</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="profile.css">
-  <!-- env.js must come first -->
+  <!-- 1) env.js first -->
   <script src="/env.js"></script>
+  <!-- 2) Firebase “compat” SDK for Auth -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <!-- 3) Initialize Firebase & track currentUser -->
+  <script>
+    ;(function(){
+      const fb = window.__env__ || {};
+      firebase.initializeApp({
+        apiKey:            fb.FIREBASE_API_KEY,
+        authDomain:        fb.FIREBASE_AUTH_DOMAIN,
+        projectId:         fb.FIREBASE_PROJECT_ID,
+        storageBucket:     fb.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: fb.FIREBASE_MESSAGING_SENDER_ID,
+        appId:             fb.FIREBASE_APP_ID
+      });
+      firebase.auth().onAuthStateChanged(user => {
+        window.currentUser = user;
+      });
+    })();
+  </script>
 </head>
 <body>
-  <!-- site‐wide navbar -->
+  <!-- site-wide navbar -->
   <script type="module" src="widgets/navbar.mjs"></script>
 
   <main class="profile-page">
@@ -41,7 +61,7 @@
       </div>
     </section>
 
-    <!-- DISCUSSION PLACEHOLDER -->
+    <!-- DISCUSSION -->
     <section id="sectionDiscussion" class="profile-discussion" style="display:none;">
       <h2>Discussion</h2>
       <div class="placeholder">
@@ -51,93 +71,82 @@
 
   </main>
 
-  <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import {
-      doc, getDoc,
-      collection, query, where, getDocs
-    } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Tab switching
+      const btnBuilds     = document.getElementById('tabBuilds');
+      const btnDiscussion = document.getElementById('tabDiscussion');
+      const secBuilds     = document.getElementById('sectionBuilds');
+      const secDisc       = document.getElementById('sectionDiscussion');
+      btnBuilds.addEventListener('click', () => {
+        btnBuilds.classList.add('active');
+        btnDiscussion.classList.remove('active');
+        secBuilds.style.display = '';
+        secDisc.style.display   = 'none';
+      });
+      btnDiscussion.addEventListener('click', () => {
+        btnDiscussion.classList.add('active');
+        btnBuilds.classList.remove('active');
+        secDisc.style.display   = '';
+        secBuilds.style.display = 'none';
+      });
 
-    // Tab switching
-    const btnBuilds     = document.getElementById('tabBuilds');
-    const btnDiscussion = document.getElementById('tabDiscussion');
-    const secBuilds     = document.getElementById('sectionBuilds');
-    const secDiscussion = document.getElementById('sectionDiscussion');
+      // Wait for Firebase Auth
+      const unbind = firebase.auth().onAuthStateChanged(async user => {
+        if (!user) {
+          // not signed in → redirect to login
+          return location.href = '/login.html';
+        }
+        unbind(); // only run once
 
-    btnBuilds.addEventListener('click', () => {
-      btnBuilds.classList.add('active');
-      btnDiscussion.classList.remove('active');
-      secBuilds.style.display = '';
-      secDiscussion.style.display = 'none';
-    });
-    btnDiscussion.addEventListener('click', () => {
-      btnDiscussion.classList.add('active');
-      btnBuilds.classList.remove('active');
-      secDiscussion.style.display = '';
-      secBuilds.style.display = 'none';
-    });
+        // Header: name & avatar
+        document.getElementById('lblName').textContent =
+          user.displayName || user.email;
+        document.getElementById('imgAvatar').src =
+          user.photoURL || '/images/default-avatar.png';
 
-    auth.onAuthStateChanged(async user => {
-      if (!user) return location.href = '/login.html';
+        // (Optional) load a favorite color from your own profile store...
+        // document.getElementById('clrDisplay').textContent = ...;
 
-      // Load profile metadata
-      const profileRef = doc(db, 'profiles', user.uid);
-      const snap = await getDoc(profileRef);
-      const data = snap.exists() ? snap.data() : {};
+        document.getElementById('btnEditProfile')
+                .onclick = () => location.href = '/settings.html';
 
-      // Header
-      document.getElementById('lblName').textContent =
-        data.displayName || user.email;
-      document.getElementById('imgAvatar').src =
-        data.avatarURL || user.photoURL || '/images/default-avatar.png';
+        // Fetch **all** builds, filter by current user
+        let allBuilds;
+        try {
+          allBuilds = await fetch('/api/builds').then(r => r.json());
+        } catch (e) {
+          console.error('Failed to load builds', e);
+          allBuilds = [];
+        }
+        const myBuilds = allBuilds.filter(b => b.creatorId === user.uid);
 
-      // Favorite color
-      const clr = data.color || '#888';
-      document.getElementById('clrDisplay').textContent = clr;
-      document.body.style.setProperty('--accent', clr);
-
-      document.getElementById('btnEditProfile')
-        .onclick = () => location.href = '/settings.html';
-
-      // Load builds
-      const buildsContainer = document.getElementById('buildsContainer');
-      buildsContainer.innerHTML = ''; // clear
-      const q = query(
-        collection(db, 'builds'),
-        where('uid','==', user.uid)
-      );
-      const snaps = await getDocs(q);
-      if (snaps.empty) {
-        buildsContainer.innerHTML =
-          `<p style="color:#888;">You haven’t saved any builds yet.</p>`;
-      } else {
-        snaps.forEach(docSnap => {
-          const b = docSnap.data();
-          const card = document.createElement('div');
-          card.className = 'build-card';
-          card.innerHTML = `
-            <div class="card-header">
-              <img src="${b.heroAvatar}" alt="${b.heroName}">
-              <h3>${b.heroName}</h3>
-            </div>
-            <div class="card-body">
-              <div class="squares">
-                ${b.powers.slice(0,4).map(p => `
-                  <div class="square">
-                    <img class="icon" src="${p.icon}" alt="">
-                  </div>`).join('')}
+        const container = document.getElementById('buildsContainer');
+        container.innerHTML = '';
+        if (myBuilds.length === 0) {
+          container.innerHTML =
+            `<p style="color:#888;">You haven’t saved any builds yet.</p>`;
+        } else {
+          myBuilds.forEach(b => {
+            const card = document.createElement('div');
+            card.className = 'build-card';
+            card.innerHTML = `
+              <div class="card-header">
+                <!-- no avatar for hero here; just show character name -->
+                <h3>${b.character}</h3>
               </div>
-              <div class="circles">
-                ${b.items.slice(0,6).map(i => `
-                  <div class="circle">
-                    <img class="icon" src="${i.icon}" alt="">
-                  </div>`).join('')}
-              </div>
-              <div class="cost">Total: ${b.totalCost.toLocaleString()}</div>
-            </div>`;
-          buildsContainer.appendChild(card);
-        });
-      }
+              <div class="card-body">
+                <p><strong>Powers:</strong> ${b.powers.join(', ')}</p>
+                <p><strong>Items:</strong> ${b.items.join(', ')}</p>
+                <p><strong>Saved:</strong> ${new Date(b.timestamp).toLocaleString()}</p>
+                <a href="/${encodeURIComponent(b.creator)}/${encodeURIComponent(b.character)}/${b.code}">
+                  Load this build
+                </a>
+              </div>`;
+            container.appendChild(card);
+          });
+        }
+      });
     });
   </script>
 </body>
