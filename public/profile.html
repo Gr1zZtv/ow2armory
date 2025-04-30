@@ -174,7 +174,7 @@
                 </div>`;
             }).join('');
 
-            // build the card
+            // build the card (position:relative added by CSS)
             const card = document.createElement('div');
             card.className = 'build-card';
             card.innerHTML = `
@@ -182,14 +182,12 @@
                 <img src="${heroDef.avatar||'/images/default-avatar.png'}"
                      alt="${b.character}">
                 <h3>${b.character}</h3>
+                <a class="btn-view" href="/viewer.html?buildId=${id}">View</a>
               </div>
               <div class="card-body">
                 <div class="squares">${squares}</div>
                 <div class="circles">${circles}</div>
                 <div class="cost">Total: ${totalCost.toLocaleString()}</div>
-                <div class="card-footer">
-                  <a class="btn-view" href="/viewer.html?buildId=${id}">View</a>
-                </div>
               </div>`;
             buildsContainer.appendChild(card);
           });
