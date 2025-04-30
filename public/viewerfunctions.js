@@ -34,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let selectedHeroIdx = parseInt(localStorage.getItem('selectedHeroIdx')) || 0;
   let selectedTabIdx  = parseInt(localStorage.getItem('selectedTabIdx'))  || 0;
-
   const tooltip = document.getElementById('tooltip');
 
   // ── TOOLTIP HANDLERS ──────────────────────────────────────────────────────
@@ -48,9 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <span class="tooltip-label">${def.label}</span>
         </div>`;
     }).join('');
-    const ctx = a.tooltip
-      ? `<div class="tooltip-context">${a.tooltip}</div>`
-      : '';
+    const ctx = a.tooltip ? `<div class="tooltip-context">${a.tooltip}</div>` : '';
     tooltip.innerHTML = `
       <div class="tooltip-header">${a.name||''}</div>
       <div class="tooltip-body">${statLines}${ctx}</div>
@@ -248,8 +245,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('btnSaveBuild')
       .addEventListener('click', async () => {
         const hero = data.heroes[selectedHeroIdx];
-        const build = {
-          heroName:  hero.name,
+        const payload = {
+          creator:   window.__env__.USER_NAME || 'anonymous',
+          character: hero.name,
           powers:    hero.buildPowers.map(a=>a.name),
           items:     hero.buildItems.map(a=>a.name),
           timestamp: Date.now()
@@ -257,40 +255,38 @@ document.addEventListener("DOMContentLoaded", () => {
         const resp = await fetch('/api/builds', {
           method: 'POST',
           headers: {'Content-Type':'application/json'},
-          body: JSON.stringify(build)
+          body: JSON.stringify(payload)
         });
-        const { id } = await resp.json();
-        const link  = `${window.location.origin}/viewer.html?buildId=${id}`;
-        const a     = document.getElementById('buildLink');
-        a.href           = link;
-        a.textContent    = link;
+        const { code, url } = await resp.json();
+        const a = document.getElementById('buildLink');
+        a.href           = url;
+        a.textContent    = window.location.origin + url;
         document.getElementById('shareLink').style.display = 'block';
       });
   }
 
-  // ── LOAD BUILD FROM ?buildId=… ───────────────────────────────────────────
+  // ── LOAD BUILD FROM /creator/character/code ──────────────────────────────
   async function loadBuildFromURL() {
-    const params = new URLSearchParams(window.location.search);
-    if (!params.has('buildId')) return;
-    const { buildId } = Object.fromEntries(params);
-    const resp = await fetch(`/api/builds/${buildId}`);
-    if (!resp.ok) return;
-    const saved = await resp.json();
-    // re-select hero
-    selectedHeroIdx = data.heroes.findIndex(h=>h.name===saved.heroName);
-    document.getElementById('heroSelect').value = selectedHeroIdx;
-
-    // reconstruct slots
-    const pool = [...data.globalAbilities, ...data.heroes[selectedHeroIdx].abilities];
-    data.heroes[selectedHeroIdx].buildPowers =
-      pool.filter(a=> saved.powers.includes(a.name));
-    data.heroes[selectedHeroIdx].buildItems  =
-      pool.filter(a=> saved.items.includes(a.name));
-
-    renderTabs();
-    renderAbilities();
-    renderBuildSlots();
-    renderStats(calculateStats(data.heroes[selectedHeroIdx]));
+    const parts = window.location.pathname.split('/').filter(Boolean);
+    if (parts.length === 3) {
+      const code = parts[2];
+      const resp = await fetch(`/api/builds/${code}`);
+      if (!resp.ok) return;
+      const saved = await resp.json();
+      // re-select hero
+      selectedHeroIdx = data.heroes.findIndex(h=>h.name===saved.character);
+      document.getElementById('heroSelect').value = selectedHeroIdx;
+      // rebuild slots
+      const pool = [...data.globalAbilities, ...data.heroes[selectedHeroIdx].abilities];
+      data.heroes[selectedHeroIdx].buildPowers =
+        pool.filter(a=> saved.powers.includes(a.name));
+      data.heroes[selectedHeroIdx].buildItems  =
+        pool.filter(a=> saved.items.includes(a.name));
+      renderTabs();
+      renderAbilities();
+      renderBuildSlots();
+      renderStats(calculateStats(data.heroes[selectedHeroIdx]));
+    }
   }
 
   // ── COMMUNITY GALLERY ─────────────────────────────────────────────────────
@@ -299,10 +295,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const builds = await fetch('/api/builds').then(r=>r.json());
     grid.innerHTML = builds.map(b=>`
       <div class="community-card">
-        <strong>${b.heroName}</strong><br>
+        <strong>${b.character}</strong> by ${b.creator}<br>
         Powers: ${b.powers.join(', ')}<br>
         Items:  ${b.items.join(', ')}<br>
-        <a href="viewer.html?buildId=${b.id}">Load Build</a>
+        <a href="/${encodeURIComponent(b.creator)}/${encodeURIComponent(b.character)}/${b.code}">
+          Load Build
+        </a>
       </div>
     `).join('');
   }
