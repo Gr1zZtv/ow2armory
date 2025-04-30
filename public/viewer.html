@@ -2,26 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <base href="/" />
   <title>The Armory — Viewer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <!-- Your styles -->
+  <!-- your styles -->
   <link rel="stylesheet" href="viewerstyles.css">
 
-  <!-- 1) Firebase config injected from your server -->
+  <!-- 1) Firebase config injected by your server -->
   <script src="/env.js"></script>
 
   <!-- 2) Firebase compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 
-  <!-- 3) Initialize Firebase & track current user -->
+  <!-- 3) Initialize Firebase & expose currentUser globally -->
   <script>
     (function() {
-      // Grab env vars
       const fb = window.__env__ || {};
-      // Init
       firebase.initializeApp({
         apiKey:            fb.FIREBASE_API_KEY,
         authDomain:        fb.FIREBASE_AUTH_DOMAIN,
@@ -30,7 +27,6 @@
         messagingSenderId: fb.FIREBASE_MESSAGING_SENDER_ID,
         appId:             fb.FIREBASE_APP_ID
       });
-      // Track the signed-in user for viewerfunctions.js
       firebase.auth().onAuthStateChanged(user => {
         window.currentUser = user || null;
       });
@@ -117,9 +113,10 @@
     <div id="communityGrid" class="community-grid"></div>
   </section>
 
-  <!-- Your data + logic -->
-  <script src="/initialData.js"></script>
-  <script src="/viewerfunctions.js"></script>
+  <!-- 4) Load your static JSON/JS data -->
+  <script src="initialData.js"></script>
 
+  <!-- 5) Load the viewer logic as an ES module -->
+  <script type="module" src="viewerfunctions.js"></script>
 </body>
 </html>
