@@ -36,7 +36,7 @@
   </script>
 </head>
 <body>
-  <!-- site‐wide navbar -->
+  <!-- site-wide navbar -->
   <script type="module" src="widgets/navbar.mjs"></script>
 
   <main class="profile-page">
@@ -147,7 +147,7 @@
             const itemObjs  = pool.filter(a=> b.items.includes(a.name));
 
             // compute total cost
-            const totalCost = 
+            const totalCost =
               powerObjs.reduce((s,a)=>s+a.cost,0) +
               itemObjs .reduce((s,a)=>s+a.cost,0);
 
@@ -186,8 +186,7 @@
                 <div class="squares">${squares}</div>
                 <div class="circles">${circles}</div>
                 <div class="cost">Total: ${totalCost.toLocaleString()}</div>
-              </div>
-            `;
+              </div>`;
             buildsContainer.appendChild(card);
           });
 
