@@ -22,37 +22,59 @@ app.get('/env.js', (req, res) => {
   `);
 });
 
-// ── 2) In-memory “database” for community builds ───────────────────────────
-const builds = [];
-let nextId = 1;
+// ── 2) In-memory “database” keyed by code ────────────────────────────────
+const builds = {};
+function makeCode(len = 6) {
+  // generate a random uppercase alphanumeric code
+  return Math.random().toString(36).slice(2, 2 + len).toUpperCase();
+}
 
 // ── 3) API: Save a new build ─────────────────────────────────────────────
 app.post('/api/builds', (req, res) => {
-  const { heroName, powers, items, timestamp } = req.body;
-  if (!heroName || !Array.isArray(powers) || !Array.isArray(items)) {
-    return res.status(400).json({ error: 'Invalid build payload' });
+  const { creator, character, powers, items, timestamp } = req.body;
+  if (
+    !creator ||
+    !character ||
+    !Array.isArray(powers) ||
+    !Array.isArray(items)
+  ) {
+    return res.status(400).json({ error: 'creator, character, powers & items required' });
   }
-  const id = String(nextId++);
-  builds.push({ id, heroName, powers, items, timestamp });
-  res.json({ id });
+  const code = makeCode();
+  builds[code] = { code, creator, character, powers, items, timestamp };
+  // return both the code and the full pretty URL
+  res.json({
+    code,
+    url: `/${encodeURIComponent(creator)}/${encodeURIComponent(character)}/${code}`
+  });
 });
 
 // ── 4) API: List all builds ───────────────────────────────────────────────
 app.get('/api/builds', (req, res) => {
-  res.json(builds);
+  res.json(Object.values(builds));
 });
 
-// ── 5) API: Fetch one build by ID ────────────────────────────────────────
-app.get('/api/builds/:id', (req, res) => {
-  const b = builds.find(x => x.id === req.params.id);
+// ── 5) API: Fetch one build by code ──────────────────────────────────────
+app.get('/api/builds/:code', (req, res) => {
+  const b = builds[req.params.code];
   if (!b) return res.status(404).json({ error: 'Build not found' });
   res.json(b);
 });
 
-// ── 6) Serve static files from /public ───────────────────────────────────
-app.use(express.static(path.join(__dirname, 'public')));
+// ── 6) Dynamic route for pretty share URLs ────────────────────────────────
+app.get('/:creator/:character/:code', (req, res, next) => {
+  const { creator, character, code } = req.params;
+  // Optional: validate the build exists & matches creator+character
+  const b = builds[code];
+  if (!b || b.creator !== creator || b.character !== character) {
+    return next(); // fall back to 404/static handler
+  }
+  // serve viewer.html (it will parse the path and load the build via JS)
+  res.sendFile(path.join(__dirname, 'public/viewer.html'));
+});
 
-// ── 7) Fallback all other routes to index.html ───────────────────────────
+// ── 7) Serve static files & catch-all ────────────────────────────────────
+app.use(express.static(path.join(__dirname, 'public')));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
