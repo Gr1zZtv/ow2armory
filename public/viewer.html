@@ -4,7 +4,37 @@
   <meta charset="UTF-8">
   <title>The Armory — Viewer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- Your styles -->
   <link rel="stylesheet" href="viewerstyles.css">
+
+  <!-- 1) Firebase config injected from your server -->
+  <script src="/env.js"></script>
+
+  <!-- 2) Firebase compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+  <!-- 3) Initialize Firebase & track current user -->
+  <script>
+    (function() {
+      // Grab env vars
+      const fb = window.__env__ || {};
+      // Init
+      firebase.initializeApp({
+        apiKey:            fb.FIREBASE_API_KEY,
+        authDomain:        fb.FIREBASE_AUTH_DOMAIN,
+        projectId:         fb.FIREBASE_PROJECT_ID,
+        storageBucket:     fb.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: fb.FIREBASE_MESSAGING_SENDER_ID,
+        appId:             fb.FIREBASE_APP_ID
+      });
+      // Track the signed-in user for viewerfunctions.js
+      firebase.auth().onAuthStateChanged(user => {
+        window.currentUser = user || null;
+      });
+    })();
+  </script>
 </head>
 <body>
 
@@ -17,7 +47,7 @@
 
   <!-- Save & Share -->
   <div id="save-share">
-    <button id="btnSaveBuild">Save & Share Build</button>
+    <button id="btnSaveBuild">Save &amp; Share Build</button>
     <div id="shareLink" style="display:none; margin-top:8px;">
       Shareable link: <a href="#" target="_blank" id="buildLink"></a>
     </div>
@@ -86,7 +116,7 @@
     <div id="communityGrid" class="community-grid"></div>
   </section>
 
-  <!-- Data + Logic -->
+  <!-- Your data + logic -->
   <script src="initialData.js"></script>
   <script src="viewerfunctions.js"></script>
 </body>
