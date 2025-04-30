@@ -1,0 +1,1 @@
+this area includes vanilla headers for all heroes in support
