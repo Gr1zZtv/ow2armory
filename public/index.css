@@ -168,7 +168,7 @@ body {
 }
 .site-header .nav-links {
   display: flex;
-  gap: 24px;
+  gap: 16px;
   /* always horizontal on desktop */
   flex-direction: row;
 }
