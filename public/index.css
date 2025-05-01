@@ -211,6 +211,9 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+
+  /* ← this pushes the widget into the right‐hand column */
+  justify-self: end;
 }
 .site-user__avatar {
   width: 32px;
