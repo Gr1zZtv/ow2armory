@@ -5,8 +5,8 @@ function buildNavbar() {
   const header = document.createElement('header');
   header.className = 'site-header';
   header.innerHTML = `
-    <div class="site-header__inner">
-      <a href="/index.html" class="site-header__logo">
+    <div class="nav-container">
+      <a href="/index.html" class="logo">
         <img src="/images/logo.png" alt="Logo">
         <span>The Armory</span>
       </a>
@@ -62,11 +62,10 @@ function wireAuthUI() {
       // wire up Log Out
       logout.onclick = () => {
         auth.signOut().then(() => {
-          menu.hidden  = true;
+          menu.hidden   = true;
           avatar.hidden = true;
-          name.hidden  = true;
-          login.hidden = false;
-          // optionally redirect:
+          name.hidden   = true;
+          login.hidden  = false;
           location.href = '/login.html';
         });
       };
