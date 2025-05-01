@@ -69,7 +69,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-/* Card Header */
 .card-header {
   display: flex;
   align-items: center;
@@ -87,14 +86,12 @@ body {
   margin: 0;
   font-size: 1.1rem;
 }
-/* Card Body */
 .card-body {
   padding: 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-/* 4 Squared Abilities */
 .squares {
   display: flex;
   gap: 8px;
@@ -113,7 +110,6 @@ body {
   max-width: 100%;
   max-height: 100%;
 }
-/* 2 Rows of 3 Circles */
 .circles {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -134,7 +130,6 @@ body {
   max-width: 70%;
   max-height: 70%;
 }
-/* Cost Footer */
 .cost {
   margin-top: auto;
   text-align: right;
@@ -152,13 +147,16 @@ body {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   z-index: 1000;
 }
+
+/* switch to grid for perfect left-center-right */
 .site-header .nav-container {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 12px 24px;
+  gap: 16px; /* small gap between columns */
 }
 
 /* Logo */
@@ -175,16 +173,12 @@ body {
   margin-right: 8px;
 }
 
-/* Main nav links */
+/* Centered nav links */
 .site-nav ul {
   display: flex;
+  justify-content: center;
   gap: 16px;
-  list-style: none;   /* remove bullets */
-  margin: 0;
-  padding: 0;
-}
-.site-nav ul li {
-  margin: 0;
+  list-style: none; /* remove bullets */
 }
 .site-nav a {
   color: #ddd;
@@ -211,7 +205,7 @@ body {
   width: 100%;
 }
 
-/* User area */
+/* User area on the right */
 .site-user {
   position: relative;
   display: flex;
@@ -219,7 +213,7 @@ body {
   gap: 8px;
 }
 .site-user__avatar {
-  width: 32px;        /* force size */
+  width: 32px;
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
@@ -245,7 +239,6 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 140px;
-  /* hidden by default; JS should toggle [hidden] attribute */
 }
 .site-user__menu[hidden] {
   display: none !important;
@@ -269,17 +262,16 @@ body {
 /* ─────────── RESPONSIVE NAVBAR ─────────── */
 @media (max-width: 768px) {
   .site-header .nav-container {
-    flex-wrap: wrap;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    text-align: center;
   }
   .site-nav ul {
-    order: 3;
-    width: 100%;
-    justify-content: center;
+    order: 2;
     margin: 12px 0;
   }
   .site-user {
-    order: 2;
-    width: 100%;
+    order: 3;
     justify-content: center;
     margin-bottom: 12px;
   }
