@@ -26,37 +26,7 @@
     </form>
   </section>
 
-  <!-- 2) now import your firebase-config module -->
-  <script type="module">
-    import { auth, db } from './firebase-config.js';
-    import { onAuthStateChanged, signOut }
-      from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
-    import { doc, getDoc, setDoc }
-      from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
-
-    onAuthStateChanged(auth, async user => {
-      if (!user) return location.href = '/login.html';
-
-      document.getElementById('btnLogout').onclick = () =>
-        signOut(auth).then(() => location.href = '/login.html');
-
-      const ref  = doc(db, 'profiles', user.uid);
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        const { displayName, color } = snap.data();
-        document.getElementById('inpDisplayName').value = displayName || '';
-        document.getElementById('inpColor').value       = color       || '#ffffff';
-      }
-
-      document.getElementById('settingsForm').onsubmit = async e => {
-        e.preventDefault();
-        await setDoc(ref, {
-          displayName: document.getElementById('inpDisplayName').value,
-          color:       document.getElementById('inpColor').value
-        }, { merge: true });
-        alert('Profile saved!');
-      };
-    });
-  </script>
+  <!-- 2) load the settings logic as a separate module -->
+  <script type="module" src="/settings.js"></script>
 </body>
 </html>
