@@ -83,6 +83,7 @@
     <button id="tabSignUp">Sign Up</button>
   </div>
 
+  <!-- SIGN IN FORM -->
   <form id="formSignIn" class="active">
     <div id="errorSignIn" class="error"></div>
     <label>Email
@@ -94,15 +95,19 @@
     <button type="button" id="btnSignIn" class="submit">Sign In</button>
   </form>
 
+  <!-- SIGN UP FORM -->
   <form id="formSignUp">
     <div id="errorSignUp" class="error"></div>
+    <label>Username
+      <input type="text" id="signUpUsername" required placeholder="Pick a username">
+    </label>
     <label>Email
       <input type="email" id="signUpEmail" required>
     </label>
     <label>Password
       <input type="password" id="signUpPassword" required>
     </label>
-    <label>Confirm
+    <label>Confirm Password
       <input type="password" id="signUpPassword2" required>
     </label>
     <button type="button" id="btnSignUp" class="submit">Sign Up</button>
@@ -110,9 +115,6 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('🔑 Login page loaded', window.__env__);
-
-      // ── Initialize Firebase ────────────────────────────────────
       const fb = window.__env__ || {};
       firebase.initializeApp({
         apiKey:            fb.FIREBASE_API_KEY,
@@ -125,15 +127,15 @@
       const auth = firebase.auth();
       const db   = firebase.firestore();
 
-      // ── Tab logic ──────────────────────────────────────────────
-      const tabIn   = document.getElementById('tabSignIn');
-      const tabUp   = document.getElementById('tabSignUp');
-      const formIn  = document.getElementById('formSignIn');
-      const formUp  = document.getElementById('formSignUp');
-      const errIn   = document.getElementById('errorSignIn');
-      const errUp   = document.getElementById('errorSignUp');
-      const btnIn   = document.getElementById('btnSignIn');
-      const btnUp   = document.getElementById('btnSignUp');
+      // Tab logic
+      const tabIn  = document.getElementById('tabSignIn');
+      const tabUp  = document.getElementById('tabSignUp');
+      const formIn = document.getElementById('formSignIn');
+      const formUp = document.getElementById('formSignUp');
+      const errIn  = document.getElementById('errorSignIn');
+      const errUp  = document.getElementById('errorSignUp');
+      const btnIn  = document.getElementById('btnSignIn');
+      const btnUp  = document.getElementById('btnSignUp');
 
       tabIn.onclick = () => {
         tabIn .classList.add('active');
@@ -148,7 +150,7 @@
         formIn.classList.remove('active');
       };
 
-      // ── Sign‐In / Sign‐Up logic ─────────────────────────────────
+      // Sign In
       async function signIn() {
         errIn.textContent = '';
         try {
@@ -162,28 +164,37 @@
         }
       }
 
+      // Sign Up with username
       async function signUp() {
         errUp.textContent = '';
-        const email = document.getElementById('signUpEmail').value;
-        const pw    = document.getElementById('signUpPassword').value;
-        const pw2   = document.getElementById('signUpPassword2').value;
+        const username = document.getElementById('signUpUsername').value.trim();
+        const email    = document.getElementById('signUpEmail').value;
+        const pw       = document.getElementById('signUpPassword').value;
+        const pw2      = document.getElementById('signUpPassword2').value;
+
+        if (!username) {
+          errUp.textContent = 'Username is required.';
+          return;
+        }
         if (pw !== pw2) {
           errUp.textContent = 'Passwords must match.';
           return;
         }
+
         try {
-          // create user
+          // 1) create user
           await auth.createUserWithEmailAndPassword(email, pw);
           const user = auth.currentUser;
 
-          // set default avatar on Auth profile
+          // 2) set the Auth profile: username + default avatar
           await user.updateProfile({
-            photoURL: '/images/default-avatar.png'
+            displayName: username,
+            photoURL:    '/images/default-avatar.png'
           });
 
-          // create Firestore profile document
+          // 3) create Firestore profile document
           await db.collection('profiles').doc(user.uid).set({
-            displayName: user.email,
+            displayName: username,
             avatarURL:   user.photoURL,
             color:       '#888'
           });
@@ -194,7 +205,7 @@
         }
       }
 
-      // ── Wire up clicks & “Enter” ────────────────────────────────
+      // Wire up events
       btnIn.addEventListener('click', e => { e.preventDefault(); signIn(); });
       btnUp.addEventListener('click', e => { e.preventDefault(); signUp(); });
       formIn.addEventListener('keydown', e => {
@@ -204,7 +215,7 @@
         if (e.key === 'Enter') { e.preventDefault(); signUp(); }
       });
 
-      // ── Redirect if already signed in ────────────────────────────
+      // Redirect if already signed in
       auth.onAuthStateChanged(user => {
         if (user) window.location.href = '/index.html';
       });
