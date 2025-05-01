@@ -205,17 +205,15 @@ body {
   width: 100%;
 }
 
-/* User area on the right */
-.site-user {
+/* User area on the right (single, qualified rule) */
+.site-header .site-user {
   position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
-
-  /* ← this pushes the widget into the right‐hand column */
-  justify-self: end;
+  justify-self: end; /* <-- pushes user into the right‐hand column */
 }
-.site-user__avatar {
+.site-header .site-user__avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -223,14 +221,14 @@ body {
   cursor: pointer;
   border: 2px solid #444;
 }
-.site-user__name {
+.site-header .site-user__name {
   cursor: pointer;
   color: #fff;
   font-size: 0.95rem;
 }
 
 /* Dropdown menu */
-.site-user__menu {
+.site-header .site-user__menu {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
@@ -243,10 +241,10 @@ body {
   flex-direction: column;
   min-width: 140px;
 }
-.site-user__menu[hidden] {
+.site-header .site-user__menu[hidden] {
   display: none !important;
 }
-.site-user__menu-item {
+.site-header .site-user__menu-item {
   padding: 8px 16px;
   font-size: 0.95rem;
   color: #ddd;
@@ -258,7 +256,7 @@ body {
   cursor: pointer;
   transition: background 0.2s;
 }
-.site-user__menu-item:hover {
+.site-header .site-user__menu-item:hover {
   background: rgba(255,255,255,0.1);
 }
 
@@ -273,9 +271,9 @@ body {
     order: 2;
     margin: 12px 0;
   }
-  .site-user {
+  .site-header .site-user {
     order: 3;
-    justify-content: center;
+    justify-self: center;
     margin-bottom: 12px;
   }
 }
