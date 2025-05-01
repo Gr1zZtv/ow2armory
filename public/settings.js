@@ -7,35 +7,58 @@ import {
 } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
 import {
   doc,
+  collection,
   getDoc,
+  getDocs,
+  query,
+  where,
   setDoc
 } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
 
 onAuthStateChanged(auth, async user => {
   if (!user) return location.href = '/login.html';
 
-  // Wire up Log Out
   document.getElementById('btnLogout').onclick = () =>
     signOut(auth).then(() => location.href = '/login.html');
 
-  // Reference to their Firestore profile
-  const ref  = doc(db, 'profiles', user.uid);
-  const snap = await getDoc(ref);
+  const ref     = doc(db, 'profiles', user.uid);
+  const snap    = await getDoc(ref);
+  const form    = document.getElementById('settingsForm');
+  const inpName = document.getElementById('inpDisplayName');
+  const inpCol  = document.getElementById('inpColor');
+
   if (snap.exists()) {
     const { displayName, color } = snap.data();
-    document.getElementById('inpDisplayName').value = displayName || '';
-    document.getElementById('inpColor').value       = color       || '#ffffff';
+    inpName.value = displayName   || '';
+    inpCol.value  = color || '#ffffff';
   }
 
-  document.getElementById('settingsForm').onsubmit = async e => {
+  form.onsubmit = async e => {
     e.preventDefault();
-    const newName  = document.getElementById('inpDisplayName').value.trim();
-    const newColor = document.getElementById('inpColor').value;
+    const newName  = inpName.value.trim();
+    const newColor = inpCol.value;
 
-    // 1) Update the Firebase Auth profile name
+    if (!newName) {
+      return alert('Please enter a display name.');
+    }
+
+    // 1) Check Firestore for existing profile with this displayName
+    const q = query(
+      collection(db, 'profiles'),
+      where('displayName', '==', newName)
+    );
+    const existing = await getDocs(q);
+
+    // If there’s any doc with the same name *and* it’s not the current user, reject
+    const conflict = existing.docs.some(d => d.id !== user.uid);
+    if (conflict) {
+      return alert('That display name is already taken. Please choose another.');
+    }
+
+    // 2) Update Firebase Auth profile
     await updateProfile(auth.currentUser, { displayName: newName });
 
-    // 2) Mirror it in Firestore
+    // 3) Mirror it in Firestore
     await setDoc(ref, {
       displayName: newName,
       color:       newColor
