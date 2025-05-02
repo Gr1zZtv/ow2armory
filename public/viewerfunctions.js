@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { key: 'criticalDamage',   label: 'Critical Damage',     icon: 'images/stats/stat-critical-dmg.png' },
   ];
 
-  // ── LOAD + NORMALIZE LOCAL DATA ──────────────────────────────────────────
+  // ── LOAD & NORMALIZE LOCAL DATA ──────────────────────────────────────────
   let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
   data.heroes          = Array.isArray(data.heroes)          ? data.heroes          : [];
   data.globalAbilities = Array.isArray(data.globalAbilities) ? data.globalAbilities : [];
@@ -218,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderStats(calculateStats(hero));
   }
 
-  // ── RENDER THE HERO-DECK SIDEBAR ─────────────────────────────────────────
+  // ── RENDER HERO-DECK SIDEBAR ─────────────────────────────────────────────
   function renderHeroDeck() {
     const deck = document.getElementById('heroDeck');
     deck.innerHTML = '';
@@ -232,11 +232,13 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem('selectedHeroIdx', i);
         selectedTabIdx = 0;
         localStorage.setItem('selectedTabIdx', 0);
-        // re-render everything for the new hero:
+        // update main avatar
+        document.querySelector('.header .avatar').src = h.avatar;
+        // re-render panels
         renderTabs();
         renderAbilities();
         renderBuildSlots();
-        renderStats(calculateStats(data.heroes[i]));
+        renderStats(calculateStats(h));
         renderHeroDeck();
       };
       deck.appendChild(img);
@@ -297,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ── LOAD BUILD FROM ?buildId=… ───────────────────────────────────────────
+  // ── LOAD BUILD FROM URL ───────────────────────────────────────────────────
   async function loadBuildFromURL() {
     const params = new URLSearchParams(window.location.search);
     if (!params.has('buildId')) return;
@@ -306,16 +308,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!snap.exists) return;
     const b    = snap.data();
     selectedHeroIdx = data.heroes.findIndex(h=>h.name===b.character);
-    document.getElementById('heroSelect').value = selectedHeroIdx;
-    const pool = [...data.globalAbilities, ...data.heroes[selectedHeroIdx].abilities];
-    data.heroes[selectedHeroIdx].buildPowers =
-      pool.filter(a=> b.powers.includes(a.name));
-    data.heroes[selectedHeroIdx].buildItems  =
-      pool.filter(a=> b.items.includes(a.name));
+    const hero = data.heroes[selectedHeroIdx];
+    // update main avatar
+    document.querySelector('.header .avatar').src = hero.avatar;
+    // fill slots
+    const pool = [...data.globalAbilities, ...hero.abilities];
+    hero.buildPowers = pool.filter(a=> b.powers.includes(a.name));
+    hero.buildItems  = pool.filter(a=> b.items.includes(a.name));
     renderTabs();
     renderAbilities();
     renderBuildSlots();
-    renderStats(calculateStats(data.heroes[selectedHeroIdx]));
+    renderStats(calculateStats(hero));
   }
 
   // ── COMMUNITY GALLERY ─────────────────────────────────────────────────────
@@ -335,29 +338,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── INIT VIEWER & HOOKS ──────────────────────────────────────────────────
   function initViewer() {
-    // populate hero select dropdown (you can hide this if you like)
-    const sel = document.getElementById('heroSelect');
-    sel.innerHTML = data.heroes
-      .map((h,i)=>`<option value="${i}">${h.name}</option>`)
-      .join('');
-    sel.value = selectedHeroIdx;
-    sel.onchange = () => {
-      selectedHeroIdx = +sel.value;
-      localStorage.setItem('selectedHeroIdx', selectedHeroIdx);
-      selectedTabIdx = 0;
-      localStorage.setItem('selectedTabIdx', 0);
-      renderTabs();
-      renderAbilities();
-      renderBuildSlots();
-      renderStats(calculateStats(data.heroes[selectedHeroIdx]));
-      renderHeroDeck();
-    };
+    // initial main avatar
+    document.querySelector('.header .avatar').src =
+      data.heroes[selectedHeroIdx].avatar || '/images/default-avatar.png';
 
     renderTabs();
     renderAbilities();
     renderBuildSlots();
     renderStats(calculateStats(data.heroes[selectedHeroIdx]));
-
     bindSaveShare();
     loadBuildFromURL();
     renderCommunity();
