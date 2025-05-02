@@ -39,20 +39,11 @@
   <!-- 5) Navbar -->
   <script type="module" src="/widgets/navbar.mjs"></script>
 
-  <!-- Hero selector -->
-  <div class="hero-selector">
-    Hero:
-    <select id="heroSelect"></select>
-    <a href="/admin.html" class="admin-link">Admin</a>
-  </div>
+  <!-- Hero selector (we’ll populate thumbnails & names via JS into #heroDeck) -->
+  <!-- moved into the aside below -->
 
-  <!-- 6) Container for deck + armory -->
+  <!-- 6) Container for armory + hero deck -->
   <div class="viewer-container">
-
-    <!-- HERO DECK (left sidebar) -->
-    <aside id="heroDeck" class="hero-deck">
-      <!-- JS will populate hero avatars here -->
-    </aside>
 
     <!-- MAIN ARMORY PANEL -->
     <div class="armory">
@@ -90,7 +81,7 @@
         <img src="" class="avatar" alt="Avatar">
         <div class="titles">
           <h1>The Armory</h1>
-          <h2></h2>
+          <!-- subtitle removed -->
         </div>
         <div class="stats header-stats" id="statsContainer"></div>
       </div>
@@ -130,6 +121,11 @@
       </div>
 
     </div><!-- /.armory -->
+
+    <!-- HERO DECK (right sidebar) -->
+    <aside id="heroDeck" class="hero-deck">
+      <!-- JS will inject hero avatars + names here -->
+    </aside>
 
   </div><!-- /.viewer-container -->
 
