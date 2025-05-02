@@ -12,8 +12,8 @@ body {
   font-family: 'Oswald', sans-serif;
   color: #fff;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;    /* stack navbar above content */
+  align-items: center;       /* center content horizontally */
   min-height: 100vh;
   overflow: auto;
 }
