@@ -35,6 +35,7 @@
   </script>
 </head>
 <body>
+
   <!-- 5) Navbar -->
   <script type="module" src="/widgets/navbar.mjs"></script>
 
@@ -45,85 +46,92 @@
     <a href="/admin.html" class="admin-link">Admin</a>
   </div>
 
-  
+  <!-- 6) Container for deck + armory -->
   <div class="viewer-container">
-    <div class="armory"> … </div>
-    <aside id="heroDeck" class="hero-deck"></aside>
-  </div>
-  <!-- Main Armory -->
-  <div class="armory">
-    <!-- moved ! save button top-right inside .armory -->
-    <div id="save-share">
-      <button id="btnSaveBuild">Save</button>
-      <div id="shareLink" style="display:none; margin-top:8px;">
-        Shareable link: <a href="#" target="_blank" id="buildLink"></a>
-      </div>
-    </div>
 
-    <!-- Save modal -->
-    <dialog id="saveDialog" class="save-dialog">
-      <form method="dialog">
-        <label>
-          Build Name (max 18 chars):
-          <input
-            id="buildNameInput"
-            type="text"
-            maxlength="18"
-            required
-            placeholder="My awesome build"
-          >
-        </label>
-        <menu>
-          <button value="cancel">Cancel</button>
-          <button id="confirmSave" value="default">Save</button>
-        </menu>
-      </form>
-    </dialog>
+    <!-- HERO DECK (left sidebar) -->
+    <aside id="heroDeck" class="hero-deck">
+      <!-- JS will populate hero avatars here -->
+    </aside>
 
-    <!-- ARMORY HEADER -->
-    <div class="header">
-      <img src="" class="avatar" alt="Avatar">
-      <div class="titles">
-        <h1>The Armory</h1>
-        <h2></h2>
-      </div>
-      <div class="stats header-stats" id="statsContainer"></div>
-    </div>
+    <!-- MAIN ARMORY PANEL -->
+    <div class="armory">
 
-    <!-- ABILITY TABS -->
-    <div class="tabs" id="tabsContainer"></div>
+      <!-- Save button top-right -->
+      <div id="save-share">
+        <button id="btnSaveBuild">Save</button>
+        <div id="shareLink" style="display:none; margin-top:8px;">
+          Shareable link: <a href="#" target="_blank" id="buildLink"></a>
+        </div>
+      </div>
 
-    <!-- BUILD PANEL -->
-    <div class="left-panel">
-      <div class="build-cost">
-        <img src="" class="cost-icon" alt="Cost">
-        <span class="cost-value">0</span>
-      </div>
-      <div class="slots powers">
-        <div class="circle"></div><div class="circle"></div>
-        <div class="circle"></div><div class="circle"></div>
-      </div>
-      <div class="slots items">
-        <div class="circle"></div><div class="circle"></div>
-        <div class="circle"></div><div class="circle"></div>
-        <div class="circle"></div><div class="circle"></div>
-      </div>
-    </div>
+      <!-- Save modal -->
+      <dialog id="saveDialog" class="save-dialog">
+        <form method="dialog">
+          <label>
+            Build Name (max 18 chars):
+            <input
+              id="buildNameInput"
+              type="text"
+              maxlength="18"
+              required
+              placeholder="My awesome build"
+            >
+          </label>
+          <menu>
+            <button value="cancel">Cancel</button>
+            <button id="confirmSave" value="default">Save</button>
+          </menu>
+        </form>
+      </dialog>
 
-    <!-- ABILITY COLUMNS -->
-    <div class="column common">
-      <h3>Common</h3>
-      <div class="grid" id="commonGrid"></div>
-    </div>
-    <div class="column rare">
-      <h3>Rare</h3>
-      <div class="grid" id="rareGrid"></div>
-    </div>
-    <div class="column epic">
-      <h3>Epic</h3>
-      <div class="grid" id="epicGrid"></div>
-    </div>
-  </div>
+      <!-- ARMORY HEADER -->
+      <div class="header">
+        <img src="" class="avatar" alt="Avatar">
+        <div class="titles">
+          <h1>The Armory</h1>
+          <h2></h2>
+        </div>
+        <div class="stats header-stats" id="statsContainer"></div>
+      </div>
+
+      <!-- ABILITY TABS -->
+      <div class="tabs" id="tabsContainer"></div>
+
+      <!-- BUILD PANEL -->
+      <div class="left-panel">
+        <div class="build-cost">
+          <img src="" class="cost-icon" alt="Cost">
+          <span class="cost-value">0</span>
+        </div>
+        <div class="slots powers">
+          <div class="circle"></div><div class="circle"></div>
+          <div class="circle"></div><div class="circle"></div>
+        </div>
+        <div class="slots items">
+          <div class="circle"></div><div class="circle"></div>
+          <div class="circle"></div><div class="circle"></div>
+          <div class="circle"></div><div class="circle"></div>
+        </div>
+      </div>
+
+      <!-- ABILITY COLUMNS -->
+      <div class="column common">
+        <h3>Common</h3>
+        <div class="grid" id="commonGrid"></div>
+      </div>
+      <div class="column rare">
+        <h3>Rare</h3>
+        <div class="grid" id="rareGrid"></div>
+      </div>
+      <div class="column epic">
+        <h3>Epic</h3>
+        <div class="grid" id="epicGrid"></div>
+      </div>
+
+    </div><!-- /.armory -->
+
+  </div><!-- /.viewer-container -->
 
   <!-- Tooltip -->
   <div class="tooltip" id="tooltip"></div>
@@ -134,7 +142,7 @@
     <div id="communityGrid" class="community-grid"></div>
   </section>
 
-  <!-- 6) Static data & logic -->
+  <!-- 7) Static data & logic -->
   <script src="/initialData.js"></script>
   <script src="/viewerfunctions.js"></script>
 </body>
