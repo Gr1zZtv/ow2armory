@@ -218,6 +218,31 @@ document.addEventListener("DOMContentLoaded", () => {
     renderStats(calculateStats(hero));
   }
 
+  // ── RENDER THE HERO-DECK SIDEBAR ─────────────────────────────────────────
+  function renderHeroDeck() {
+    const deck = document.getElementById('heroDeck');
+    deck.innerHTML = '';
+    data.heroes.forEach((h,i) => {
+      const img = document.createElement('img');
+      img.src = h.avatar || '/images/default-avatar.png';
+      img.alt = h.name;
+      img.className = 'deck-hero' + (i===selectedHeroIdx ? ' active' : '');
+      img.onclick = () => {
+        selectedHeroIdx = i;
+        localStorage.setItem('selectedHeroIdx', i);
+        selectedTabIdx = 0;
+        localStorage.setItem('selectedTabIdx', 0);
+        // re-render everything for the new hero:
+        renderTabs();
+        renderAbilities();
+        renderBuildSlots();
+        renderStats(calculateStats(data.heroes[i]));
+        renderHeroDeck();
+      };
+      deck.appendChild(img);
+    });
+  }
+
   // ── SAVE & SHARE WITH NAME MODAL ─────────────────────────────────────────
   function bindSaveShare() {
     const btn     = document.getElementById('btnSaveBuild');
@@ -287,7 +312,6 @@ document.addEventListener("DOMContentLoaded", () => {
       pool.filter(a=> b.powers.includes(a.name));
     data.heroes[selectedHeroIdx].buildItems  =
       pool.filter(a=> b.items.includes(a.name));
-    updateHeader();
     renderTabs();
     renderAbilities();
     renderBuildSlots();
@@ -311,36 +335,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── INIT VIEWER & HOOKS ──────────────────────────────────────────────────
   function initViewer() {
+    // populate hero select dropdown (you can hide this if you like)
     const sel = document.getElementById('heroSelect');
     sel.innerHTML = data.heroes
       .map((h,i)=>`<option value="${i}">${h.name}</option>`)
       .join('');
     sel.value = selectedHeroIdx;
-
-    // ── UPDATE HEADER AVATAR & NAME ───────────────────────────────────────
-    function updateHeader() {
-      const hero = data.heroes[selectedHeroIdx] || {};
-      document.querySelector('.header .avatar')
-              .src = hero.avatar || '/images/default-avatar.png';
-      document.querySelector('.titles h2')
-              .textContent = hero.name || '';
-    }
-
     sel.onchange = () => {
       selectedHeroIdx = +sel.value;
       localStorage.setItem('selectedHeroIdx', selectedHeroIdx);
       selectedTabIdx = 0;
       localStorage.setItem('selectedTabIdx', 0);
-
-      updateHeader();
       renderTabs();
       renderAbilities();
       renderBuildSlots();
       renderStats(calculateStats(data.heroes[selectedHeroIdx]));
+      renderHeroDeck();
     };
 
-    // initial render
-    updateHeader();
     renderTabs();
     renderAbilities();
     renderBuildSlots();
@@ -349,6 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
     bindSaveShare();
     loadBuildFromURL();
     renderCommunity();
+    renderHeroDeck();
   }
 
   initViewer();
