@@ -287,6 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
       pool.filter(a=> b.powers.includes(a.name));
     data.heroes[selectedHeroIdx].buildItems  =
       pool.filter(a=> b.items.includes(a.name));
+    updateHeader();
     renderTabs();
     renderAbilities();
     renderBuildSlots();
@@ -315,17 +316,31 @@ document.addEventListener("DOMContentLoaded", () => {
       .map((h,i)=>`<option value="${i}">${h.name}</option>`)
       .join('');
     sel.value = selectedHeroIdx;
+
+    // ── UPDATE HEADER AVATAR & NAME ───────────────────────────────────────
+    function updateHeader() {
+      const hero = data.heroes[selectedHeroIdx] || {};
+      document.querySelector('.header .avatar')
+              .src = hero.avatar || '/images/default-avatar.png';
+      document.querySelector('.titles h2')
+              .textContent = hero.name || '';
+    }
+
     sel.onchange = () => {
       selectedHeroIdx = +sel.value;
       localStorage.setItem('selectedHeroIdx', selectedHeroIdx);
       selectedTabIdx = 0;
       localStorage.setItem('selectedTabIdx', 0);
+
+      updateHeader();
       renderTabs();
       renderAbilities();
       renderBuildSlots();
       renderStats(calculateStats(data.heroes[selectedHeroIdx]));
     };
 
+    // initial render
+    updateHeader();
     renderTabs();
     renderAbilities();
     renderBuildSlots();
