@@ -232,9 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem('selectedHeroIdx', i);
         selectedTabIdx = 0;
         localStorage.setItem('selectedTabIdx', 0);
-        // update main avatar
-        document.querySelector('.header .avatar').src = h.avatar;
-        // re-render panels
+        document.querySelector('.header .avatar').src = h.avatar || '/images/default-avatar.png';
         renderTabs();
         renderAbilities();
         renderBuildSlots();
@@ -309,9 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const b    = snap.data();
     selectedHeroIdx = data.heroes.findIndex(h=>h.name===b.character);
     const hero = data.heroes[selectedHeroIdx];
-    // update main avatar
-    document.querySelector('.header .avatar').src = hero.avatar;
-    // fill slots
+    document.querySelector('.header .avatar').src = hero.avatar || '/images/default-avatar.png';
     const pool = [...data.globalAbilities, ...hero.abilities];
     hero.buildPowers = pool.filter(a=> b.powers.includes(a.name));
     hero.buildItems  = pool.filter(a=> b.items.includes(a.name));
@@ -323,22 +319,87 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── COMMUNITY GALLERY ─────────────────────────────────────────────────────
   async function renderCommunity() {
-    const grid  = document.getElementById('communityGrid');
-    const snaps = await db.collection('builds').get();
-    const all   = snaps.docs.map(d=>({ id:d.id, ...d.data() }));
-    grid.innerHTML = all.map(b=>`
-      <div class="community-card">
-        <strong>${b.character}</strong> by ${b.creator}<br>
-        Powers: ${b.powers.join(', ')}<br>
-        Items:  ${b.items.join(', ')}<br>
-        <a href="viewer.html?buildId=${b.id}">Load Build</a>
-      </div>
-    `).join('');
+    const container = document.getElementById('communityGrid');
+    container.innerHTML = '<p style="color:#888;">Loading community builds…</p>';
+
+    try {
+      const snaps = await db
+        .collection('builds')
+        .orderBy('timestamp', 'desc')
+        .limit(12)
+        .get();
+
+      if (snaps.empty) {
+        container.innerHTML =
+          '<p style="color:#888;">No community builds yet.</p>';
+        return;
+      }
+
+      const heroes  = data.heroes;
+      const globals = data.globalAbilities;
+
+      container.innerHTML = '';
+      snaps.docs.forEach(docSnap => {
+        const b       = docSnap.data();
+        const heroDef = heroes.find(h => h.name === b.character) || {};
+        const pool    = [...globals, ...(heroDef.abilities||[])];
+
+        const powerObjs = pool.filter(a => b.powers.includes(a.name));
+        const itemObjs  = pool.filter(a => b.items .includes(a.name));
+
+        const totalCost = powerObjs.reduce((sum,a)=>sum+a.cost,0)
+                        + itemObjs .reduce((sum,a)=>sum+a.cost,0);
+
+        const squares = Array(4).fill().map((_,i) => {
+          const a = powerObjs[i];
+          return `
+            <div class="square">
+              <img class="icon"
+                   src="${a ? a.icon : 'images/placeholders/sq.png'}"
+                   alt="">
+            </div>`;
+        }).join('');
+
+        const circles = Array(6).fill().map((_,i) => {
+          const a = itemObjs[i];
+          return `
+            <div class="circle">
+              <img class="icon"
+                   src="${a ? a.icon : 'images/placeholders/circ.png'}"
+                   alt="">
+            </div>`;
+        }).join('');
+
+        const card = document.createElement('div');
+        card.className = 'build-card';
+        card.innerHTML = `
+          <div class="card-header">
+            <img src="${heroDef.avatar||'/images/default-avatar.png'}"
+                 alt="${b.character}">
+            <h3>${b.character}</h3>
+            <a class="btn-view"
+               href="viewer.html?buildId=${docSnap.id}">
+              View
+            </a>
+          </div>
+          <div class="card-body">
+            <div class="squares">${squares}</div>
+            <div class="circles">${circles}</div>
+            <div class="cost">Total: ${totalCost.toLocaleString()}</div>
+          </div>`;
+        container.appendChild(card);
+      });
+
+    } catch(err) {
+      console.error('Error loading community builds:', err);
+      container.innerHTML =
+        '<p style="color:#f88;">Failed to load community builds.</p>';
+    }
   }
 
   // ── INIT VIEWER & HOOKS ──────────────────────────────────────────────────
   function initViewer() {
-    // initial main avatar
+    // set initial main avatar
     document.querySelector('.header .avatar').src =
       data.heroes[selectedHeroIdx].avatar || '/images/default-avatar.png';
 
