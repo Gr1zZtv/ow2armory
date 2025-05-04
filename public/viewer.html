@@ -5,11 +5,11 @@
   <title>The Armory — Viewer</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
 
-  <!-- 1) Nav + viewer styles -->
+  <!-- 1) Site navbar & viewer styles -->
   <link rel="stylesheet" href="/index.css">
   <link rel="stylesheet" href="/viewerstyles.css">
 
-  <!-- 2) env.js -->
+  <!-- 2) Expose env vars -->
   <script src="/env.js"></script>
 
   <!-- 3) Firebase compat SDKs -->
@@ -39,16 +39,13 @@
   <!-- 5) Navbar -->
   <script type="module" src="/widgets/navbar.mjs"></script>
 
-  <!-- Hero selector (we’ll populate thumbnails & names via JS into #heroDeck) -->
-  <!-- moved into the aside below -->
-
-  <!-- 6) Container for armory + hero deck -->
+  <!-- 6) Viewer container: main armory + hero deck on the right -->
   <div class="viewer-container">
 
-    <!-- MAIN ARMORY PANEL -->
+    <!-- Main Armory Panel -->
     <div class="armory">
 
-      <!-- Save button top-right -->
+      <!-- Save button (top-right) -->
       <div id="save-share">
         <button id="btnSaveBuild">Save</button>
         <div id="shareLink" style="display:none; margin-top:8px;">
@@ -56,18 +53,12 @@
         </div>
       </div>
 
-      <!-- Save modal -->
+      <!-- Save modal dialog -->
       <dialog id="saveDialog" class="save-dialog">
         <form method="dialog">
           <label>
             Build Name (max 18 chars):
-            <input
-              id="buildNameInput"
-              type="text"
-              maxlength="18"
-              required
-              placeholder="My awesome build"
-            >
+            <input id="buildNameInput" type="text" maxlength="18" required placeholder="My awesome build">
           </label>
           <menu>
             <button value="cancel">Cancel</button>
@@ -76,20 +67,19 @@
         </form>
       </dialog>
 
-      <!-- ARMORY HEADER -->
+      <!-- Header -->
       <div class="header">
         <img src="" class="avatar" alt="Avatar">
         <div class="titles">
           <h1>The Armory</h1>
-          <!-- subtitle removed -->
         </div>
         <div class="stats header-stats" id="statsContainer"></div>
       </div>
 
-      <!-- ABILITY TABS -->
+      <!-- Ability Tabs -->
       <div class="tabs" id="tabsContainer"></div>
 
-      <!-- BUILD PANEL -->
+      <!-- Build Panel -->
       <div class="left-panel">
         <div class="build-cost">
           <img src="" class="cost-icon" alt="Cost">
@@ -106,7 +96,7 @@
         </div>
       </div>
 
-      <!-- ABILITY COLUMNS -->
+      <!-- Ability Columns -->
       <div class="column common">
         <h3>Common</h3>
         <div class="grid" id="commonGrid"></div>
@@ -122,9 +112,9 @@
 
     </div><!-- /.armory -->
 
-    <!-- HERO DECK (right sidebar) -->
+    <!-- Hero-deck sidebar (right) -->
     <aside id="heroDeck" class="hero-deck">
-      <!-- JS will inject hero avatars + names here -->
+      <!-- Thumbnails + names injected via JS -->
     </aside>
 
   </div><!-- /.viewer-container -->
@@ -138,7 +128,7 @@
     <div id="communityGrid" class="community-grid"></div>
   </section>
 
-  <!-- 7) Static data & logic -->
+  <!-- 7) Static data + viewer logic -->
   <script src="/initialData.js"></script>
   <script src="/viewerfunctions.js"></script>
 </body>
