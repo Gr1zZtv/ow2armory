@@ -137,7 +137,6 @@ document.addEventListener("DOMContentLoaded", () => {
           wrap.className = 'ability';
           const card = document.createElement('div');
           card.className = 'card';
-          card.__ability = a;
           card.innerHTML = `<img src="${a.icon}" alt="">`;
           card.addEventListener('click',    ()=> purchaseAbility(a));
           card.addEventListener('mouseover',()=> showTooltip(a));
@@ -172,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.onmouseover = ()=> a && showTooltip(a);
         el.onmousemove = onMouseMove;
         el.onmouseout  = hideTooltip;
-        el.onclick     = ()=> {
+        el.onclick     = () => {
           if (!a) return;
           hero.buildPowers.splice(i,1);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -192,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
         el.onmouseover = ()=> a && showTooltip(a);
         el.onmousemove = onMouseMove;
         el.onmouseout  = hideTooltip;
-        el.onclick     = ()=> {
+        el.onclick     = () => {
           if (!a) return;
           hero.buildItems.splice(i,1);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -204,15 +203,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── PURCHASE LOGIC ────────────────────────────────────────────────────────
   function purchaseAbility(a) {
-    const hero   = data.heroes[selectedHeroIdx];
-    const isPower= hero.tabs[selectedTabIdx]==='Power';
-    if (isPower) {
-      if (hero.buildPowers.length>=4) return alert('Power slots full');
-      hero.buildPowers.push(a);
-    } else {
-      if (hero.buildItems.length>=6)  return alert('Item slots full');
-      hero.buildItems.push(a);
+    const hero    = data.heroes[selectedHeroIdx];
+    const isPower = hero.tabs[selectedTabIdx] === 'Power';
+    const slotArr = isPower ? 'buildPowers' : 'buildItems';
+    const max     = isPower ? 4 : 6;
+    if (hero[slotArr].length >= max) {
+      return alert(`${isPower ? 'Power' : 'Item'} slots full`);
     }
+    hero[slotArr].push(a);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     renderBuildSlots();
     renderStats(calculateStats(hero));
@@ -223,23 +221,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const deck = document.getElementById('heroDeck');
     deck.innerHTML = '';
     data.heroes.forEach((h,i) => {
-      const img = document.createElement('img');
-      img.src = h.avatar || '/images/default-avatar.png';
-      img.alt = h.name;
-      img.className = 'deck-hero' + (i===selectedHeroIdx ? ' active' : '');
-      img.onclick = () => {
+      const el = document.createElement('div');
+      el.className = 'deck-hero' + (i===selectedHeroIdx ? ' active' : '');
+      el.innerHTML = `
+        <img src="${h.avatar || '/images/default-avatar.png'}" alt="${h.name}">
+        <span>${h.name}</span>
+      `;
+      el.onclick = () => {
         selectedHeroIdx = i;
         localStorage.setItem('selectedHeroIdx', i);
         selectedTabIdx = 0;
         localStorage.setItem('selectedTabIdx', 0);
-        document.querySelector('.header .avatar').src = h.avatar || '/images/default-avatar.png';
+        // update avatar
+        document.querySelector('.header .avatar').src =
+          h.avatar || '/images/default-avatar.png';
         renderTabs();
         renderAbilities();
         renderBuildSlots();
         renderStats(calculateStats(h));
         renderHeroDeck();
       };
-      deck.appendChild(img);
+      deck.appendChild(el);
     });
   }
 
@@ -307,20 +309,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const b    = snap.data();
     selectedHeroIdx = data.heroes.findIndex(h=>h.name===b.character);
     const hero = data.heroes[selectedHeroIdx];
-    document.querySelector('.header .avatar').src = hero.avatar || '/images/default-avatar.png';
+    document.querySelector('.header .avatar').src =
+      hero.avatar || '/images/default-avatar.png';
     const pool = [...data.globalAbilities, ...hero.abilities];
     hero.buildPowers = pool.filter(a=> b.powers.includes(a.name));
-    hero.buildItems  = pool.filter(a=> b.items.includes(a.name));
+    hero.buildItems  = pool.filter(a=> b.items .includes(a.name));
     renderTabs();
     renderAbilities();
     renderBuildSlots();
     renderStats(calculateStats(hero));
   }
 
-  // ── COMMUNITY GALLERY ─────────────────────────────────────────────────────
+  // ── COMMUNITY GALLERY (as card grid) ─────────────────────────────────────
   async function renderCommunity() {
-    const container = document.getElementById('communityGrid');
-    container.innerHTML = '<p style="color:#888;">Loading community builds…</p>';
+    const grid = document.getElementById('communityGrid');
+    grid.innerHTML = '<p style="color:#888;">Loading community builds…</p>';
 
     try {
       const snaps = await db
@@ -330,23 +333,21 @@ document.addEventListener("DOMContentLoaded", () => {
         .get();
 
       if (snaps.empty) {
-        container.innerHTML =
-          '<p style="color:#888;">No community builds yet.</p>';
+        grid.innerHTML = '<p style="color:#888;">No community builds yet.</p>';
         return;
       }
 
       const heroes  = data.heroes;
       const globals = data.globalAbilities;
+      grid.innerHTML = '';
 
-      container.innerHTML = '';
-      snaps.docs.forEach(docSnap => {
+      snaps.forEach(docSnap => {
         const b       = docSnap.data();
         const heroDef = heroes.find(h => h.name === b.character) || {};
         const pool    = [...globals, ...(heroDef.abilities||[])];
 
         const powerObjs = pool.filter(a => b.powers.includes(a.name));
         const itemObjs  = pool.filter(a => b.items .includes(a.name));
-
         const totalCost = powerObjs.reduce((sum,a)=>sum+a.cost,0)
                         + itemObjs .reduce((sum,a)=>sum+a.cost,0);
 
@@ -378,28 +379,26 @@ document.addEventListener("DOMContentLoaded", () => {
                  alt="${b.character}">
             <h3>${b.character}</h3>
             <a class="btn-view"
-               href="viewer.html?buildId=${docSnap.id}">
-              View
-            </a>
+               href="viewer.html?buildId=${docSnap.id}">View</a>
           </div>
           <div class="card-body">
             <div class="squares">${squares}</div>
             <div class="circles">${circles}</div>
             <div class="cost">Total: ${totalCost.toLocaleString()}</div>
           </div>`;
-        container.appendChild(card);
+
+        grid.appendChild(card);
       });
 
     } catch(err) {
       console.error('Error loading community builds:', err);
-      container.innerHTML =
-        '<p style="color:#f88;">Failed to load community builds.</p>';
+      grid.innerHTML = '<p style="color:#f88;">Failed to load community builds.</p>';
     }
   }
 
   // ── INIT VIEWER & HOOKS ──────────────────────────────────────────────────
   function initViewer() {
-    // set initial main avatar
+    // set initial avatar
     document.querySelector('.header .avatar').src =
       data.heroes[selectedHeroIdx].avatar || '/images/default-avatar.png';
 
