@@ -402,11 +402,11 @@ body {
 .save-dialog button:hover {
   background: #e85e01;
 }
-/* Make the community grid a responsive card layout */
+
+/* COMMUNITY GRID */
 .community-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
-  margin: 0;
-  padding: 0;
+  margin: 40px 0;
 }
