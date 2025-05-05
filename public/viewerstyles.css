@@ -313,7 +313,7 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.7);
   display: none;
 }
-/* ... tooltip inner styling omitted for brevity ... */
+/* … tooltip inner styling … */
 
 /* SAVE-DIALOG */
 .save-dialog {
@@ -323,7 +323,7 @@ body {
   background: #1a1a2e;
   color: #fff;
 }
-/* ... save-dialog inner styling omitted ... */
+/* … save-dialog inner styling … */
 
 /* COMMUNITY SECTION WRAPPER */
 #community {
@@ -370,12 +370,23 @@ body {
   gap: 8px;
   margin-top: 12px;
 }
-.build-card .card-body .square,
+
+/* SLOTS: rounded-square for powers, circle for items */
+.build-card .card-body .square {
+  width: 48px;
+  height: 48px;
+  border: 2px dashed rgba(255,255,255,0.3);
+  border-radius: 8px;               /* rounded square corners */
+  background: rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .build-card .card-body .circle {
   width: 48px;
   height: 48px;
   border: 2px dashed rgba(255,255,255,0.3);
-  border-radius: 50%;
+  border-radius: 50%;               /* perfect circle */
   background: rgba(0,0,0,0.1);
   display: flex;
   align-items: center;
