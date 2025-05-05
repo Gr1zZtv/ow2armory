@@ -313,7 +313,7 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.7);
   display: none;
 }
-/* … tooltip inner styling … */
+/* …tooltip inner styling… */
 
 /* SAVE-DIALOG */
 .save-dialog {
@@ -323,7 +323,7 @@ body {
   background: #1a1a2e;
   color: #fff;
 }
-/* … save-dialog inner styling … */
+/* …save-dialog inner styling… */
 
 /* COMMUNITY SECTION WRAPPER */
 #community {
@@ -371,33 +371,41 @@ body {
   margin-top: 12px;
 }
 
-/* SLOTS: rounded-square for powers, circle for items */
+/* FORCE FIXED 48×48 SIZE FOR COMMUNITY SLOTS */
+.build-card .card-body .square,
+.build-card .card-body .circle {
+  flex: 0 0 48px;      /* prevent flex-wrapping from stretching them */
+}
+
 .build-card .card-body .square {
   width: 48px;
   height: 48px;
   border: 2px dashed rgba(255,255,255,0.3);
-  border-radius: 8px;               /* rounded square corners */
+  border-radius: 8px;   /* rounded-corner square */
   background: rgba(0,0,0,0.1);
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .build-card .card-body .circle {
   width: 48px;
   height: 48px;
   border: 2px dashed rgba(255,255,255,0.3);
-  border-radius: 50%;               /* perfect circle */
+  border-radius: 50%;   /* perfect circle */
   background: rgba(0,0,0,0.1);
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .build-card .card-body .square img,
 .build-card .card-body .circle img {
   width: 80%;
   height: 80%;
   object-fit: cover;
 }
+
 .build-card .card-body .cost {
   width: 100%;
   text-align: right;
