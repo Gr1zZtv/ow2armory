@@ -23,7 +23,7 @@ body {
 .viewer-container {
   display: flex;
   align-items: flex-start;
-  justify-content: flex-start;  /* anchor the Armory to the left */
+  justify-content: center;  /* anchor the Armory to the left */
   width: 100%;
   padding: 16px;
   box-sizing: border-box;
