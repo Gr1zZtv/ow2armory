@@ -1,7 +1,7 @@
 /* viewerstyles.css */
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap');
 
-/* RESET & BASE */
+/* ─────────── RESET & BASE ─────────── */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -12,27 +12,27 @@ body {
   font-family: 'Oswald', sans-serif;
   color: #fff;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: column;    /* stack navbar above content */
+  align-items: center;       /* center content horizontally */
   min-height: 100vh;
-  overflow-x: hidden; /* viewer-container will scroll horizontally if needed */
+  overflow-x: hidden;        /* viewer-container will scroll if needed */
 }
 
-/* WRAP ARMORY + HERO DECK */
+/* ─────────── WRAP ARMORY + HERO DECK ─────────── */
 .viewer-container {
   display: flex;
   align-items: flex-start;
-  justify-content: center;  /* center the whole viewer + sidebar */
+  justify-content: center;   /* center Armory + sidebar */
   width: 100%;
   padding: 16px;
-  overflow-x: auto;         /* allow horizontal scroll */
+  overflow-x: auto;          /* allow horizontal scrolling */
 }
 
-/* HERO-DECK SIDEBAR */
+/* ─────────── HERO-DECK SIDEBAR ─────────── */
 .hero-deck {
   width: 80px;
   margin-left: 24px;
-  margin-top: 128px;         /* line up under the Armory header */
+  margin-top: 128px;         /* line up under Armory header */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -52,7 +52,7 @@ body {
   border-color: #f96302;
 }
 
-/* HERO SELECTOR (top-right) */
+/* ─────────── HERO SELECTOR (top-right) ─────────── */
 .hero-selector {
   position: absolute;
   top: 16px;
@@ -64,7 +64,7 @@ body {
   padding: 4px;
 }
 
-/* ARMORY PANEL */
+/* ─────────── ARMORY PANEL ─────────── */
 .armory {
   position: relative;
   width: 1220px;
@@ -101,7 +101,7 @@ body {
   background: #e85e01;
 }
 
-/* HEADER */
+/* ─────────── HEADER ─────────── */
 .header {
   grid-column: 1 / -1;
   grid-row: 1 / 2;
@@ -125,13 +125,13 @@ body {
   text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
 }
 
-/* STATS IN HEADER */
+/* ─────────── STATS IN HEADER ─────────── */
 .stats.header-stats {
   margin-left: auto;
   margin-right: 100px;
   margin-top: 85px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2,1fr);
   gap: 4px 8px;
   padding: 4px 8px;
   background: rgba(15,25,39,0.6);
@@ -163,7 +163,7 @@ body {
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
 }
 .stats.header-stats .bar::after {
-  content: attr(data-percent) '%';
+  content: attr(data-percent)'%';
   position: absolute;
   right: 4px;
   top: 50%;
@@ -172,12 +172,12 @@ body {
 }
 .stats.header-stats .fill {
   height: 100%;
-  background: linear-gradient(90deg, #f96302, #ffab60);
+  background: linear-gradient(90deg,#f96302,#ffab60);
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
   transition: width .3s ease;
 }
 
-/* TABS */
+/* ─────────── TABS ─────────── */
 .tabs {
   grid-column: 1 / -1;
   grid-row: 2 / 3;
@@ -204,7 +204,7 @@ body {
   box-shadow: 0 2px 8px rgba(249,99,2,0.7);
 }
 
-/* BUILD PANEL */
+/* ─────────── BUILD PANEL ─────────── */
 .left-panel {
   grid-column: 1 / 2;
   grid-row: 3 / 4;
@@ -239,7 +239,7 @@ body {
   border-style: solid;
 }
 
-/* ABILITY COLUMNS */
+/* ─────────── ABILITY COLUMNS ─────────── */
 .column {
   padding: 24px;
   background: rgba(15,25,39,0.6);
@@ -259,12 +259,12 @@ body {
 .rare   { grid-column: 3 / 4; grid-row: 3 / 4; }
 .epic   { grid-column: 4 / 5; grid-row: 3 / 4; }
 
-/* ABILITY GRID */
+/* ─────────── ABILITY GRID ─────────── */
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, fit-content(64px));
+  grid-template-columns: repeat(3,fit-content(64px));
   grid-auto-rows: fit-content(80px);
-  justify-content: center;
+  justify-content: center; 
   gap: 12px 16px;
 }
 .ability {
@@ -298,7 +298,7 @@ body {
 .rare   .card { background: #1e5a87; }
 .epic   .card { background: #7b3b9d; }
 
-/* TOOLTIP */
+/* ─────────── TOOLTIP ─────────── */
 .tooltip {
   position: absolute;
   background: rgba(15,25,39,0.95);
@@ -313,9 +313,9 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.7);
   display: none;
 }
-/* …tooltip inner styling… */
+/* …inner tooltip styling here… */
 
-/* SAVE-DIALOG */
+/* ─────────── SAVE-DIALOG ─────────── */
 .save-dialog {
   border: none;
   border-radius: 8px;
@@ -323,83 +323,106 @@ body {
   background: #1a1a2e;
   color: #fff;
 }
-/* …save-dialog inner styling… */
+/* …inner save-dialog styling here… */
 
-/* COMMUNITY SECTION WRAPPER */
+/* ─────────── COMMUNITY SECTION WRAPPER ─────────── */
 #community {
   width: 100%;
   max-width: 1220px;    /* match Armory width */
-  margin: 0 auto;       /* center under the Armory panel */
-  padding: 0 16px;      /* same side-gutters as viewer-container */
+  margin: 0 auto;       /* center under Armory panel */
+  padding: 0 16px;      /* same gutters as viewer-container */
   box-sizing: border-box;
 }
 
-/* COMMUNITY GRID (4-across responsive cards) */
+/* ─────────── COMMUNITY GRID (4-across responsive cards) ─────────── */
 .community-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
   gap: 20px;
   margin: 40px 0;
 }
 
-/* COMMUNITY BUILD CARD STYLING */
+/* ─────────── COMMUNITY BUILD CARD ─────────── */
 .build-card {
-  background: rgba(15,25,39,0.8);
-  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(15,25,39,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.7);
-  padding: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .build-card .card-header {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 12px;
+  background: rgba(0,0,0,0.2);
+}
+.build-card .card-header img {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
 }
 .build-card .card-header h3 {
   margin: 0;
-  font-size: 20px;
-  flex: 1;
+  font-size: 1.1rem;
 }
 .build-card .btn-view {
+  margin-left: auto;
   color: #8ab4f8;
   text-decoration: none;
 }
 
-/* --- important change: use a 4×2 grid for the squares/circles --- */
+/* EXACT INDEX.CSS BODY LAYOUT FOR CARDS */
 .build-card .card-body {
-  display: grid;
-  grid-template-columns: repeat(4, 48px);
-  grid-template-rows: repeat(2, 48px);
-  gap: 8px;
-  margin-top: 12px;
+  padding: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
-.build-card .card-body .square,
-.build-card .card-body .circle {
-  width: 48px;
-  height: 48px;
-  border: 2px dashed rgba(255,255,255,0.3);
-  background: rgba(0,0,0,0.1);
+.build-card .card-body .squares {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.build-card .card-body .square {
+  flex: 1;
+  height: 60px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.build-card .card-body .square {
-  border-radius: 8px;
+.build-card .card-body .square .icon {
+  max-width: 100%;
+  max-height: 100%;
+}
+.build-card .card-body .circles {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+  justify-items: center;
 }
 .build-card .card-body .circle {
+  width: 48px;
+  height: 48px;
+  background: rgba(0,0,0,0.2);
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.build-card .card-body .square img,
-.build-card .card-body .circle img {
-  width: 80%;
-  height: 80%;
-  object-fit: cover;
+.build-card .card-body .circle .icon {
+  max-width: 70%;
+  max-height: 70%;
 }
-
-/* total row */
-.build-card .card-body + .cost {
-  grid-column: 1 / -1;
+.build-card .card-body .cost {
+  margin-top: auto;
   text-align: right;
-  margin-top: 8px;
   font-weight: bold;
+  font-size: 1rem;
+  color: #ddd;
 }
