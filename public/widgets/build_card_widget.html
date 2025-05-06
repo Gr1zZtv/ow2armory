@@ -2,9 +2,9 @@
 <template id="build-card-template">
   <div class="build-card">
     <div class="card-header">
-      <img class="avatar" src="" alt="Avatar">
-      <h3 class="character-name"></h3>
-      <a class="btn-view" href="">View</a>
+      <img class="hero-avatar" src="" alt="Hero avatar">
+      <h3 class="hero-name"></h3>
+      <a class="btn-view" href="#">View</a>
     </div>
     <div class="card-body">
       <div class="squares"></div>
@@ -15,60 +15,145 @@
 </template>
 
 <script type="module">
-/**
- * Takes an object:
- *   {
- *     id,            // build ID (string)
- *     avatar,        // hero avatar URL
- *     character,     // hero name
- *     powers:  [a],  // array of ability objects { name, icon }
- *     items:   [b],  // array of item objects { name, icon }
- *     totalCost      // number
- *   }
- * Returns a DOM node for insertion.
- */
-export function renderBuildCard({ 
-  id, avatar, character, powers, items, totalCost 
-}) {
-  // clone template
-  const tpl = document.getElementById('build-card-template').content;
-  const el  = tpl.cloneNode(true).querySelector('.build-card');
+  /**
+   * Renders a build‐card DOM element from the given data.
+   * @param {{id:string,avatar:string,character:string,powers: {icon:string,name:string}[],items: {icon:string,name:string}[],totalCost:number}} data
+   * @returns {HTMLElement} the `.build-card` element
+   */
+  export function renderBuildCard(data) {
+    const tpl = document.getElementById('build-card-template');
+    const frag = tpl.content.cloneNode(true);
+    const card = frag.querySelector('.build-card');
 
-  // header
-  el.querySelector('.avatar').src       = avatar;
-  el.querySelector('.avatar').alt       = character;
-  el.querySelector('.character-name').textContent = character;
-  const viewLink = el.querySelector('.btn-view');
-  viewLink.href            = `viewer.html?buildId=${id}`;
-  viewLink.textContent     = 'View';
+    // — HEADER —
+    const imgEl  = frag.querySelector('.hero-avatar');
+    const nameEl = frag.querySelector('.hero-name');
+    const btn    = frag.querySelector('.btn-view');
+    imgEl.src    = data.avatar;
+    imgEl.alt    = data.character;
+    nameEl.textContent = data.character;
+    btn.href     = `viewer.html?buildId=${data.id}`;
+    btn.textContent = 'View';
 
-  // squares (4 slots)
-  const sq = el.querySelector('.squares');
-  sq.innerHTML = powers
-    .slice(0,4)
-    .map(a => `
-      <div class="square">
-        <img class="icon" src="${a.icon}" alt="${a.name}">
-      </div>`)
-    .join('')
-    + Array(Math.max(0,4-powers.length)).fill().map(()=>`
-      <div class="square"></div>`).join('');
+    // — POWERS (squares) —
+    const sqContainer = frag.querySelector('.squares');
+    for (let i = 0; i < 4; i++) {
+      const slot = document.createElement('div');
+      slot.className = 'square';
+      if (data.powers[i]) {
+        const icon = document.createElement('img');
+        icon.className = 'icon';
+        icon.src       = data.powers[i].icon;
+        icon.alt       = data.powers[i].name;
+        slot.appendChild(icon);
+      }
+      sqContainer.appendChild(slot);
+    }
 
-  // circles (6 slots)
-  const cir = el.querySelector('.circles');
-  cir.innerHTML = items
-    .slice(0,6)
-    .map(a => `
-      <div class="circle">
-        <img class="icon" src="${a.icon}" alt="${a.name}">
-      </div>`)
-    .join('')
-    + Array(Math.max(0,6-items.length)).fill().map(()=>`
-      <div class="circle"></div>`).join('');
+    // — ITEMS (circles) —
+    const ciContainer = frag.querySelector('.circles');
+    for (let i = 0; i < 6; i++) {
+      const slot = document.createElement('div');
+      slot.className = 'circle';
+      if (data.items[i]) {
+        const icon = document.createElement('img');
+        icon.className = 'icon';
+        icon.src       = data.items[i].icon;
+        icon.alt       = data.items[i].name;
+        slot.appendChild(icon);
+      }
+      ciContainer.appendChild(slot);
+    }
 
-  // cost
-  el.querySelector('.cost').textContent = `Total: ${totalCost.toLocaleString()}`;
+    // — TOTAL COST —
+    frag.querySelector('.cost').textContent = `Total: ${data.totalCost.toLocaleString()}`;
 
-  return el;
-}
+    return card;
+  }
 </script>
+
+<style>
+  /* build_card_widget.css */
+  .build-card {
+    background: rgba(15, 25, 39, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+  }
+  .card-header .hero-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+  }
+  .card-header .hero-name {
+    margin: 0;
+    font-size: 1.1rem;
+    flex: 1;
+  }
+  .card-header .btn-view {
+    color: #8ab4f8;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .card-body {
+    padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .squares {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .square {
+    flex: 1;
+    height: 60px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .square .icon {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  .circles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+    justify-items: center;
+  }
+  .circle {
+    width: 48px;
+    height: 48px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .circle .icon {
+    max-width: 70%;
+    max-height: 70%;
+  }
+  .cost {
+    margin-top: auto;
+    text-align: right;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #ddd;
+  }
+</style>
