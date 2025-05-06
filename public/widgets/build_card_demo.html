@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Build-Card Widget Demo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <style>
+    body {
+      background: #0b1625;
+      color: #fff;
+      font-family: 'Oswald', sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 16px;
+    }
+    #demoGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
+      gap: 20px;
+    }
+    /* bring in your widget’s CSS rules for .build-card if needed: */
+    /* e.g. @import url('/viewerstyles.css'); */
+  </style>
+
+  <!-- import the build‐card widget -->
+  <script type="module" src="./build_card_widget.html"></script>
+</head>
+<body>
+
+  <h1>Build-Card Widget Demo</h1>
+  <p>If you see three cards below, your widget is working!</p>
+
+  <div id="demoGrid"></div>
+
+  <script type="module">
+    import { renderBuildCard } from './build_card_widget.html';
+
+    // sample data
+    const samples = [
+      {
+        id:        'demo1',
+        avatar:    '/images/heroes/moira.png',
+        character: 'Moira',
+        powers: [
+          { name:'Biotic Orb', icon:'/images/abilities/orb.png' },
+          { name:'Fade',       icon:'/images/abilities/fade.png' },
+          { name:'Biotic Grasp',icon:'/images/abilities/grasp.png' }
+        ],
+        items: [
+          { name:'Grenade', icon:'/images/items/grenade.png' },
+          { name:'Shield',  icon:'/images/items/shield.png' }
+        ],
+        totalCost:  5000
+      },
+      {
+        id:        'demo2',
+        avatar:    '/images/heroes/ana.png',
+        character: 'Ana',
+        powers: [
+          { name:'Sleep Dart', icon:'/images/abilities/sleep.png' },
+          { name:'Biotic Rifle',icon:'/images/abilities/rifle.png' }
+        ],
+        items: [
+          { name:'Medpack', icon:'/images/items/medpack.png' }
+        ],
+        totalCost:  3000
+      },
+      {
+        id:        'demo3',
+        avatar:    '/images/heroes/mercy.png',
+        character: 'Mercy',
+        powers: [
+          { name:'Caduceus Staff',icon:'/images/abilities/staff.png' },
+          { name:'Guardian Angel', icon:'/images/abilities/angel.png' },
+          { name:'Resurrect',      icon:'/images/abilities/resurrect.png' },
+          { name:'Valkyrie',       icon:'/images/abilities/valkyrie.png' }
+        ],
+        items: [
+          { name:'Winged Boots', icon:'/images/items/boots.png' },
+          { name:'Halo',         icon:'/images/items/halo.png' },
+          { name:'Angel Feather',icon:'/images/items/feather.png' }
+        ],
+        totalCost:  8500
+      }
+    ];
+
+    const grid = document.getElementById('demoGrid');
+    samples.forEach(s => {
+      const card = renderBuildCard(s);
+      grid.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>
