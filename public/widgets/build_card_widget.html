@@ -1,0 +1,74 @@
+<!-- widgets/build_card_widget.html -->
+<template id="build-card-template">
+  <div class="build-card">
+    <div class="card-header">
+      <img class="avatar" src="" alt="Avatar">
+      <h3 class="character-name"></h3>
+      <a class="btn-view" href="">View</a>
+    </div>
+    <div class="card-body">
+      <div class="squares"></div>
+      <div class="circles"></div>
+      <div class="cost"></div>
+    </div>
+  </div>
+</template>
+
+<script type="module">
+/**
+ * Takes an object:
+ *   {
+ *     id,            // build ID (string)
+ *     avatar,        // hero avatar URL
+ *     character,     // hero name
+ *     powers:  [a],  // array of ability objects { name, icon }
+ *     items:   [b],  // array of item objects { name, icon }
+ *     totalCost      // number
+ *   }
+ * Returns a DOM node for insertion.
+ */
+export function renderBuildCard({ 
+  id, avatar, character, powers, items, totalCost 
+}) {
+  // clone template
+  const tpl = document.getElementById('build-card-template').content;
+  const el  = tpl.cloneNode(true).querySelector('.build-card');
+
+  // header
+  el.querySelector('.avatar').src       = avatar;
+  el.querySelector('.avatar').alt       = character;
+  el.querySelector('.character-name').textContent = character;
+  const viewLink = el.querySelector('.btn-view');
+  viewLink.href            = `viewer.html?buildId=${id}`;
+  viewLink.textContent     = 'View';
+
+  // squares (4 slots)
+  const sq = el.querySelector('.squares');
+  sq.innerHTML = powers
+    .slice(0,4)
+    .map(a => `
+      <div class="square">
+        <img class="icon" src="${a.icon}" alt="${a.name}">
+      </div>`)
+    .join('')
+    + Array(Math.max(0,4-powers.length)).fill().map(()=>`
+      <div class="square"></div>`).join('');
+
+  // circles (6 slots)
+  const cir = el.querySelector('.circles');
+  cir.innerHTML = items
+    .slice(0,6)
+    .map(a => `
+      <div class="circle">
+        <img class="icon" src="${a.icon}" alt="${a.name}">
+      </div>`)
+    .join('')
+    + Array(Math.max(0,6-items.length)).fill().map(()=>`
+      <div class="circle"></div>`).join('');
+
+  // cost
+  el.querySelector('.cost').textContent = `Total: ${totalCost.toLocaleString()}`;
+
+  return el;
+}
+</script>
