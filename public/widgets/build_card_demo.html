@@ -1,34 +1,37 @@
-<!-- widgets/build_card_demo.html -->
+<!-- public/widgets/build_card_demo.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Build-Card Widget Demo</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- basic demo styling -->
   <style>
     body {
       background: #0b1625;
       color: #fff;
-      font-family: 'Oswald', sans-serif;
+      font-family: 'Oswald',sans-serif;
       padding: 20px;
     }
-    h1 { margin-bottom: 16px; }
     #demoGrid {
       display: grid;
       grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
       gap: 20px;
     }
   </style>
-  <!-- load the widget file (HTML as module) -->
-  <script type="module" src="./build_card_widget.html"></script>
+
+  <!-- load widget JS & CSS -->
+  <script type="module" src="./build_card_widget.mjs"></script>
+  <link rel="stylesheet" href="./build_card_widget.css">
 </head>
 <body>
   <h1>Build-Card Widget Demo</h1>
-  <p>If you see three cards below, your widget is working!</p>
+  <p>If you see three cards below, it’s working!</p>
   <div id="demoGrid"></div>
 
   <script type="module">
-    import { renderBuildCard } from './build_card_widget.html';
+    import { renderBuildCard } from './build_card_widget.mjs';
 
     const samples = [
       {
@@ -36,17 +39,39 @@
         avatar: '/images/heroes/moira.png',
         character: 'Moira',
         powers: [
-          { name:'Orb', icon:'/images/abilities/orb.png' },
+          { name:'Orb',  icon:'/images/abilities/orb.png' },
           { name:'Fade', icon:'/images/abilities/fade.png' },
-          { name:'Grasp', icon:'/images/abilities/grasp.png' }
+          { name:'Grasp',icon:'/images/abilities/grasp.png' }
         ],
         items: [
-          { name:'Grenade', icon:'/images/items/grenade.png' },
-          { name:'Shield',  icon:'/images/items/shield.png' }
+          { name:'Mine', icon:'/images/items/mine.png' },
+          { name:'Shield',icon:'/images/items/shield.png' }
         ],
         totalCost: 5000
       },
-      /* two more samples… */
+      {
+        id: 'demo2',
+        avatar: '/images/heroes/ana.png',
+        character: 'Ana',
+        powers: [
+          { name:'Dart', icon:'/images/abilities/dart.png' },
+          { name:'Sleep',icon:'/images/abilities/sleep.png' }
+        ],
+        items: [],
+        totalCost: 3000
+      },
+      {
+        id: 'demo3',
+        avatar: '/images/heroes/mercy.png',
+        character: 'Mercy',
+        powers: [
+          { name:'Heal', icon:'/images/abilities/heal.png' },
+          { name:'Boost',icon:'/images/abilities/boost.png' },
+          { name:'Res',  icon:'/images/abilities/res.png' }
+        ],
+        items: [ ],
+        totalCost: 8500
+      }
     ];
 
     const grid = document.getElementById('demoGrid');
