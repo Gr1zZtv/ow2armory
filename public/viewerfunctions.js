@@ -6,7 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const db   = firebase.firestore();
 
   // ── CONSTANTS & STORAGE KEYS ─────────────────────────────────────────────
-  const STORAGE_KEY = 'armoryData';
+  const STORAGE_KEY   = 'armoryData';
+  const ROUND_KEY     = 'selectedRound';
+  const MAX_ROUNDS    = 7;
   const STAT_DEFS = [
     { key: 'life',             label: 'Life',               icon: 'images/stats/stat-life.png' },
     { key: 'weaponPower',      label: 'Weapon Power',       icon: 'images/stats/weaponpowericon.png' },
@@ -22,24 +24,33 @@ document.addEventListener("DOMContentLoaded", () => {
     { key: 'criticalDamage',   label: 'Critical Damage',     icon: 'images/stats/stat-critical-dmg.png' },
   ];
 
-  // ── LOAD & NORMALIZE LOCAL DATA ──────────────────────────────────────────
+  // ── LOAD + NORMALIZE LOCAL DATA ──────────────────────────────────────────
   let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
   data.heroes          = Array.isArray(data.heroes)          ? data.heroes          : [];
   data.globalAbilities = Array.isArray(data.globalAbilities) ? data.globalAbilities : [];
+
+  // Ensure each hero has per‐round build storage
   data.heroes.forEach(h => {
+    if (!Array.isArray(h.roundBuilds) || h.roundBuilds.length !== MAX_ROUNDS) {
+      // initialize an array of 7 rounds
+      h.roundBuilds = Array.from({ length: MAX_ROUNDS }, () => ({
+        powers: [],
+        items: []
+      }));
+    }
     h.tabs        = Array.isArray(h.tabs)        ? h.tabs        : ['Weapon','Ability','Survival','Power'];
     h.abilities   = Array.isArray(h.abilities)   ? h.abilities   : [];
     h.stats       = Array.isArray(h.stats)       ? h.stats       : [];
-    h.buildPowers = Array.isArray(h.buildPowers) ? h.buildPowers : [];
-    h.buildItems  = Array.isArray(h.buildItems)  ? h.buildItems  : [];
     if (!h.stats.find(s => s.key === 'life')) {
       h.stats.push({ key:'life', value:0 });
     }
   });
 
+  // ── STATE: hero, tab, round ───────────────────────────────────────────────
   let selectedHeroIdx = parseInt(localStorage.getItem('selectedHeroIdx')) || 0;
   let selectedTabIdx  = parseInt(localStorage.getItem('selectedTabIdx'))  || 0;
-  const tooltip = document.getElementById('tooltip');
+  let currentRound    = parseInt(localStorage.getItem(ROUND_KEY))       || 1;
+  const tooltip       = document.getElementById('tooltip');
 
   // ── TOOLTIP HANDLERS ──────────────────────────────────────────────────────
   function showTooltip(a) {
@@ -67,10 +78,34 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   function hideTooltip() { tooltip.style.display = 'none'; }
   function onMouseMove(e) {
-    if (tooltip.style.display==='block') {
+    if (tooltip.style.display === 'block') {
       tooltip.style.left = (e.pageX + 12) + 'px';
       tooltip.style.top  = (e.pageY + 12) + 'px';
     }
+  }
+
+  // ── ROUND CONTROLS ─────────────────────────────────────────────────────────
+  function updateRoundDisplay() {
+    document.getElementById('roundNumber').textContent = currentRound;
+    localStorage.setItem(ROUND_KEY, currentRound);
+  }
+  function bindRoundButtons() {
+    document.getElementById('prevRound').onclick = () => {
+      if (currentRound > 1) {
+        currentRound--;
+        updateRoundDisplay();
+        renderBuildSlots();
+        renderStats(calculateStats(data.heroes[selectedHeroIdx]));
+      }
+    };
+    document.getElementById('nextRound').onclick = () => {
+      if (currentRound < MAX_ROUNDS) {
+        currentRound++;
+        updateRoundDisplay();
+        renderBuildSlots();
+        renderStats(calculateStats(data.heroes[selectedHeroIdx]));
+      }
+    };
   }
 
   // ── STAT CALCULATION & RENDER ─────────────────────────────────────────────
@@ -78,10 +113,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const out = {};
     STAT_DEFS.forEach(s => out[s.key] = 0);
     (hero.stats||[]).forEach(s => out[s.key] += s.value);
-    hero.buildPowers.forEach(a =>
+    // add effects from current round's builds
+    const roundData = hero.roundBuilds[currentRound - 1];
+    roundData.powers.forEach(a =>
       (a.stats||[]).forEach(s => out[s.key] += s.value)
     );
-    hero.buildItems.forEach(a =>
+    roundData.items.forEach(a =>
       (a.stats||[]).forEach(s => out[s.key] += s.value)
     );
     return out;
@@ -90,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cont = document.getElementById('statsContainer');
     cont.innerHTML = '';
     STAT_DEFS.forEach(({key,label,icon}) => {
-      if (key==='life') return;
+      if (key === 'life') return;
       const pct = Math.min(Math.round(stats[key]), 100);
       const statEl = document.createElement('div');
       statEl.className = 'stat';
@@ -125,13 +162,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── ABILITY GRID ──────────────────────────────────────────────────────────
   function renderAbilities() {
-    const hero = data.heroes[selectedHeroIdx];
+    const hero     = data.heroes[selectedHeroIdx];
     const combined = [...data.globalAbilities, ...(hero.abilities||[])];
     ['common','rare','epic'].forEach(rarity => {
       const grid = document.getElementById(rarity + 'Grid');
       grid.innerHTML = '';
       combined
-        .filter(a => a.tabIdx===selectedTabIdx && a.category===rarity)
+        .filter(a => a.tabIdx === selectedTabIdx && a.category === rarity)
         .forEach(a => {
           const wrap = document.createElement('div');
           wrap.className = 'ability';
@@ -154,45 +191,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── BUILD PANEL ───────────────────────────────────────────────────────────
   function renderBuildSlots() {
-    const hero = data.heroes[selectedHeroIdx];
-    const total = hero.buildPowers.reduce((s,a)=>s+a.cost,0)
-                + hero.buildItems .reduce((s,a)=>s+a.cost,0);
+    const hero     = data.heroes[selectedHeroIdx];
+    const roundData= hero.roundBuilds[currentRound - 1];
+    // calculate total cost this round
+    const total = roundData.powers.reduce((s,a)=>s+a.cost,0)
+                + roundData.items .reduce((s,a)=>s+a.cost,0);
     document.querySelector('.build-cost .cost-value')
       .textContent = total.toLocaleString();
 
-    // power & item slots (unchanged)…
+    // power slots
     document.querySelectorAll('.left-panel .slots.powers .circle')
       .forEach((el,i) => {
-        const a = hero.buildPowers[i];
+        const a = roundData.powers[i];
         el.innerHTML = a
           ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
           : '';
-        el.style.cursor = a?'pointer':'default';
+        el.style.cursor = a ? 'pointer' : 'default';
         el.onmouseover = ()=> a && showTooltip(a);
         el.onmousemove = onMouseMove;
         el.onmouseout  = hideTooltip;
         el.onclick     = ()=> {
           if (!a) return;
-          hero.buildPowers.splice(i,1);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          roundData.powers.splice(i,1);
+          saveData();
           renderBuildSlots();
           renderStats(calculateStats(hero));
         };
       });
+
+    // item slots
     document.querySelectorAll('.left-panel .slots.items .circle')
       .forEach((el,i) => {
-        const a = hero.buildItems[i];
+        const a = roundData.items[i];
         el.innerHTML = a
           ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
           : '';
-        el.style.cursor = a?'pointer':'default';
+        el.style.cursor = a ? 'pointer' : 'default';
         el.onmouseover = ()=> a && showTooltip(a);
         el.onmousemove = onMouseMove;
         el.onmouseout  = hideTooltip;
         el.onclick     = ()=> {
           if (!a) return;
-          hero.buildItems.splice(i,1);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          roundData.items.splice(i,1);
+          saveData();
           renderBuildSlots();
           renderStats(calculateStats(hero));
         };
@@ -201,20 +242,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── PURCHASE LOGIC ────────────────────────────────────────────────────────
   function purchaseAbility(a) {
-    const hero    = data.heroes[selectedHeroIdx];
-    const isPower = hero.tabs[selectedTabIdx] === 'Power';
-    const slotArr = isPower ? 'buildPowers' : 'buildItems';
-    const max     = isPower ? 4 : 6;
-    if (hero[slotArr].length >= max) {
+    const hero     = data.heroes[selectedHeroIdx];
+    const isPower  = hero.tabs[selectedTabIdx] === 'Power';
+    const slotArr  = isPower ? 'powers' : 'items';
+    const max      = isPower ? 4 : 6;
+    const roundData= hero.roundBuilds[currentRound - 1];
+
+    if (roundData[slotArr].length >= max) {
       return alert(`${isPower ? 'Power' : 'Item'} slots full`);
     }
-    hero[slotArr].push(a);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    roundData[slotArr].push(a);
+    saveData();
     renderBuildSlots();
     renderStats(calculateStats(hero));
   }
 
-  // ── HERO‐DECK SIDEBAR ────────────────────────────────────────────────────
+  // ── SAVE TO LOCAL ─────────────────────────────────────────────────────────
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  // ── RENDER HERO‐DECK SIDEBAR ─────────────────────────────────────────────
   function renderHeroDeck() {
     const deck = document.getElementById('heroDeck');
     deck.innerHTML = '';
@@ -226,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
       img.onclick = () => {
         selectedHeroIdx = i;
         localStorage.setItem('selectedHeroIdx', i);
-        selectedTabIdx = 0;
+        selectedTabIdx  = 0;
         localStorage.setItem('selectedTabIdx', 0);
         document.querySelector('.header .avatar').src =
           h.avatar || '/images/default-avatar.png';
@@ -270,14 +318,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function saveBuild(buildName) {
       const hero = data.heroes[selectedHeroIdx];
+      const roundData = hero.roundBuilds[currentRound - 1];
       const user = auth.currentUser;
       const payload = {
         creator:   user ? (user.displayName||user.email) : 'anonymous',
         uid:       user ? user.uid : null,
         character: hero.name,
         name:      buildName,
-        powers:    hero.buildPowers.map(a=>a.name),
-        items:     hero.buildItems.map(a=>a.name),
+        round:     currentRound,
+        powers:    roundData.powers.map(a=>a.name),
+        items:     roundData.items.map(a=>a.name),
         timestamp: Date.now()
       };
       try {
@@ -301,16 +351,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!snap.exists) return;
     const b    = snap.data();
     selectedHeroIdx = data.heroes.findIndex(h=>h.name===b.character);
+    currentRound    = b.round || 1;
     const hero = data.heroes[selectedHeroIdx];
     document.querySelector('.header .avatar').src =
       hero.avatar || '/images/default-avatar.png';
     const pool = [...data.globalAbilities, ...hero.abilities];
-    hero.buildPowers = pool.filter(a=> b.powers.includes(a.name));
-    hero.buildItems  = pool.filter(a=> b.items .includes(a.name));
+    // load that specific round
+    hero.roundBuilds[currentRound - 1].powers = pool.filter(a=> b.powers.includes(a.name));
+    hero.roundBuilds[currentRound - 1].items  = pool.filter(a=> b.items.includes(a.name));
     renderTabs();
     renderAbilities();
     renderBuildSlots();
     renderStats(calculateStats(hero));
+    updateRoundDisplay();
   }
 
   // ── COMMUNITY GALLERY ─────────────────────────────────────────────────────
@@ -318,50 +371,37 @@ document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById('communityGrid');
     grid.innerHTML = '<p style="color:#888;">Loading community builds…</p>';
     try {
-      const snaps = await db
-        .collection('builds')
+      const snaps = await db.collection('builds')
         .orderBy('timestamp','desc')
         .limit(12)
         .get();
-
       if (snaps.empty) {
         grid.innerHTML = '<p style="color:#888;">No community builds yet.</p>';
         return;
       }
-
       grid.innerHTML = '';
       const heroes  = data.heroes;
       const globals = data.globalAbilities;
-
       snaps.docs.forEach(docSnap => {
         const b       = docSnap.data();
-        const heroDef = heroes.find(h=>h.name===b.character) || {};
-        const pool    = [...globals, ...(heroDef.abilities||[])];
+        const heroDef = heroes.find(h=>h.name===b.character)||{};
+        const pool    = [...globals,(heroDef.abilities||[])].flat();
         const powerObjs = pool.filter(a=> b.powers.includes(a.name));
         const itemObjs  = pool.filter(a=> b.items .includes(a.name));
         const totalCost = powerObjs.reduce((s,a)=>s+a.cost,0)
                         + itemObjs .reduce((s,a)=>s+a.cost,0);
-
-        const squares = Array(4).fill().map((_,i) => `
-          <div class="square">
-            <img class="icon"
-                 src="${powerObjs[i]?.icon||'images/placeholders/sq.png'}"
-                 alt="">
-          </div>`).join('');
-
-        const circles = Array(6).fill().map((_,i) => `
-          <div class="circle">
-            <img class="icon"
-                 src="${itemObjs[i]?.icon||'images/placeholders/circ.png'}"
-                 alt="">
-          </div>`).join('');
-
+        const squares = Array(4).fill().map((_,i)=>
+          `<div class="square"><img class="icon" src="${powerObjs[i]?.icon||'images/placeholders/sq.png'}" alt=""></div>`
+        ).join('');
+        const circles = Array(6).fill().map((_,i)=>
+          `<div class="circle"><img class="icon" src="${itemObjs[i]?.icon||'images/placeholders/circ.png'}" alt=""></div>`
+        ).join('');
         const card = document.createElement('div');
         card.className = 'build-card';
         card.innerHTML = `
           <div class="card-header">
             <img src="${heroDef.avatar||'/images/default-avatar.png'}" alt="${b.character}">
-            <h3>${b.character}</h3>
+            <h3>${b.character} (R${b.round||1})</h3>
             <a class="btn-view" href="viewer.html?buildId=${docSnap.id}">View</a>
           </div>
           <div class="card-body">
@@ -369,7 +409,6 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="circles">${circles}</div>
             <div class="cost">Total: ${totalCost.toLocaleString()}</div>
           </div>`;
-
         grid.appendChild(card);
       });
     } catch(err) {
@@ -380,14 +419,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── INIT VIEWER & HOOKS ──────────────────────────────────────────────────
   function initViewer() {
-    // set initial avatar
+    // header avatar
     document.querySelector('.header .avatar').src =
       data.heroes[selectedHeroIdx].avatar || '/images/default-avatar.png';
+
     renderTabs();
     renderAbilities();
     renderBuildSlots();
     renderStats(calculateStats(data.heroes[selectedHeroIdx]));
     bindSaveShare();
+    bindRoundButtons();
+    updateRoundDisplay();
     loadBuildFromURL();
     renderCommunity();
     renderHeroDeck();
