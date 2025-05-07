@@ -73,7 +73,7 @@ body {
   border-radius: 12px;
   backdrop-filter: blur(6px);
   display: grid;
-  grid-template-rows: 128px 48px 1fr auto;
+  grid-template-rows: 128px 48px 48px 1fr auto;
   grid-template-columns: 300px repeat(3,1fr);
   box-shadow: 0 4px 20px rgba(0,0,0,0.7);
   overflow: hidden;
@@ -177,10 +177,35 @@ body {
   transition: width .3s ease;
 }
 
-/* ─────────── TABS ─────────── */
-.tabs {
+/* ─────────── ROUND TABS ─────────── */
+.round-tabs {
   grid-column: 1 / -1;
   grid-row: 2 / 3;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 24px;
+}
+.round-tabs button {
+  background: rgba(0,0,0,0.3);
+  border: none;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.round-tabs button.active {
+  background: #f96302;
+}
+
+/* ─────────── ABILITY TABS ─────────── */
+.tabs {
+  grid-column: 1 / -1;
+  grid-row: 3 / 4;
   display: flex;
   align-items: center;
   padding: 0 24px;
@@ -207,7 +232,7 @@ body {
 /* ─────────── BUILD PANEL ─────────── */
 .left-panel {
   grid-column: 1 / 2;
-  grid-row: 3 / 4;
+  grid-row: 4 / 5;
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -262,9 +287,9 @@ body {
   padding: 4px 0;
   border-radius: 4px;
 }
-.common { grid-column: 2 / 3; grid-row: 3 / 4; }
-.rare   { grid-column: 3 / 4; grid-row: 3 / 4; }
-.epic   { grid-column: 4 / 5; grid-row: 3 / 4; }
+.common { grid-column: 2 / 3; grid-row: 4 / 5; }
+.rare   { grid-column: 3 / 4; grid-row: 4 / 5; }
+.epic   { grid-column: 4 / 5; grid-row: 4 / 5; }
 
 /* ─────────── ABILITY GRID ─────────── */
 .grid {
@@ -337,33 +362,6 @@ body {
   color: #fff;
 }
 /* …inner save-dialog styling here… */
-
-/* ─────────── ROUND CONTROLS ─────────── */
-.round-controls {
-  grid-column: 1 / -1;
-  grid-row: 4 / 5;
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  padding: 16px;
-}
-.round-controls button {
-  background: rgba(0,0,0,0.3);
-  border: none;
-  padding: 8px 16px;
-  color: #fff;
-  text-transform: uppercase;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background .2s;
-}
-.round-controls button:hover {
-  background: #f96302;
-}
-.round-controls #roundNumber {
-  font-size: 1.2rem;
-  font-weight: bold;
-}
 
 /* ─────────── COMMUNITY SECTION WRAPPER ─────────── */
 #community {
