@@ -6,9 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const db   = firebase.firestore();
 
   // ── CONSTANTS & STORAGE KEYS ─────────────────────────────────────────────
-  const STORAGE_KEY   = 'armoryData';
-  const ROUND_KEY     = 'selectedRound';
-  const MAX_ROUNDS    = 7;
+  const STORAGE_KEY = 'armoryData';
+  const ROUND_KEY   = 'selectedRound';
+  const MAX_ROUNDS  = 7;
   const STAT_DEFS = [
     { key: 'life',             label: 'Life',               icon: 'images/stats/stat-life.png' },
     { key: 'weaponPower',      label: 'Weapon Power',       icon: 'images/stats/weaponpowericon.png' },
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { key: 'criticalDamage',   label: 'Critical Damage',     icon: 'images/stats/stat-critical-dmg.png' },
   ];
 
-  // ── LOAD + NORMALIZE LOCAL DATA ──────────────────────────────────────────
+  // ── LOAD & NORMALIZE LOCAL DATA ──────────────────────────────────────────
   let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
   data.heroes          = Array.isArray(data.heroes)          ? data.heroes          : [];
   data.globalAbilities = Array.isArray(data.globalAbilities) ? data.globalAbilities : [];
@@ -32,21 +32,20 @@ document.addEventListener("DOMContentLoaded", () => {
   // Ensure each hero has per‐round build storage
   data.heroes.forEach(h => {
     if (!Array.isArray(h.roundBuilds) || h.roundBuilds.length !== MAX_ROUNDS) {
-      // initialize an array of 7 rounds
       h.roundBuilds = Array.from({ length: MAX_ROUNDS }, () => ({
         powers: [],
         items: []
       }));
     }
-    h.tabs        = Array.isArray(h.tabs)        ? h.tabs        : ['Weapon','Ability','Survival','Power'];
-    h.abilities   = Array.isArray(h.abilities)   ? h.abilities   : [];
-    h.stats       = Array.isArray(h.stats)       ? h.stats       : [];
+    h.tabs      = Array.isArray(h.tabs)      ? h.tabs      : ['Weapon','Ability','Survival','Power'];
+    h.abilities = Array.isArray(h.abilities) ? h.abilities : [];
+    h.stats     = Array.isArray(h.stats)     ? h.stats     : [];
     if (!h.stats.find(s => s.key === 'life')) {
       h.stats.push({ key:'life', value:0 });
     }
   });
 
-  // ── STATE: hero, tab, round ───────────────────────────────────────────────
+  // ── STATE: selected hero, tab & round ─────────────────────────────────────
   let selectedHeroIdx = parseInt(localStorage.getItem('selectedHeroIdx')) || 0;
   let selectedTabIdx  = parseInt(localStorage.getItem('selectedTabIdx'))  || 0;
   let currentRound    = parseInt(localStorage.getItem(ROUND_KEY))       || 1;
@@ -55,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ── TOOLTIP HANDLERS ──────────────────────────────────────────────────────
   function showTooltip(a) {
     const statLines = (a.stats||[]).map(s => {
-      const def = STAT_DEFS.find(d=>d.key===s.key) || {label:s.key,icon:''};
+      const def = STAT_DEFS.find(d => d.key === s.key) || {label:s.key,icon:''};
       return `
         <div class="tooltip-line">
           <img src="${def.icon}" alt="${def.label}">
@@ -84,28 +83,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ── ROUND CONTROLS ─────────────────────────────────────────────────────────
-  function updateRoundDisplay() {
-    document.getElementById('roundNumber').textContent = currentRound;
-    localStorage.setItem(ROUND_KEY, currentRound);
-  }
-  function bindRoundButtons() {
-    document.getElementById('prevRound').onclick = () => {
-      if (currentRound > 1) {
-        currentRound--;
-        updateRoundDisplay();
+  // ── ROUND TABS ────────────────────────────────────────────────────────────
+  function renderRoundTabs() {
+    const tabs = document.getElementById('roundTabs');
+    tabs.innerHTML = '';
+    for (let i = 1; i <= MAX_ROUNDS; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = `R${i}`;
+      if (i === currentRound) btn.classList.add('active');
+      btn.addEventListener('click', () => {
+        currentRound = i;
+        localStorage.setItem(ROUND_KEY, i);
+        renderRoundTabs();
         renderBuildSlots();
         renderStats(calculateStats(data.heroes[selectedHeroIdx]));
-      }
-    };
-    document.getElementById('nextRound').onclick = () => {
-      if (currentRound < MAX_ROUNDS) {
-        currentRound++;
-        updateRoundDisplay();
-        renderBuildSlots();
-        renderStats(calculateStats(data.heroes[selectedHeroIdx]));
-      }
-    };
+      });
+      tabs.appendChild(btn);
+    }
   }
 
   // ── STAT CALCULATION & RENDER ─────────────────────────────────────────────
@@ -113,7 +107,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const out = {};
     STAT_DEFS.forEach(s => out[s.key] = 0);
     (hero.stats||[]).forEach(s => out[s.key] += s.value);
-    // add effects from current round's builds
     const roundData = hero.roundBuilds[currentRound - 1];
     roundData.powers.forEach(a =>
       (a.stats||[]).forEach(s => out[s.key] += s.value)
@@ -141,12 +134,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ── TAB RENDERING ─────────────────────────────────────────────────────────
+  // ── ABILITY TABS ──────────────────────────────────────────────────────────
   function renderTabs() {
     const container = document.getElementById('tabsContainer');
     container.innerHTML = '';
     const hero = data.heroes[selectedHeroIdx] || { tabs: [] };
-    hero.tabs.forEach((tab,i) => {
+    hero.tabs.forEach((tab, i) => {
       const btn = document.createElement('button');
       btn.textContent = tab;
       if (i === selectedTabIdx) btn.classList.add('active');
@@ -175,8 +168,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `<img src="${a.icon}" alt="">`;
-          card.addEventListener('click',    ()=> purchaseAbility(a));
-          card.addEventListener('mouseover',()=> showTooltip(a));
+          card.addEventListener('click',    () => purchaseAbility(a));
+          card.addEventListener('mouseover',() => showTooltip(a));
           card.addEventListener('mousemove', onMouseMove);
           card.addEventListener('mouseout',  hideTooltip);
           wrap.appendChild(card);
@@ -191,11 +184,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── BUILD PANEL ───────────────────────────────────────────────────────────
   function renderBuildSlots() {
-    const hero     = data.heroes[selectedHeroIdx];
-    const roundData= hero.roundBuilds[currentRound - 1];
-    // calculate total cost this round
+    const hero      = data.heroes[selectedHeroIdx];
+    const roundData = hero.roundBuilds[currentRound - 1];
     const total = roundData.powers.reduce((s,a)=>s+a.cost,0)
-                + roundData.items .reduce((s,a)=>s+a.cost,0);
+                +  roundData.items .reduce((s,a)=>s+a.cost,0);
     document.querySelector('.build-cost .cost-value')
       .textContent = total.toLocaleString();
 
@@ -207,10 +199,10 @@ document.addEventListener("DOMContentLoaded", () => {
           ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
           : '';
         el.style.cursor = a ? 'pointer' : 'default';
-        el.onmouseover = ()=> a && showTooltip(a);
+        el.onmouseover = () => a && showTooltip(a);
         el.onmousemove = onMouseMove;
         el.onmouseout  = hideTooltip;
-        el.onclick     = ()=> {
+        el.onclick     = () => {
           if (!a) return;
           roundData.powers.splice(i,1);
           saveData();
@@ -227,10 +219,10 @@ document.addEventListener("DOMContentLoaded", () => {
           ? `<img src="${a.icon}" style="width:100%;height:100%;object-fit:cover">`
           : '';
         el.style.cursor = a ? 'pointer' : 'default';
-        el.onmouseover = ()=> a && showTooltip(a);
+        el.onmouseover = () => a && showTooltip(a);
         el.onmousemove = onMouseMove;
         el.onmouseout  = hideTooltip;
-        el.onclick     = ()=> {
+        el.onclick     = () => {
           if (!a) return;
           roundData.items.splice(i,1);
           saveData();
@@ -245,10 +237,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const hero     = data.heroes[selectedHeroIdx];
     const isPower  = hero.tabs[selectedTabIdx] === 'Power';
     const slotArr  = isPower ? 'powers' : 'items';
-    const max      = isPower ? 4 : 6;
     const roundData= hero.roundBuilds[currentRound - 1];
-
-    if (roundData[slotArr].length >= max) {
+    if (roundData[slotArr].length >= (isPower ? 4 : 6)) {
       return alert(`${isPower ? 'Power' : 'Item'} slots full`);
     }
     roundData[slotArr].push(a);
@@ -262,7 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
 
-  // ── RENDER HERO‐DECK SIDEBAR ─────────────────────────────────────────────
+  // ── HERO‐DECK SIDEBAR ─────────────────────────────────────────────────────
   function renderHeroDeck() {
     const deck = document.getElementById('heroDeck');
     deck.innerHTML = '';
@@ -270,11 +260,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const img = document.createElement('img');
       img.src = h.avatar || '/images/default-avatar.png';
       img.alt = h.name;
-      img.className = 'deck-hero' + (i===selectedHeroIdx ? ' active' : '');
+      img.className = 'deck-hero' + (i === selectedHeroIdx ? ' active' : '');
       img.onclick = () => {
         selectedHeroIdx = i;
         localStorage.setItem('selectedHeroIdx', i);
-        selectedTabIdx  = 0;
+        selectedTabIdx = 0;
         localStorage.setItem('selectedTabIdx', 0);
         document.querySelector('.header .avatar').src =
           h.avatar || '/images/default-avatar.png';
@@ -282,6 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderAbilities();
         renderBuildSlots();
         renderStats(calculateStats(h));
+        renderRoundTabs();
         renderHeroDeck();
       };
       deck.appendChild(img);
@@ -317,17 +308,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     async function saveBuild(buildName) {
-      const hero = data.heroes[selectedHeroIdx];
+      const hero      = data.heroes[selectedHeroIdx];
       const roundData = hero.roundBuilds[currentRound - 1];
-      const user = auth.currentUser;
-      const payload = {
+      const user      = auth.currentUser;
+      const payload   = {
         creator:   user ? (user.displayName||user.email) : 'anonymous',
         uid:       user ? user.uid : null,
         character: hero.name,
         name:      buildName,
         round:     currentRound,
-        powers:    roundData.powers.map(a=>a.name),
-        items:     roundData.items.map(a=>a.name),
+        powers:    roundData.powers.map(a => a.name),
+        items:     roundData.items.map(a => a.name),
         timestamp: Date.now()
       };
       try {
@@ -349,21 +340,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!params.has('buildId')) return;
     const snap = await db.collection('builds').doc(params.get('buildId')).get();
     if (!snap.exists) return;
-    const b    = snap.data();
-    selectedHeroIdx = data.heroes.findIndex(h=>h.name===b.character);
+    const b = snap.data();
+    selectedHeroIdx = data.heroes.findIndex(h => h.name === b.character);
     currentRound    = b.round || 1;
     const hero = data.heroes[selectedHeroIdx];
     document.querySelector('.header .avatar').src =
       hero.avatar || '/images/default-avatar.png';
     const pool = [...data.globalAbilities, ...hero.abilities];
-    // load that specific round
-    hero.roundBuilds[currentRound - 1].powers = pool.filter(a=> b.powers.includes(a.name));
-    hero.roundBuilds[currentRound - 1].items  = pool.filter(a=> b.items.includes(a.name));
+    // populate that saved round
+    hero.roundBuilds[currentRound - 1].powers = pool.filter(a => b.powers.includes(a.name));
+    hero.roundBuilds[currentRound - 1].items  = pool.filter(a => b.items.includes(a.name));
     renderTabs();
     renderAbilities();
     renderBuildSlots();
     renderStats(calculateStats(hero));
-    updateRoundDisplay();
+    renderRoundTabs();
   }
 
   // ── COMMUNITY GALLERY ─────────────────────────────────────────────────────
@@ -384,16 +375,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const globals = data.globalAbilities;
       snaps.docs.forEach(docSnap => {
         const b       = docSnap.data();
-        const heroDef = heroes.find(h=>h.name===b.character)||{};
-        const pool    = [...globals,(heroDef.abilities||[])].flat();
-        const powerObjs = pool.filter(a=> b.powers.includes(a.name));
-        const itemObjs  = pool.filter(a=> b.items .includes(a.name));
+        const heroDef = heroes.find(h => h.name === b.character) || {};
+        const pool    = [...globals, ...(heroDef.abilities||[])];
+        const powerObjs = pool.filter(a => b.powers.includes(a.name));
+        const itemObjs  = pool.filter(a => b.items.includes(a.name));
         const totalCost = powerObjs.reduce((s,a)=>s+a.cost,0)
                         + itemObjs .reduce((s,a)=>s+a.cost,0);
-        const squares = Array(4).fill().map((_,i)=>
+        const squares = Array(4).fill().map((_,i) =>
           `<div class="square"><img class="icon" src="${powerObjs[i]?.icon||'images/placeholders/sq.png'}" alt=""></div>`
         ).join('');
-        const circles = Array(6).fill().map((_,i)=>
+        const circles = Array(6).fill().map((_,i) =>
           `<div class="circle"><img class="icon" src="${itemObjs[i]?.icon||'images/placeholders/circ.png'}" alt=""></div>`
         ).join('');
         const card = document.createElement('div');
@@ -419,7 +410,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ── INIT VIEWER & HOOKS ──────────────────────────────────────────────────
   function initViewer() {
-    // header avatar
+    // set header avatar
     document.querySelector('.header .avatar').src =
       data.heroes[selectedHeroIdx].avatar || '/images/default-avatar.png';
 
@@ -428,8 +419,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderBuildSlots();
     renderStats(calculateStats(data.heroes[selectedHeroIdx]));
     bindSaveShare();
-    bindRoundButtons();
-    updateRoundDisplay();
+    renderRoundTabs();
     loadBuildFromURL();
     renderCommunity();
     renderHeroDeck();
