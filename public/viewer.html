@@ -39,7 +39,7 @@
   <!-- 5) Navbar -->
   <script type="module" src="/widgets/navbar.mjs"></script>
 
-  <!-- 6) Viewer container: main armory + hero deck on the right -->
+  <!-- 6) Viewer container: main armory + hero deck -->
   <div class="viewer-container">
 
     <!-- Main Armory Panel -->
@@ -76,11 +76,11 @@
         <div class="stats header-stats" id="statsContainer"></div>
       </div>
 
-      <!-- Round Control (per‐round builds) -->
-      <div class="round-control">
-        <button id="prevRound" type="button">←</button>
-        <span>Round <span id="roundNumber">1</span> / 7</span>
-        <button id="nextRound" type="button">→</button>
+      <!-- Round Controls -->
+      <div class="round-controls">
+        <button id="prevRound" type="button">Previous</button>
+        <span>Round <strong id="roundNumber">1</strong> / 7</span>
+        <button id="nextRound" type="button">Next</button>
       </div>
 
       <!-- Ability Tabs -->
@@ -126,7 +126,7 @@
 
     <!-- Hero-deck sidebar (right) -->
     <aside id="heroDeck" class="hero-deck">
-      <!-- Thumbnails + names injected via JS -->
+      <!-- Thumbnails injected via JS -->
     </aside>
 
   </div><!-- /.viewer-container -->
